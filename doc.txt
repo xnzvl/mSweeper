@@ -1,0 +1,71 @@
+general info
+============
+    Types
+    -----
+        Position_t = Tuple[int, int]
+        Cell_t = int
+        Minesweeper_t = List[List[Cell_t]]
+
+    Constants and their values
+    --------------------------
+        MINE        0b0000_1111
+
+        SHOWN       0b0001_0000
+        FLAG        0b0010_0000
+        COVERED     0b0011_0000
+        
+
+class Minesweeper
+=================
+
+    Class that represents Minesweeper game with its functionality
+
+    Attributes:
+    -----------
+        height: int
+        width: int
+        mines: int
+
+    Methods:
+    --------
+        __init__(int, int, float) -> None
+        look() -> Minesweeper_t
+        is_playable() -> bool
+        is_won() -> bool
+        cell_LMB(Position_t) -> None
+        cell_RMB(Position_t) -> None
+
+
+        __init__(height: int, width: int, mines: float) -> None
+        -------------------------------------------------------
+            height & width are self-explanatory
+            mines    in range (0, 1), percentage of cell that are mines
+
+        look() -> Minesweeper_t
+        ------------------------------------
+            returns list of row
+            (deep copy of inner representation)
+
+        is_playable() -> bool
+        ---------------------
+            True    if game is not over
+            False   if game is won or lost
+
+        is_won() -> bool
+        ----------------
+            True    if all cells that are not mines are uncovered
+            False   if mine exploded
+
+        cell_LMB(position: Position_t) -> None
+        --------------------------------------
+            cell at `position`
+            is covered      uncovers the position (uses floodfill)
+            is uncovered    if there is `number` flags in proximity,
+                            reveals not-flagged cells in the proximity
+
+        cell_RMB(position: Position_t) -> None
+        --------------------------------------
+            cell at `position`
+            is flagged      unflags it
+            is covered      flags it
+            is uncovered    None

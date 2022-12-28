@@ -12,13 +12,14 @@ mMinesweeper_t = List[List[mCell_t]]
 
 
 CELL_SIZE = 20
-EASY, MEDIUM, HARD = 0, 1, 2
+EASY, MEDIUM, HARD = 0, 1, 2  # indices
 
 # feel free to change these
 DIFFICULTY = EASY  # has to be EASY/MEDIUM/HARD tho
 HIGHSCORE_FILE = ".mSweeper_highscores.txt"
 
+SPACE_REPLACEMENT = '~'
 ALLOWED_CHARS = set(
-        [chr(i) for i in range(ord('a') - 1, ord('z') + 1) if chr(i).isalnum()]
-    ) | set([' ', '-', '<', '>'])
-
+        [chr(i) for i in range(ord('A'), ord('z') + 1) if chr(i).isalnum()]
+    ) | set([' ', '-', '_', ':', '.'])
+assert SPACE_REPLACEMENT not in ALLOWED_CHARS

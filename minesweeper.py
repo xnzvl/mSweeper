@@ -34,10 +34,13 @@ class Minesweeper:
         width: int,
         mines: float = 0.15625
     ) -> None:
-        assert height > 5 and width > 5, \
-            "invalid dimensions"
-        assert 0 < mines < 1 and int(height * width * mines) > 0, \
-            "invalid mine-%"
+        assert height > 5 \
+               and width > 5, \
+               "invalid dimensions"
+        assert 0 < mines < 1 \
+               and int(height * width * mines) > 0 \
+               and int(height * width * (1 - mines)) > 9, \
+               "invalid mine-%"
 
         self.height = height
         self.width = width
@@ -143,7 +146,7 @@ class Minesweeper:
     def look(
         self
     ) -> Minesweeper_t:
-        assert False
+        return self._field
 
     def is_playable(
         self

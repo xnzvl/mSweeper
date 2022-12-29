@@ -10,6 +10,7 @@ Cell_t = uber.mCell_t
 #    └────── state-bits
 
 Position_t = uber.mPosition_t
+Dimensions_t = uber.mDimensions_t
 Cell_state_t = uber.mCell_state_t
 Minesweeper_t = uber.mMinesweeper_t
 
@@ -30,10 +31,11 @@ UNINITIALIZED, PLAYING, GAME_LOST, GAME_WON = 0, 1, 2, 3
 class Minesweeper:
     def __init__(
         self,
-        height: int,
-        width: int,
+        dimensions: Dimensions_t,
         mines: float = 0.15625
     ) -> None:
+        width, height = dimensions
+
         assert height > 5 \
                and width > 5, \
                "invalid dimensions"

@@ -44,7 +44,7 @@ class Cypher:
 
     def _check(
         self
-    ) -> str:
+    ) -> None:
         for char in ALLOWED_CHARS:
             if char != self.decrypt(self.encrypt(char)):
                 raise ValueError("Invalid cypher (1:1 requested)")
@@ -155,13 +155,20 @@ class Highscores:
 
         self._check_order()
 
+    def _score_to_str(
+        self,
+        score: Score_record_t
+    ) -> str:
+        pass
+
     def _write_hfile(
         self
     ) -> None:
         with open(self._filename, 'w') as output:
             for diff in self._difficulties:
                 for score in diff:
-                    output.write(self._cypher.encrypt(score) + '\n')
+                    to_write = self._score_to_str(score)
+                    output.write(self._cypher.encrypt(to_write) + '\n')
 
                 output.write('\n')
 

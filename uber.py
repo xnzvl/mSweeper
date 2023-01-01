@@ -1,8 +1,8 @@
-from typing import Tuple, Callable, List
+from typing import Tuple, Callable, List, Literal, Any
 
 
 mTime_tuple_t = Tuple[int, int, int, int]
-mDifficulty_t = int
+mDifficulty_t = Literal[0, 1, 2]
 mScore_record_t = Tuple[mTime_tuple_t, str, str]
 
 mCell_t = int
@@ -10,13 +10,18 @@ mPosition_t = Tuple[int, int]
 mDimensions_t = Tuple[int, int]
 mCell_state_t = int
 mMinesweeper_t = List[List[mCell_t]]
-
 mClick_t = Callable[[mPosition_t], None]
+mAI_player_t = Any  # TODO
 
 
-CELL_SIZE = 20
-EASY, MEDIUM, HARD = 0, 1, 2  # used as indices, don't change ._.
-DIMENSIONS = [
+# used as indices, don't change ._.
+EASY: Literal[0] = 0
+MEDIUM: Literal[1] = 1
+HARD: Literal[2] = 2
+
+
+DIFFICULTY_VALUES = EASY, MEDIUM, HARD
+DIMENSIONS: List[mDimensions_t] = [
     (8, 8),  # ---- easy
     (16, 16),  # -- medium
     (30, 16)  # --- hard
@@ -26,7 +31,7 @@ DIMENSIONS = [
 # ======================================================
 
 # feel free to change these two
-DIFFICULTY = EASY  # has to be EASY/MEDIUM/HARD tho
+DEFAULT_DIFFICULTY = EASY  # has to be EASY/MEDIUM/HARD tho b-><-d
 HIGHSCORE_FILE = ".mSweeper_highscores.txt"
 
 # ======================================================

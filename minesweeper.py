@@ -145,7 +145,7 @@ class Minesweeper:
 
     ###########################################################################
 
-    def look(
+    def get_data(
         self
     ) -> Minesweeper_t:
         return self._field

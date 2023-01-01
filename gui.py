@@ -1,25 +1,43 @@
 import tkinter as tk
-from typing import Tuple, Optional
-from minesweeper import Minesweeper
+
+from typing import Optional
+import main
 
 import uber
 
 
 Click_t = uber.mClick_t
 Position_t = uber.mPosition_t
-Dimensions_t = uber.mDimensions_t
 
 
-CELL_SIZE = uber.CELL_SIZE
+CELL_SIZE = 20
+
+NUM_FONT = ('system', 16)
+BACKGROUND = '#d9d9d9'
+
+TILE_COLOUR = {' ': '#008000', 'X': '#292929', '*': '#800000'}
+
+NUM_COLOURS = [
+    BACKGROUND,
+    '#0000ff',
+    '#008100',
+    '#ff1300',
+    '#000083',
+    '#810500',
+    '#2a9494',
+    '#000000',
+    '#808080',
+]
 
 
-class Game:
+class Gui:
     def __init__(
         self,
-        dimensions: Dimensions_t,
-        clicks: Optional[Tuple[Click_t, Click_t]] = None
+        session: main.Session,
+        interactive: bool = True
     ) -> None:
-        width, height = dimensions
+        self.session = session
+        width, height = session.dimensions
 
         self.root = tk.Tk()
         self.canvas = tk.Canvas(
@@ -30,13 +48,20 @@ class Game:
 
         self.canvas.bind_all("q", lambda _: self.root.destroy())
 
-        if clicks is not None:
-            self._lmb, self._rmb = clicks
-
+        if interactive:
             self.canvas.bind_all("r", lambda _: self._reset())
-            self.canvas.bind("<Button-1>", self._click_lmb)
-            self.canvas.bind("<Button-3>", self._click_rmb)
+            self.canvas.bind(
+                "<Button-1>",
+                lambda event: self._click(self.session.lmb, event)
+            )
+            self.canvas.bind(
+                "<Button-3>",
+                lambda event: self._click(self.session.rmb, event)
+            )
 
+    def start_mainloop(
+        self
+    ) -> None:
         self._reset()
         self.root.mainloop()
 
@@ -44,56 +69,50 @@ class Game:
         self
     ) -> None:
         print("refresh\n")
-        return
 
         self.canvas.delete("all")
+        for y, row in enumerate(self.ms_data):
+            for x, tile in enumerate(row):
+                continue
+                # cy = y * CELL_SIZE + 1
+                # cx = x * CELL_SIZE + 1
+                # self.canvas.create_rectangle(
+                #     cx, cy, cx + CELL_SIZE, cy + CELL_SIZE,
+                #     fill=TILE_COLOUR.get(tile, BACKGROUND)
+                # )
+                # if tile:
+                #     self.canvas.create_text(
+                #         cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
+                #         text=tile, font=NUM_FONT,
+                #         fill=NUM_COLOURS[int(tile)]
+                #     )
 
     def _reset(
         self
     ) -> None:  # reset()/init()
-        print("reset")
-        # self._refresh()
+        print("reset/init - (re)init")
+        self.ms_data = self.session._get_new_ms().get_data()
+
+        self._refresh()
 
     def _get_position(
         self,
-        event: tk.Event
+        x: int,
+        y: int
     ) -> Optional[Position_t]:
-        x = event.x - 1
-        y = event.y - 1
         return x, y
 
     def _click(
         self,
         click_fun: Click_t,
-        event: tk.Event
+        event: tk.Event  # type: ignore
     ) -> None:
-        position = self._get_position(event)
+        x, y = event.x, event.y
+        position = self._get_position(x, y)
 
         if position is None:
             return
 
-        print(position)
+        print(position)  # testing
         click_fun(position)
         self._refresh()
-
-    def _click_lmb(
-        self,
-        event: tk.Event
-    ) -> None:
-        self._click(self._lmb, event)
-
-    def _click_rmb(
-        self,
-        event: tk.Event
-    ) -> None:
-        self._click(self._rmb, event)
-
-
-def main() -> None:
-    ms = Minesweeper()
-    a = Game((16, 16), (lambda _: print("LMB"), lambda _: print("RMB")))
-    print(id(a))
-
-
-if __name__ == "__main__":
-    main()

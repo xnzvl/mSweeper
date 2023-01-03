@@ -1,18 +1,26 @@
-from typing import List
+from typing import List, Literal, Optional
 from random import randint
 
 import uber
+import stopwatch
 
-# Special types n shit
+
+Cell_state_t = uber.mCell_state_t
+
 Cell_t = uber.mCell_t
 # 0bXX XXXX
 #   └┤ └──┴─ mine-bits
 #    └────── state-bits
 
-Position_t = uber.mPosition_t
+Click_t = uber.mClick_t
 Dimensions_t = uber.mDimensions_t
-Cell_state_t = uber.mCell_state_t
 Minesweeper_t = uber.mMinesweeper_t
+Position_t = uber.mPosition_t
+Sweeper_state_t = Literal[0, 1, 2, 3]
+Time_tuple_t = uber.mTime_tuple_t
+
+
+MINE_PERCENTAGE = 0.1565
 
 # Constant for mine
 MINE = 0b1111
@@ -25,24 +33,44 @@ STATE_MASK = 0b11_0000
 COVERED, FLAG, SHOWN = 0b11_0000, 0b10_0000, 0b01_0000
 
 # Minesweeper states
-UNINITIALIZED, PLAYING, GAME_LOST, GAME_WON = 0, 1, 2, 3
+UNINITIALIZED: Literal[0] = 0
+PLAYING: Literal[1] = 1
+GAME_WON: Literal[2] = 2
+GAME_LOST: Literal[3] = 3
+
+
+def cell_to_num(
+    cell: Cell_t
+) -> int:
+    return cell & MINES_MASK
+
+
+def is_mine(
+    cell: Cell_t
+) -> bool:
+    return (cell & MINES_MASK) == MINE
+
+
+def is_shown(
+    cell: Cell_t
+) -> bool:
+    return (cell & STATE_MASK) == SHOWN
 
 
 class Minesweeper:
     def __init__(
         self,
         dimensions: Dimensions_t,
-        mines: float = 0.15625
+        mines: float
     ) -> None:
         width, height = dimensions
 
-        assert height > 5 \
-               and width > 5, \
-               "invalid dimensions"
-        assert 0 < mines < 1 \
-               and int(height * width * mines) > 0 \
-               and int(height * width * (1 - mines)) > 9, \
-               "invalid mine-%"
+        if height < 5 or width < 5:
+            raise ValueError("invalid dimensions")
+        if not (0 < mines < 1
+                and int(height * width * mines) > 0
+                and int(height * width * (1 - mines)) > 9):
+            raise ValueError("invalid mine-%")
 
         self.height = height
         self.width = width
@@ -52,7 +80,11 @@ class Minesweeper:
         self._field: Minesweeper_t = [
             [COVERED for _ in range(self.width)] for _ in range(self.height)
         ]
-        self._state = UNINITIALIZED
+        self._state: Sweeper_state_t = UNINITIALIZED
+
+        self._stopwatch = stopwatch.Stopwatch()
+        self._stopwatch.start()
+        self._time: Optional[Time_tuple_t] = None
 
     def _in_proximity(
         self,
@@ -84,7 +116,7 @@ class Minesweeper:
             rand_x = randint(0, self.width - 1)
             rand_y = randint(0, self.height - 1)
 
-            if (self._field[rand_y][rand_x] & MINES_MASK) != MINE \
+            if not is_mine(self._field[rand_y][rand_x]) \
                     and (rand_x, rand_y) not in cells_to_skip:
                 self._field[rand_y][rand_x] |= MINE
                 mines_planted += 1
@@ -97,7 +129,25 @@ class Minesweeper:
                 self._field[y][x] |= \
                     self._count_around((x, y), MINES_MASK, MINE)
 
+    def _init(
+        self,
+        position: Position_t
+    ) -> None:
+        self._stopwatch.stop()
+        self._plant_mines(position)
+        self._fill_numbers()
+        self._state == PLAYING
+        self._stopwatch.resume()
+
     ###########################################################################
+
+    def _set_final_state(
+        self,
+        state: Sweeper_state_t
+    ) -> None:
+        self._state = state
+        assert not self._stopwatch.is_measuring()
+        self._time = self._stopwatch.get_time_tuple()
 
     def _set_cell_state(
         self,
@@ -112,6 +162,10 @@ class Minesweeper:
         position: Position_t
     ) -> None:
         self._set_cell_state(position, SHOWN)
+        self._to_uncovered -= 1
+
+        if self._to_uncovered == 0 and self._state != GAME_LOST:
+            self._state = GAME_WON
 
         for x, y in self._in_proximity(position):
             if (self._field[y][x] & STATE_MASK) != SHOWN:
@@ -143,50 +197,49 @@ class Minesweeper:
             if self._field[p_y][p_x] & STATE_MASK == COVERED:
                 self._set_cell_state((p_x, p_y), SHOWN)
 
-    ###########################################################################
-
-    def get_data(
-        self
-    ) -> Minesweeper_t:
-        return self._field
-
-    def is_playable(
+    def _is_playable(
         self
     ) -> bool:
         return self._state != GAME_LOST and self._state != GAME_WON
 
-    def is_won(
-        self
-    ) -> bool:
-        return self._state == GAME_WON
+    def _click_wrap(
+        self,
+        position: Position_t,
+        button: Click_t
+    ) -> None:
+        self._stopwatch.stop()
+        button(position)
+        self._stopwatch.resume()
 
-    def cell_LMB(  # PRESS
+    ###########################################################################
+
+    def _lmb(  # PRESS
         self,
         position: Position_t
     ) -> None:
-        if not self.is_playable():
+        if not self._is_playable():
             return
 
         if self._state == UNINITIALIZED:
-            self._plant_mines(position)
-            self._fill_numbers()
+            self._init
 
         cell = self._field[position[1]][position[0]]
         c_state = cell & STATE_MASK
 
         if c_state == COVERED:
-            if cell & MINES_MASK == MINE:
+            if is_mine(cell):
                 self._set_cell_state(position, SHOWN)
+                self._state == GAME_LOST
             else:
                 self._flood_reveal(position)
         elif c_state == SHOWN:
             self._special_move(position)
 
-    def cell_RMB(  # FLAG
+    def _rmb(  # FLAG
         self,
         position: Position_t
     ) -> None:
-        if not self.is_playable():
+        if not self._is_playable():
             return
 
         x, y = position
@@ -195,3 +248,27 @@ class Minesweeper:
         if c_state != SHOWN:
             new_state = FLAG if c_state != FLAG else COVERED
             self._set_cell_state(position, new_state)
+
+    ###########################################################################
+
+    def get_data(
+        self
+    ) -> Minesweeper_t:
+        return self._field
+
+    def get_state(
+        self
+    ) -> Sweeper_state_t:
+        return self._state
+
+    def lmb(
+        self,
+        position: Position_t
+    ) -> None:
+        self._click_wrap(position, self._lmb)
+
+    def rmb(
+        self,
+        position: Position_t
+    ) -> None:
+        self._click_wrap(position, self._rmb)

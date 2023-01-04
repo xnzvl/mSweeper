@@ -1,16 +1,17 @@
 from typing import List, Literal, Optional
 from random import randint
 
-import uber
 import stopwatch
+
+import uber
 
 
 Cell_state_t = uber.mCell_state_t
 
 Cell_t = uber.mCell_t
 # 0bXX XXXX
-#   └┤ └──┴─ mine-bits
-#    └────── state-bits
+#   ├┘ └──┴─ mine-bits
+#   └─────── state-bits
 
 Click_t = uber.mClick_t
 Dimensions_t = uber.mDimensions_t
@@ -22,7 +23,7 @@ Time_tuple_t = uber.mTime_tuple_t
 
 MINE_PERCENTAGE = 0.1565
 
-# Constant for mine
+# Constant for a mine
 MINE = 0b1111
 
 # Masks
@@ -39,7 +40,7 @@ GAME_WON: Literal[2] = 2
 GAME_LOST: Literal[3] = 3
 
 
-def cell_to_num(
+def cell_to_mines(
     cell: Cell_t
 ) -> int:
     return cell & MINES_MASK
@@ -61,7 +62,7 @@ class Minesweeper:
     def __init__(
         self,
         dimensions: Dimensions_t,
-        mines: float
+        mines: float = MINE_PERCENTAGE
     ) -> None:
         width, height = dimensions
 
@@ -80,7 +81,7 @@ class Minesweeper:
         self._field: Minesweeper_t = [
             [COVERED for _ in range(self.width)] for _ in range(self.height)
         ]
-        self._state: Sweeper_state_t = UNINITIALIZED
+        self._state = UNINITIALIZED
 
         self._stopwatch = stopwatch.Stopwatch()
         self._stopwatch.start()
@@ -106,10 +107,10 @@ class Minesweeper:
 
     def _plant_mines(
         self,
-        skip_cell: Position_t
+        skip_origin: Position_t
     ) -> None:
-        cells_to_skip = set(self._in_proximity(skip_cell))
-        cells_to_skip.add(skip_cell)
+        cells_to_skip = set(self._in_proximity(skip_origin))
+        cells_to_skip.add(skip_origin)
 
         mines_planted = 0
         while mines_planted < self.mines:
@@ -129,25 +130,26 @@ class Minesweeper:
                 self._field[y][x] |= \
                     self._count_around((x, y), MINES_MASK, MINE)
 
-    def _init(
+    def _field_init(
         self,
         position: Position_t
     ) -> None:
-        self._stopwatch.stop()
         self._plant_mines(position)
         self._fill_numbers()
-        self._state == PLAYING
-        self._stopwatch.resume()
+        self._set_ms_state(PLAYING)
 
     ###########################################################################
 
-    def _set_final_state(
+    def _set_ms_state(
         self,
         state: Sweeper_state_t
     ) -> None:
-        self._state = state
-        assert not self._stopwatch.is_measuring()
-        self._time = self._stopwatch.get_time_tuple()
+        if self._state != GAME_LOST:
+            self._state = state
+
+        if state == GAME_LOST or state == GAME_WON:
+            assert not self._stopwatch.is_measuring()
+            self._time = self._stopwatch.get_time_tuple()
 
     def _set_cell_state(
         self,
@@ -165,11 +167,13 @@ class Minesweeper:
         self._to_uncovered -= 1
 
         if self._to_uncovered == 0 and self._state != GAME_LOST:
-            self._state = GAME_WON
+            self._set_ms_state(GAME_WON)
 
-        for x, y in self._in_proximity(position):
-            if (self._field[y][x] & STATE_MASK) != SHOWN:
-                self._flood_reveal((x, y))
+        x, y = position
+        if cell_to_mines(self._field[y][x]) == 0:
+            for x, y in self._in_proximity(position):
+                if (self._field[y][x] & STATE_MASK) != SHOWN:
+                    self._flood_reveal((x, y))
 
     def _count_around(
         self,
@@ -221,7 +225,7 @@ class Minesweeper:
             return
 
         if self._state == UNINITIALIZED:
-            self._init
+            self._field_init(position)
 
         cell = self._field[position[1]][position[0]]
         c_state = cell & STATE_MASK
@@ -229,7 +233,7 @@ class Minesweeper:
         if c_state == COVERED:
             if is_mine(cell):
                 self._set_cell_state(position, SHOWN)
-                self._state == GAME_LOST
+                self._set_ms_state(GAME_LOST)
             else:
                 self._flood_reveal(position)
         elif c_state == SHOWN:

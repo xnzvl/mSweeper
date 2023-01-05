@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import List, Optional
 from random import randint
 
 import stopwatch
@@ -17,7 +17,7 @@ Click_t = uber.mClick_t
 Dimensions_t = uber.mDimensions_t
 Minesweeper_t = uber.mMinesweeper_t
 Position_t = uber.mPosition_t
-Sweeper_state_t = Literal[0, 1, 2, 3]
+Sweeper_state_t = int
 Time_tuple_t = uber.mTime_tuple_t
 
 
@@ -30,32 +30,32 @@ MINE = 0b1111
 MINES_MASK = 0b1111
 STATE_MASK = 0b11_0000
 
-# Cell states
+# Cell_state_t constants
 COVERED, FLAG, SHOWN = 0b11_0000, 0b10_0000, 0b01_0000
 
 # Minesweeper states
-UNINITIALIZED: Literal[0] = 0
-PLAYING: Literal[1] = 1
-GAME_WON: Literal[2] = 2
-GAME_LOST: Literal[3] = 3
+UNINITIALIZED = 0
+PLAYING = 1
+GAME_WON = 2
+GAME_LOST = 3
 
 
-def cell_to_mines(
+def get_cell_mines(
     cell: Cell_t
 ) -> int:
     return cell & MINES_MASK
+
+
+def get_cell_state(
+    cell: Cell_t
+) -> Cell_state_t:
+    return cell & STATE_MASK
 
 
 def is_mine(
     cell: Cell_t
 ) -> bool:
     return (cell & MINES_MASK) == MINE
-
-
-def is_shown(
-    cell: Cell_t
-) -> bool:
-    return (cell & STATE_MASK) == SHOWN
 
 
 class Minesweeper:
@@ -170,7 +170,7 @@ class Minesweeper:
             self._set_ms_state(GAME_WON)
 
         x, y = position
-        if cell_to_mines(self._field[y][x]) == 0:
+        if get_cell_mines(self._field[y][x]) == 0:
             for x, y in self._in_proximity(position):
                 if (self._field[y][x] & STATE_MASK) != SHOWN:
                     self._flood_reveal((x, y))

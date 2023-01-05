@@ -1,8 +1,8 @@
-from typing import Tuple, Callable, List, Literal, Any
+from typing import Tuple, Callable, List, Any
 
 
 mTime_tuple_t = Tuple[int, int, int, int]
-mDifficulty_t = Literal[0, 1, 2]
+mDifficulty_t = int
 mScore_record_t = Tuple[mTime_tuple_t, str, str]
 
 mCell_t = int
@@ -15,12 +15,13 @@ mAI_player_t = Any  # TODO
 
 
 # used as indices, don't change ._.
-EASY: Literal[0] = 0
-MEDIUM: Literal[1] = 1
-HARD: Literal[2] = 2
+EASY, MEDIUM, HARD = 0, 1, 2
 
 
-DIFFICULTY_VALUES = EASY, MEDIUM, HARD
+DIFFICULTY_VALUES: Tuple[
+    mDifficulty_t, mDifficulty_t, mDifficulty_t
+] = EASY, MEDIUM, HARD
+
 DIMENSIONS: List[mDimensions_t] = [
     (8, 8),  # ---- easy
     (16, 16),  # -- medium

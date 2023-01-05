@@ -1,6 +1,7 @@
-from typing import Optional, Literal
-from minesweeper import Minesweeper
+from typing import Optional
+
 import gui
+import minesweeper as ms
 
 import uber
 
@@ -22,36 +23,39 @@ class Session:
         difficulty: Difficulty_t,
         ai_player: Optional[Ai_player_t] = None
     ) -> None:
+        self.dimensions = DIMENSIONS[difficulty]
         self.difficulty = difficulty
         self.ai_player = ai_player
-        self.dimensions = DIMENSIONS[difficulty]
 
         self.gui = gui.Gui(self, True)
+        self.ms = None
+        self.lmb = None
+        self.rmb = None
 
-    def new_game(
+    def game_over(
         self
-    ) -> Literal[2, 3]:  # GAME_LOST = 2, GAME_WON = 3
-        self.gui.start_mainloop()
+    ) -> None:
+        pass
 
-    def _get_new_ms(
+    def get_new_ms(
         self
-    ) -> Minesweeper:
+    ) -> ms.Minesweeper:
         print("create_new_ms()")
 
-        self.ms = Minesweeper(self.dimensions)
-        self.lmb = self.ms.cell_LMB
-        self.rmb = self.ms.cell_RMB
+        self.ms = ms.Minesweeper(self.dimensions)
+        self.lmb = self.ms.lmb
+        self.rmb = self.ms.rmb
 
-        # testing
-        self.lmb = lambda _: print("LMB")
-        self.rmb = lambda _: print("RMB")
+        # # testing
+        # self.lmb = lambda _: print("LMB")
+        # self.rmb = lambda _: print("RMB")
 
         return self.ms
 
 
 def main() -> None:
     session = Session(MEDIUM)
-    print(session.new_game())
+    print(session)
 
 
 if __name__ == "__main__":

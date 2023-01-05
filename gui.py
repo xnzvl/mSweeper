@@ -1,7 +1,8 @@
 import tkinter as tk
+from typing import Optional, Dict
 
-from typing import Optional
 import main
+import minesweeper as ms
 
 import uber
 
@@ -10,7 +11,15 @@ Click_t = uber.mClick_t
 Position_t = uber.mPosition_t
 
 
-CELL_SIZE = 20
+CELL_SIZE = 40
+
+DEFAULT_MARGIN = 25
+MARGINS: Dict[str, int] = {
+    "top": DEFAULT_MARGIN,
+    "right": DEFAULT_MARGIN,
+    "bottom": DEFAULT_MARGIN,
+    "left": DEFAULT_MARGIN
+}
 
 NUM_FONT = ('system', 16)
 BACKGROUND = '#d9d9d9'
@@ -37,12 +46,12 @@ class Gui:
         interactive: bool = True
     ) -> None:
         self.session = session
-        width, height = session.dimensions
+        self.width, self.height = session.dimensions
 
         self.root = tk.Tk()
         self.canvas = tk.Canvas(
-            width=width * CELL_SIZE,
-            height=height * CELL_SIZE
+            width=self.width * CELL_SIZE + MARGINS["right"] + MARGINS["left"],
+            height=self.height * CELL_SIZE + MARGINS["top"] + MARGINS["bottom"]
         )
         self.canvas.pack()
 
@@ -59,11 +68,13 @@ class Gui:
                 lambda event: self._click(self.session.rmb, event)
             )
 
-    def start_mainloop(
-        self
-    ) -> None:
         self._reset()
         self.root.mainloop()
+
+    def _draw_cell(
+        self
+    ) -> None:
+        pass
 
     def _refresh(
         self
@@ -72,14 +83,27 @@ class Gui:
 
         self.canvas.delete("all")
         for y, row in enumerate(self.ms_data):
-            for x, tile in enumerate(row):
-                continue
-                # cy = y * CELL_SIZE + 1
-                # cx = x * CELL_SIZE + 1
-                # self.canvas.create_rectangle(
-                #     cx, cy, cx + CELL_SIZE, cy + CELL_SIZE,
-                #     fill=TILE_COLOUR.get(tile, BACKGROUND)
-                # )
+            for x, cell in enumerate(row):
+                cy = y * CELL_SIZE + MARGINS["top"] + 1
+                cx = x * CELL_SIZE + MARGINS["left"] + 1
+
+                # draw_cell() or smth like that
+                self.canvas.create_rectangle(
+                    cx, cy, cx + CELL_SIZE, cy + CELL_SIZE,
+                    fill="#ffffff"
+                )
+
+                cell_state = ms.get_cell_state(cell)
+
+                if cell_state == ms.SHOWN:
+                    self.canvas.create_text(
+                        cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
+                        text=str(ms.get_cell_mines(cell)),
+                        font=NUM_FONT
+                    )
+
+                # self._draw_cell()
+
                 # if tile:
                 #     self.canvas.create_text(
                 #         cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
@@ -91,7 +115,7 @@ class Gui:
         self
     ) -> None:  # reset()/init()
         print("reset/init - (re)init")
-        self.ms_data = self.session._get_new_ms().get_data()
+        self.ms_data = self.session.get_new_ms().get_data()
 
         self._refresh()
 
@@ -100,7 +124,12 @@ class Gui:
         x: int,
         y: int
     ) -> Optional[Position_t]:
-        return x, y
+        x_pos = (x - MARGINS["left"] - 1) // CELL_SIZE
+        y_pos = (y - MARGINS["top"] - 1) // CELL_SIZE
+
+        return (x_pos, y_pos) \
+            if 0 <= x_pos < self.width and 0 <= y_pos < self.height \
+            else None
 
     def _click(
         self,

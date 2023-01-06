@@ -42,7 +42,9 @@ GAME_LOST = 3
 
 def get_cell_mines(
     cell: Cell_t
-) -> int:
+) -> Optional[int]:
+    if get_cell_state(cell) != SHOWN:
+        raise ValueError("can't get number of mines from covered cell")
     return cell & MINES_MASK
 
 
@@ -62,20 +64,18 @@ class Minesweeper:
     def __init__(
         self,
         dimensions: Dimensions_t,
-        mines: float = MINE_PERCENTAGE
+        mines: int
     ) -> None:
         width, height = dimensions
 
         if height < 5 or width < 5:
             raise ValueError("invalid dimensions")
-        if not (0 < mines < 1
-                and int(height * width * mines) > 0
-                and int(height * width * (1 - mines)) > 9):
-            raise ValueError("invalid mine-%")
+        if mines >= height * width - 9 or mines < 1:
+            raise ValueError("invalid number of mines")
 
         self.height = height
         self.width = width
-        self.mines = int(height * width * mines)
+        self.mines = mines
 
         self._to_uncovered = height * width - self.mines
         self._field: Minesweeper_t = [
@@ -157,7 +157,11 @@ class Minesweeper:
         state: Cell_state_t
     ) -> None:
         x, y = position
-        self._field[y][x] = (self._field[y][x] & ~STATE_MASK) | state
+        cell = self._field[y][x]
+        self._field[y][x] = (cell & ~STATE_MASK) | state
+
+        if is_mine(cell):
+            self._set_ms_state(GAME_LOST)
 
     def _flood_reveal(
         self,
@@ -194,7 +198,8 @@ class Minesweeper:
         position: Position_t
     ) -> None:
         x, y = position
-        if self._count_around(position, STATE_MASK, FLAG) != self._field[y][x]:
+        if self._count_around(position, STATE_MASK, FLAG) \
+                != get_cell_mines(self._field[y][x]):
             return
 
         for p_x, p_y in self._in_proximity(position):
@@ -206,11 +211,14 @@ class Minesweeper:
     ) -> bool:
         return self._state != GAME_LOST and self._state != GAME_WON
 
-    def _click_wrap(
+    def _click_wrapper(
         self,
         position: Position_t,
         button: Click_t
     ) -> None:
+        if not self._is_playable():
+            return
+
         self._stopwatch.stop()
         button(position)
         self._stopwatch.resume()
@@ -221,21 +229,14 @@ class Minesweeper:
         self,
         position: Position_t
     ) -> None:
-        if not self._is_playable():
-            return
-
         if self._state == UNINITIALIZED:
             self._field_init(position)
 
         cell = self._field[position[1]][position[0]]
-        c_state = cell & STATE_MASK
+        c_state = get_cell_state(cell)
 
         if c_state == COVERED:
-            if is_mine(cell):
-                self._set_cell_state(position, SHOWN)
-                self._set_ms_state(GAME_LOST)
-            else:
-                self._flood_reveal(position)
+            self._flood_reveal(position)
         elif c_state == SHOWN:
             self._special_move(position)
 
@@ -243,17 +244,21 @@ class Minesweeper:
         self,
         position: Position_t
     ) -> None:
-        if not self._is_playable():
-            return
-
         x, y = position
-        c_state = self._field[y][x] & STATE_MASK
+        c_state = get_cell_state(self._field[y][x])
 
         if c_state != SHOWN:
             new_state = FLAG if c_state != FLAG else COVERED
             self._set_cell_state(position, new_state)
 
     ###########################################################################
+
+    def get_time(
+        self
+    ) -> Time_tuple_t:
+        if self._time is None:
+            raise ValueError("time is not set")
+        self._time
 
     def get_data(
         self
@@ -269,10 +274,10 @@ class Minesweeper:
         self,
         position: Position_t
     ) -> None:
-        self._click_wrap(position, self._lmb)
+        self._click_wrapper(position, self._lmb)
 
     def rmb(
         self,
         position: Position_t
     ) -> None:
-        self._click_wrap(position, self._rmb)
+        self._click_wrapper(position, self._rmb)

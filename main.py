@@ -42,7 +42,7 @@ class Session:
     ) -> ms.Minesweeper:
         print("create_new_ms()")
 
-        self.ms = ms.Minesweeper(self.dimensions)
+        self.ms = ms.Minesweeper(self.dimensions, 40)
         self.lmb = self.ms.lmb
         self.rmb = self.ms.rmb
 

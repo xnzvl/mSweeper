@@ -1,6 +1,4 @@
 import time
-from datetime import datetime
-from typing import Optional
 
 import uber
 
@@ -17,22 +15,19 @@ class Stopwatch:
     ) -> None:
         self._measured_t: float = 0
         self._last_start: float = 0
-        self._state: Optional[int] = None
+        self._state = STOPPED
 
     def start(
         self
     ) -> None:
-        self.reset()
         self._state = STOPPED
-        self.resume()
+        self._last_start = 0
 
     def resume(
         self
     ) -> None:
-        if self._state is None or self._state != STOPPED:
-            raise RuntimeError(
-                "attempt to resume measuring, but measuring isn't stopped"
-            )
+        if self._state != STOPPED:
+            return
 
         self._state = MEASURING
         self._last_start = time.time()
@@ -40,40 +35,43 @@ class Stopwatch:
     def stop(
         self
     ) -> None:
-        if self._state is None or self._state != MEASURING:
-            raise RuntimeError(
-                "attempt to stop Stopwatch, which isn't measuring"
-            )
+        if self._state != MEASURING:
+            return
 
         self._measured_t += time.time() - self._last_start
         self._state = STOPPED
 
-    def reset(
-        self
-    ) -> None:
-        self._measured_t = 0
-        self._last_start = 0
-        self._state = None
-
     def is_measuring(
         self
     ) -> bool:
-        return self._state is not None and self._state == MEASURING
+        return self._state == MEASURING
 
     def get_time(
         self
     ) -> float:
-        if self._state is None and self._state != STOPPED:
+        if self._state != STOPPED:
             raise ValueError("stopwatch is in an unstable state")
-        return round(self._measured_t, 6)
+        return self._measured_t
 
     def get_time_tuple(
         self
     ) -> Time_tuple_t:
-        dt = datetime.fromtimestamp(self.get_time())
-        print(dt.day, dt.hour, dt.minute, dt.second, dt.microsecond)
-        return (dt.hour, dt.minute, dt.second, dt.microsecond) \
-            if dt.day < 1 \
+        measured = int(self.get_time() * 1000000)
+
+        micro = measured % 1000000
+        measured //= 1000000
+
+        second = measured % 60
+        measured //= 60
+
+        minute = measured % 60
+        measured //= 60
+
+        hour = measured % 24
+        measured //= 24
+
+        return (hour, minute, second, micro) \
+            if measured < 1 \
             else (24, 0, 0, 0)
 
 

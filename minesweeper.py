@@ -133,7 +133,6 @@ class Minesweeper:
         self._state = UNINITIALIZED
 
         self._stopwatch = stopwatch.Stopwatch()
-        self._stopwatch.start()
         self._time: Optional[Time_tuple_t] = None
 
     def _in_proximity(
@@ -185,6 +184,7 @@ class Minesweeper:
     ) -> None:
         self._plant_mines(position)
         self._fill_numbers()
+        self._stopwatch.start()
         self._set_ms_state(PLAYING)
 
     ###########################################################################
@@ -204,11 +204,8 @@ class Minesweeper:
 
         if state == GAME_LOST or state == GAME_WON:
             self._field.project_inner()
-
-            assert not self._stopwatch.is_measuring()
             self._time = self._stopwatch.get_time_tuple()
 
-            print("[x] game lost" if state == GAME_LOST else "[o] game won")
             if state == GAME_WON:  # testing
                 print("time:", self.get_time())
 

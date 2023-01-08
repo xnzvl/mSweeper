@@ -21,8 +21,6 @@ Sweeper_state_t = int
 Time_tuple_t = uber.mTime_tuple_t
 
 
-MINE_PERCENTAGE = 0.1565
-
 # Constant for a mine
 MINE = 0b1111
 
@@ -42,9 +40,7 @@ GAME_LOST = 3
 
 def get_cell_mines(
     cell: Cell_t
-) -> Optional[int]:
-    if get_cell_state(cell) != SHOWN:
-        raise ValueError("can't get number of mines from covered cell")
+) -> int:
     return cell & MINES_MASK
 
 
@@ -54,10 +50,65 @@ def get_cell_state(
     return cell & STATE_MASK
 
 
-def is_mine(
-    cell: Cell_t
-) -> bool:
-    return (cell & MINES_MASK) == MINE
+class Field:
+    def __init__(
+        self,
+        dimensions: Dimensions_t,
+        default_value: Cell_t
+    ) -> None:
+        width, height = dimensions
+
+        self.inner: Minesweeper_t = [
+            [default_value for _ in range(width)] for _ in range(height)
+        ]
+        self.outer: Minesweeper_t = [
+            [default_value for _ in range(width)] for _ in range(height)
+        ]
+
+    def get_inner_cell(
+        self,
+        x: int,
+        y: int
+    ) -> Cell_t:
+        return self.inner[y][x]
+
+    def get_inner_value(
+        self,
+        x: int,
+        y: int
+    ) -> int:
+        return self.inner[y][x] & MINES_MASK
+
+    def get_inner_state(
+        self,
+        x: int,
+        y: int
+    ) -> Cell_state_t:
+        return self.inner[y][x] & STATE_MASK
+
+    def set_inner_value(
+        self,
+        x: int,
+        y: int,
+        value: int
+    ) -> None:
+        self.inner[y][x] |= value
+
+    def set_inner_state(
+        self,
+        x: int,
+        y: int,
+        state: Cell_state_t
+    ) -> None:
+        self.inner[y][x] = (self.inner[y][x] & ~STATE_MASK) | state
+        self.outer[y][x] = self.inner[y][x] if state == SHOWN else state
+
+    def project_inner(
+        self
+    ) -> None:
+        for y, row in enumerate(self.inner):
+            for x, cell in enumerate(row):
+                self.outer[y][x] = cell
 
 
 class Minesweeper:
@@ -76,11 +127,9 @@ class Minesweeper:
         self.height = height
         self.width = width
         self.mines = mines
-
         self._to_uncovered = height * width - self.mines
-        self._field: Minesweeper_t = [
-            [COVERED for _ in range(self.width)] for _ in range(self.height)
-        ]
+
+        self._field = Field(dimensions, COVERED)
         self._state = UNINITIALIZED
 
         self._stopwatch = stopwatch.Stopwatch()
@@ -117,9 +166,9 @@ class Minesweeper:
             rand_x = randint(0, self.width - 1)
             rand_y = randint(0, self.height - 1)
 
-            if not is_mine(self._field[rand_y][rand_x]) \
+            if not self._is_mine(self._field.get_inner_value(rand_x, rand_y)) \
                     and (rand_x, rand_y) not in cells_to_skip:
-                self._field[rand_y][rand_x] |= MINE
+                self._field.set_inner_value(rand_x, rand_y, MINE)
                 mines_planted += 1
 
     def _fill_numbers(
@@ -127,8 +176,8 @@ class Minesweeper:
     ) -> None:
         for x in range(self.width):
             for y in range(self.height):
-                self._field[y][x] |= \
-                    self._count_around((x, y), MINES_MASK, MINE)
+                mines = self._count_around((x, y), MINES_MASK, MINE)
+                self._field.set_inner_value(x, y, mines)
 
     def _field_init(
         self,
@@ -140,6 +189,12 @@ class Minesweeper:
 
     ###########################################################################
 
+    def _is_mine(
+        _,
+        cell: Cell_t
+    ) -> bool:
+        return (cell & MINES_MASK) == MINE
+
     def _set_ms_state(
         self,
         state: Sweeper_state_t
@@ -148,8 +203,14 @@ class Minesweeper:
             self._state = state
 
         if state == GAME_LOST or state == GAME_WON:
+            self._field.project_inner()
+
             assert not self._stopwatch.is_measuring()
             self._time = self._stopwatch.get_time_tuple()
+
+            print("[x] game lost" if state == GAME_LOST else "[o] game won")
+            if state == GAME_WON:  # testing
+                print("time:", self.get_time())
 
     def _set_cell_state(
         self,
@@ -157,10 +218,9 @@ class Minesweeper:
         state: Cell_state_t
     ) -> None:
         x, y = position
-        cell = self._field[y][x]
-        self._field[y][x] = (cell & ~STATE_MASK) | state
+        self._field.set_inner_state(x, y, state)
 
-        if is_mine(cell):
+        if self._is_mine(self._field.get_inner_value(x, y)) and state == SHOWN:
             self._set_ms_state(GAME_LOST)
 
     def _flood_reveal(
@@ -174,9 +234,9 @@ class Minesweeper:
             self._set_ms_state(GAME_WON)
 
         x, y = position
-        if get_cell_mines(self._field[y][x]) == 0:
+        if get_cell_mines(self._field.get_inner_value(x, y)) == 0:
             for x, y in self._in_proximity(position):
-                if (self._field[y][x] & STATE_MASK) != SHOWN:
+                if (self._field.get_inner_state(x, y)) != SHOWN:
                     self._flood_reveal((x, y))
 
     def _count_around(
@@ -188,7 +248,7 @@ class Minesweeper:
         counter = 0
 
         for x, y in self._in_proximity(position):
-            if (self._field[y][x] & mask) == to_count:
+            if (self._field.get_inner_cell(x, y) & mask) == to_count:
                 counter += 1
 
         return counter
@@ -199,12 +259,12 @@ class Minesweeper:
     ) -> None:
         x, y = position
         if self._count_around(position, STATE_MASK, FLAG) \
-                != get_cell_mines(self._field[y][x]):
+                != self._field.get_inner_value(x, y):
             return
 
         for p_x, p_y in self._in_proximity(position):
-            if self._field[p_y][p_x] & STATE_MASK == COVERED:
-                self._set_cell_state((p_x, p_y), SHOWN)
+            if self._field.get_inner_state(p_x, p_y) == COVERED:
+                self._flood_reveal((p_x, p_y))
 
     def _is_playable(
         self
@@ -232,8 +292,8 @@ class Minesweeper:
         if self._state == UNINITIALIZED:
             self._field_init(position)
 
-        cell = self._field[position[1]][position[0]]
-        c_state = get_cell_state(cell)
+        x, y = position
+        c_state = self._field.get_inner_state(x, y)
 
         if c_state == COVERED:
             self._flood_reveal(position)
@@ -245,11 +305,13 @@ class Minesweeper:
         position: Position_t
     ) -> None:
         x, y = position
-        c_state = get_cell_state(self._field[y][x])
+        c_state = self._field.get_inner_state(x, y)
 
         if c_state != SHOWN:
-            new_state = FLAG if c_state != FLAG else COVERED
-            self._set_cell_state(position, new_state)
+            self._set_cell_state(
+                position,
+                FLAG if c_state != FLAG else COVERED
+            )
 
     ###########################################################################
 
@@ -258,12 +320,12 @@ class Minesweeper:
     ) -> Time_tuple_t:
         if self._time is None:
             raise ValueError("time is not set")
-        self._time
+        return self._time
 
     def get_data(
         self
     ) -> Minesweeper_t:
-        return self._field
+        return self._field.outer if self._is_playable() else self._field.inner
 
     def get_state(
         self

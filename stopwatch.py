@@ -71,6 +71,7 @@ class Stopwatch:
         self
     ) -> Time_tuple_t:
         dt = datetime.fromtimestamp(self.get_time())
+        print(dt.day, dt.hour, dt.minute, dt.second, dt.microsecond)
         return (dt.hour, dt.minute, dt.second, dt.microsecond) \
             if dt.day < 1 \
             else (24, 0, 0, 0)

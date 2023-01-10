@@ -18,7 +18,7 @@ Click_t = uber.mClick_t
 Dimensions_t = uber.mDimensions_t
 Minesweeper_t = uber.mMinesweeper_t
 Position_t = uber.mPosition_t
-Sweeper_state_t = int
+Sweeper_state_t = uber.mSweeper_state_t
 Time_tuple_t = uber.mTime_tuple_t
 
 
@@ -131,8 +131,8 @@ class Minesweeper:
         self.height = height
         self.width = width
         self.mines = number_of_mines
+        self.flags = 0
         self._to_uncover = height * width - self.mines
-        self._flags = 0
 
         self._field = Field(dimensions)
         self._state = UNINITIALIZED
@@ -209,10 +209,9 @@ class Minesweeper:
 
         if ms_state == GAME_LOST or ms_state == GAME_WON:
             self._field.project_inner()
-            self._time = self._stopwatch.get_time_tuple()
 
-            if ms_state == GAME_WON:  # testing
-                print("time:", self.get_time())
+            if ms_state == GAME_WON:
+                self._time = self._stopwatch.get_time_tuple()
 
     def _set_cell_state(
         self,
@@ -224,9 +223,9 @@ class Minesweeper:
         self._field.set_inner_state(x, y, state)
 
         if old_state == FLAG:
-            self._flags -= 1
+            self.flags -= 1
         if state == FLAG:
-            self._flags += 1
+            self.flags += 1
 
         elif state == SHOWN:
             self._to_uncover -= 1
@@ -301,7 +300,7 @@ class Minesweeper:
 
         self._stopwatch.stop()
         button(position)
-        print(f"flagged mines:\t{self._flags} (total: {self.mines})\n")
+        print(f"flagged mines:\t{self.flags}/{self.mines}")
         self._stopwatch.resume()
 
     def _lmb(  # PRESS

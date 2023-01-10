@@ -12,10 +12,11 @@ mCell_state_t = int
 mCell_value_t = int
 mMinesweeper_t = List[List[mCell_t]]
 mClick_t = Callable[[mPosition_t], None]
+mSweeper_state_t = int
 mAI_player_t = Any  # TODO
 
 
-# used as indices, don't change ._.
+# used as indices, don't change pls ._.
 EASY, MEDIUM, HARD = 0, 1, 2
 
 
@@ -24,19 +25,19 @@ DIFFICULTY_VALUES: Tuple[
 ] = EASY, MEDIUM, HARD
 
 DIMENSIONS: List[mDimensions_t] = [
-    (8, 8),  # ---- easy
-    (16, 16),  # -- medium
-    (30, 16)  # --- hard
+    (8, 8),    # easy
+    (16, 16),  # medium
+    (30, 16)   # hard
 ]
 
 
-# ======================================================
+# =========================================================
 
 # feel free to change these two
-DEFAULT_DIFFICULTY = EASY  # has to be EASY/MEDIUM/HARD tho b-><-d
+DEFAULT_DIFFICULTY = MEDIUM  # has to be EASY/MEDIUM/HARD
 HIGHSCORE_FILE = ".mSweeper_highscores.txt"
 
-# ======================================================
+# =========================================================
 
 
 ALL_CHARS = set(
@@ -46,6 +47,3 @@ ALL_CHARS = set(
 ALLOWED_CHARS = set(
         [chr(i) for i in range(ord('A'), ord('z') + 1) if chr(i).isalnum()]
     ) | set([' ', '-', '_', ':', '.'])
-
-SPACE_REPLACEMENT = '~'
-assert SPACE_REPLACEMENT not in ALLOWED_CHARS

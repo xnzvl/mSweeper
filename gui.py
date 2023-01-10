@@ -37,6 +37,11 @@ NUM_COLOUR = "#000000"
 
 DEFAULT_DICT_KEY = -1
 
+
+# ===============================
+#  TODO activefills alternatives
+# ===============================
+
 CELL_COLOURS: Dict[Cell_state_t, Dict[Cell_value_t, str]] = {
     ms.SHOWN: {
         0: "#faf3e1",
@@ -129,7 +134,7 @@ class Gui:
     def _refresh(
         self
     ) -> None:
-        ms_state = self.ms.get_state()
+        ms_state = self.session.ms.get_state()
         self.root.title(WINDOW_ADDS[ms_state] + WINDOW_TITLE)
 
         self.canvas.delete("all")
@@ -143,8 +148,9 @@ class Gui:
     def _reset(
         self
     ) -> None:  # reset()/init()
-        self.ms = self.session.get_new_ms()
-        self.ms_data = self.ms.get_data()
+        self.session.get_new_ms()
+        assert self.session.ms is not None
+        self.ms_data = self.session.ms.get_data()
 
         if self.is_interactive:
             self._bind_actions()
@@ -155,13 +161,14 @@ class Gui:
         self
     ) -> None:
         self.canvas.bind_all("r", lambda _: self._reset())
+        # TODO button for menu?
         self.canvas.bind(
             "<Button-1>",
-            lambda event: self._click(self.ms.lmb, event)
+            lambda event: self._click(self.session.ms_lmb, event)
         )
         self.canvas.bind(
             "<Button-3>",
-            lambda event: self._click(self.ms.rmb, event)
+            lambda event: self._click(self.session.ms_rmb, event)
         )
 
     def _get_position(

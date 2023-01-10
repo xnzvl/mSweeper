@@ -9,6 +9,7 @@ mCell_t = int
 mPosition_t = Tuple[int, int]
 mDimensions_t = Tuple[int, int]
 mCell_state_t = int
+mCell_value_t = int
 mMinesweeper_t = List[List[mCell_t]]
 mClick_t = Callable[[mPosition_t], None]
 mAI_player_t = Any  # TODO

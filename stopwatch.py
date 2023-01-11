@@ -73,10 +73,3 @@ class Stopwatch:
         return (hour, minute, second, micro) \
             if measured < 1 \
             else (24, 0, 0, 0)
-
-
-def timetuple_to_str(
-    t_tuple: Time_tuple_t
-) -> str:
-    hours, minutes, seconds, _ = t_tuple
-    return f"{hours:02}:{minutes:02}:{seconds:02}"

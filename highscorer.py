@@ -1,5 +1,6 @@
 from typing import List, Callable
 import datetime
+import os
 
 import uber
 
@@ -10,13 +11,13 @@ Time_tuple_t = uber.mTime_tuple_t
 
 
 ALLOWED_CHARS = uber.ALLOWED_CHARS
-HIGHSCORE_FILE = ".mSweeper_highscores.txt"
+HIGHSCORE_FILE = uber.HIGHSCORE_FILE
 INVALID_RECORD = ValueError("Highscore record is invalid")
 INVALID_FORMAT = ValueError("Highscore file has invalid format")
 
 SPLIT_CHAR = '^'
-assert SPLIT_CHAR not in ALLOWED_CHARS and SPLIT_CHAR != uber.SPACE_REPLACEMENT
-DEFAULT_LINE = SPLIT_CHAR.join(["##:##:##.######", "####-##-##", "#"]) + '\n'
+assert SPLIT_CHAR not in ALLOWED_CHARS
+DEFAULT_LINE = SPLIT_CHAR.join(["##:##:##.######", "####-##-##", ""])
 
 
 class Cypher:
@@ -65,6 +66,9 @@ class Highscores:
             []   # hard   difficulty
         ]
 
+        if not os.path.isfile(hfile):
+            create_default_hfile(hfile)
+
         self._load_hfile()
 
     def _should_be_recorded(
@@ -81,13 +85,15 @@ class Highscores:
         difficulty: Difficult_t
     ) -> None:
         if not self._should_be_recorded(score, difficulty):
+            print("not quick enough")
             return
 
         diff = self._difficulties[difficulty]
         diff.append(score)
         diff.sort()
-        diff.pop()
-        self._difficulties[difficulty] = diff
+
+        if len(diff) > 10:
+            diff.pop()
 
         self._write_hfile()
 
@@ -138,39 +144,74 @@ class Highscores:
         datetime.date.fromisoformat(date_str)
         return date_str
 
+    def test_print(
+        self
+    ) -> None:
+        dd = ["\nEASY:", "MEDIUM:", "HARD:"]
+
+        print("== SCORES ============================")
+        for i, diff in enumerate(self._difficulties):
+            print(dd[i])
+
+            for k, row in enumerate(diff):
+                print(f"[{k + 1:02}]", row)
+
+            print()
+        print("======================================")
+
     def _load_hfile(
         self
     ) -> None:
         with open(self._filename, 'r') as f:
             i = 0
+            diff = 0
+
             for line in f:
-                if line == DEFAULT_LINE or line == "\n":
-                    continue
+                i += 1 if line != '\n' else 0
 
-                self._difficulties[i // 10].append(self._try_parse_line(line))
-                i += 1
+                if line != DEFAULT_LINE + '\n' and line != '\n':
+                    self._difficulties[diff].append(self._try_parse_line(line))
 
-                if i > 30:
-                    raise INVALID_FORMAT
+                if i == 10:
+                    i += 1
+                    diff += 1
+
+                    if diff > 2:
+                        raise INVALID_FORMAT
 
         self._check_order()
 
+        self.test_print()
+
     def _score_to_str(
-        self,
+        _,
         score: Score_record_t
     ) -> str:
-        pass
+        t_tuple, date, name = score
+        hour, minute, second, micro = t_tuple
+
+        return SPLIT_CHAR.join(
+            [f"{hour:02}:{minute:02}:{second:02}.{micro:06}", date, name]
+        )
 
     def _write_hfile(
         self
     ) -> None:
         with open(self._filename, 'w') as output:
             for diff in self._difficulties:
+                i = 0
+
                 for score in diff:
                     to_write = self._score_to_str(score)
                     output.write(self._cypher.encrypt(to_write) + '\n')
+                    i += 1
+
+                for _ in range(10 - i):
+                    output.write(self._cypher.encrypt(DEFAULT_LINE) + '\n')
 
                 output.write('\n')
+
+        self.test_print()
 
 
 def create_default_hfile(
@@ -179,7 +220,7 @@ def create_default_hfile(
     with open(filename, 'w') as file:
         for _ in range(3):
             for _ in range(10):
-                file.write(DEFAULT_LINE)
+                file.write(DEFAULT_LINE + '\n')
 
             file.write('\n')
 
@@ -196,18 +237,3 @@ def default_cypher_decrypt(
 ) -> str:
     # TODO
     return input
-
-
-def main() -> None:
-    # create_default_hfile(HIGHSCORE_FILE)
-
-    c = Cypher(default_cypher_encrypt, default_cypher_decrypt)
-    hs = Highscores(HIGHSCORE_FILE, c)
-
-    for diff in hs._difficulties:
-        for line in diff:
-            print(line)
-
-
-if __name__ == "__main__":
-    main()

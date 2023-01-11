@@ -1,5 +1,6 @@
 from typing import List, Callable
 import datetime
+import json
 import os
 
 import uber
@@ -9,11 +10,16 @@ Score_record_t = uber.mScore_record_t
 Difficult_t = uber.mDifficulty_t
 Time_tuple_t = uber.mTime_tuple_t
 
+Config_dict = uber.mConfig_dict
+
+
+CONFIG_FILE = uber.CONFIG_FILE
+CONFIG_DEFAULT = uber.DEFAULT_CONFIG
 
 ALLOWED_CHARS = uber.ALLOWED_CHARS
-HIGHSCORE_FILE = uber.HIGHSCORE_FILE
 INVALID_RECORD = ValueError("Highscore record is invalid")
 INVALID_FORMAT = ValueError("Highscore file has invalid format")
+INVALID_CONFIG = ValueError("Invalid config file")
 
 SPLIT_CHAR = '^'
 assert SPLIT_CHAR not in ALLOWED_CHARS
@@ -57,6 +63,17 @@ class Highscores:
         hfile: str,
         cypher: Cypher
     ) -> None:
+
+        def create_default_hfile(
+            filename: str
+        ) -> None:
+            with open(filename, 'w') as file:
+                for _ in range(3):
+                    for _ in range(10):
+                        file.write(DEFAULT_LINE + '\n')
+
+                file.write('\n')
+
         self._filename = hfile
         self._cypher = cypher
 
@@ -81,9 +98,12 @@ class Highscores:
 
     def score(
         self,
-        score: Score_record_t,
+        time: Time_tuple_t,
+        nick: str,
         difficulty: Difficult_t
     ) -> None:
+        score = time, datetime.date.today().strftime("%Y-%m-%d"), nick
+
         if not self._should_be_recorded(score, difficulty):
             print("not quick enough")
             return
@@ -149,7 +169,7 @@ class Highscores:
     ) -> None:
         dd = ["\nEASY:", "MEDIUM:", "HARD:"]
 
-        print("== SCORES ============================")
+        print("\n== SCORES ============================")
         for i, diff in enumerate(self._difficulties):
             print(dd[i])
 
@@ -214,26 +234,54 @@ class Highscores:
         self.test_print()
 
 
-def create_default_hfile(
-    filename: str
-) -> None:
-    with open(filename, 'w') as file:
-        for _ in range(3):
-            for _ in range(10):
-                file.write(DEFAULT_LINE + '\n')
-
-            file.write('\n')
-
-
-def default_cypher_encrypt(
+def def_cypher_encrypt(
     input: str
 ) -> str:
     # TODO
     return input
 
 
-def default_cypher_decrypt(
+def def_cypher_decrypt(
     input: str
 ) -> str:
     # TODO
     return input
+
+
+DEFAULT_CYPHER = Cypher(def_cypher_encrypt, def_cypher_decrypt)
+
+
+def get_config() -> Config_dict:
+    if not os.path.isfile(CONFIG_FILE):
+        json.dump(CONFIG_DEFAULT, open(CONFIG_FILE, 'w'), indent=4)
+
+    try:
+        deets: Config_dict = json.load(open(CONFIG_FILE, 'r'))
+
+        assert deets.keys() == CONFIG_DEFAULT.keys()
+
+        diffs = deets["DIFFICULTIES"]
+
+        assert isinstance(diffs, dict)
+        assert isinstance(deets["DEFAULT_DIFFICULTY"], str)
+        assert isinstance(deets["NICK"], str)
+        assert isinstance(deets["HIGHSCORE_FILE"], str)
+
+        assert deets["DIFFICULTIES"].keys() \
+            == CONFIG_DEFAULT["DIFFICULTIES"].keys()
+        assert deets["DEFAULT_DIFFICULTY"] in ["EASY", "MEDIUM", "HARD"]
+
+        assert len(deets["NICK"].strip()) > 0
+
+        for diff in diffs.values():
+            assert isinstance(diff, dict)
+            assert diff.keys() == set(["mines", "width", "height"])
+
+            for val in diff.values():
+                assert val > 0
+
+    except AssertionError:
+        raise INVALID_CONFIG
+
+    else:
+        return deets

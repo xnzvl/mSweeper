@@ -1,9 +1,8 @@
-from typing import Optional, Tuple, Dict
-from datetime import date
+from typing import Optional, Dict
 
 import gui
 import minesweeper as ms
-import highscorer as hsm
+import file_manager as fm
 
 import uber
 
@@ -16,37 +15,48 @@ Sweeper_state_t = uber.mSweeper_state_t
 Ai_player_t = uber.mAI_player_t
 
 
-DIMENSIONS = uber.DIMENSIONS
-DIFFICULTY = uber.DEFAULT_DIFFICULTY
-EASY, MEDIUM, HARD = uber.DIFFICULTY_VALUES
+DEFAULT_CYPHER = fm.DEFAULT_CYPHER
 
-DIFFICULTY_SETTINGS: Dict[Difficulty_t, Tuple[int, Dimensions_t]] = {
-    EASY: (10, (10, 10)),
-    MEDIUM: (40, (16, 16)),
-    HARD: (5, (30, 16))
+EASY = uber.EASY
+MEDIUM = uber.MEDIUM
+HARD = uber.HARD
+
+
+DIFFICULTY_CONSTANTS: Dict[str, Difficulty_t] = {
+    "EASY": EASY,
+    "MEDIUM": MEDIUM,
+    "HARD": HARD
 }
-
-DEFAULT_CYPHER = hsm.Cypher(
-    hsm.default_cypher_encrypt,
-    hsm.default_cypher_decrypt
-)
 
 
 class Session:
     def __init__(
         self,
-        difficulty: Difficulty_t,
         ai_player: Optional[Ai_player_t] = None
     ) -> None:
-        self.mines, self.dimensions = DIFFICULTY_SETTINGS[difficulty]
-
-        self.mines = 5
-
-        self.difficulty = difficulty
         self.ai_player = ai_player
-
-        self._hs_manager = hsm.Highscores(uber.HIGHSCORE_FILE, DEFAULT_CYPHER)
         self._waiting_for_win = True
+
+        self._cnfg = fm.get_config()
+        self._difficulty = self._cnfg["DIFFICULTIES"][
+            self._cnfg["DEFAULT_DIFFICULTY"]
+        ]
+        assert isinstance(self._difficulty, dict)
+
+        self.mines = self._difficulty["mines"]
+
+        # ==========================
+        # self.mines = 5  # testing
+        # ==========================
+
+        self.dimensions: Dimensions_t = (
+            self._difficulty["width"],
+            self._difficulty["height"]
+        )
+
+        self._hs_manager = fm.Highscores(
+            self._cnfg["HIGHSCORE_FILE"], DEFAULT_CYPHER
+        )
 
         self.game_gui = gui.Gui(self, ai_player is None)
 
@@ -55,12 +65,10 @@ class Session:
     ) -> None:
         assert self.ms is not None
         t = self.ms.get_time()
-        print("VICTORY!")
+        print("\nVICTORY!")
         print("time:", t)
 
-        self._hs_manager.score(
-            (t, date.today().strftime("%Y-%m-%d"), "Kubik"), MEDIUM
-        )
+        self._hs_manager.score(t, self._cnfg["NICK"], MEDIUM)
 
     def _ms_click_wrapper(
         self,
@@ -97,7 +105,7 @@ class Session:
 
 
 def main() -> None:
-    session = Session(MEDIUM)
+    session = Session()
     print(session)
 
 

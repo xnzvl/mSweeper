@@ -1,4 +1,4 @@
-from typing import Tuple, Callable, List, Any
+from typing import Callable, Union, Tuple, List, Dict, Any
 
 
 mTime_tuple_t = Tuple[int, int, int, int]
@@ -15,30 +15,11 @@ mClick_t = Callable[[mPosition_t], None]
 mSweeper_state_t = int
 mAI_player_t = Any  # TODO
 
+mConfig_dict = Dict[str, Union[str, Dict[str, Dict[str, int]]]]
+
 
 # used as indices, don't change pls ._.
 EASY, MEDIUM, HARD = 0, 1, 2
-
-
-DIFFICULTY_VALUES: Tuple[
-    mDifficulty_t, mDifficulty_t, mDifficulty_t
-] = EASY, MEDIUM, HARD
-
-DIMENSIONS: List[mDimensions_t] = [
-    (8, 8),    # easy
-    (16, 16),  # medium
-    (30, 16)   # hard
-]
-
-
-# =========================================================
-
-# feel free to change these two
-DEFAULT_DIFFICULTY = MEDIUM  # has to be EASY/MEDIUM/HARD
-HIGHSCORE_FILE = ".mSweeper_highscores.txt"
-
-# =========================================================
-
 
 ALL_CHARS = set(
         [chr(i) for i in range(ord(' '), ord('~') + 1)]
@@ -47,3 +28,31 @@ ALL_CHARS = set(
 ALLOWED_CHARS = set(
         [chr(i) for i in range(ord('A'), ord('z') + 1) if chr(i).isalnum()]
     ) | set([' ', '-', '_', ':', '.'])
+
+CONFIG_FILE = ".mSweeper_cnfg.json"
+
+DEFAULT_CONFIG: mConfig_dict = {
+    "_comment":           "",
+    "DEFAULT_DIFFICULTY": "MEDIUM",
+    "NICK":               "cry_baby_007",
+
+    "HIGHSCORE_FILE":     ".mSweeper_scrs.txt",
+
+    "DIFFICULTIES": {
+        "EASY": {
+            "mines":  10,
+            "width":   8,
+            "height":  8
+        },
+        "MEDIUM": {
+            "mines":  40,
+            "width":  16,
+            "height": 16
+        },
+        "HARD": {
+            "mines":  99,
+            "width":  30,
+            "height": 16
+        }
+    }
+}

@@ -38,26 +38,24 @@ class Session:
         self._waiting_for_win = True
 
         self._cnfg = fm.get_config()
-        self._difficulty = self._cnfg["DIFFICULTIES"][
-            self._cnfg["DEFAULT_DIFFICULTY"]
-        ]
-        assert isinstance(self._difficulty, dict)
 
-        self.mines = self._difficulty["mines"]
+        current_diff_str = self._cnfg["DEFAULT_DIFFICULTY"]
+        difficulties_dict = self._cnfg["DIFFICULTIES"]
+        highscore_file = self._cnfg["HIGHSCORE_FILE"]
 
-        # ==========================
-        # self.mines = 5  # testing
-        # ==========================
+        assert isinstance(current_diff_str, str) \
+            and isinstance(difficulties_dict, dict) \
+            and isinstance(highscore_file, str)
 
+        field_config = difficulties_dict[current_diff_str]
+
+        self.mines = field_config["mines"]
         self.dimensions: Dimensions_t = (
-            self._difficulty["width"],
-            self._difficulty["height"]
+            field_config["width"],
+            field_config["height"]
         )
 
-        self._hs_manager = fm.Highscores(
-            self._cnfg["HIGHSCORE_FILE"], DEFAULT_CYPHER
-        )
-
+        self._hs_manager = fm.Highscores(highscore_file, DEFAULT_CYPHER)
         self.game_gui = gui.Gui(self, ai_player is None)
 
     def _victory_routine(
@@ -68,7 +66,11 @@ class Session:
         print("\nVICTORY!")
         print("time:", t)
 
-        self._hs_manager.score(t, self._cnfg["NICK"], MEDIUM)
+        nick = self._cnfg["NICK"]
+        diff_str = self._cnfg["DEFAULT_DIFFICULTY"]
+        assert isinstance(nick, str) and isinstance(diff_str, str)
+
+        self._hs_manager.score(t, nick, DIFFICULTY_CONSTANTS[diff_str])
 
     def _ms_click_wrapper(
         self,

@@ -267,6 +267,9 @@ def get_config() -> Config_dict:
         assert isinstance(deets["NICK"], str)
         assert isinstance(deets["HIGHSCORE_FILE"], str)
 
+        assert isinstance(deets["DIFFICULTIES"], dict)
+        assert isinstance(CONFIG_DEFAULT["DIFFICULTIES"], dict)
+
         assert deets["DIFFICULTIES"].keys() \
             == CONFIG_DEFAULT["DIFFICULTIES"].keys()
         assert deets["DEFAULT_DIFFICULTY"] in ["EASY", "MEDIUM", "HARD"]

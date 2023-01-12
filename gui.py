@@ -12,6 +12,7 @@ Position_t = uber.mPosition_t
 Cell_t = uber.mCell_t
 Cell_state_t = uber.mCell_state_t
 Cell_value_t = uber.mCell_value_t
+Minesweeper_t = uber.mMinesweeper_t
 
 
 WINDOW_TITLE = "[GAME] :: mSweeper _"
@@ -150,7 +151,7 @@ class Gui:
     ) -> None:  # reset()/init()
         self.session.get_new_ms()
         assert self.session.ms is not None
-        self.ms_data = self.session.ms.get_data()
+        self.ms_data: Minesweeper_t = self.session.ms.get_data()
 
         if self.is_interactive:
             self._bind_actions()

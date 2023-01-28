@@ -16,7 +16,14 @@ mSweeper_state_t = int
 mAI_player_t = Any  # TODO
 
 mConfig_dict = Dict[str, Union[str, Dict[str, Dict[str, int]]]]
+mContext_t = int
 
+
+CONTEXT_MAIN_MENU = 0
+CONTEXT_SWEEPER = 1
+CONTEXT_SWEEPER_HS = 2
+CONTEXT_HIGHSCORES = 3
+CONTEXT_HELP = 4
 
 # used as indices, don't change pls ._.
 EASY, MEDIUM, HARD = 0, 1, 2

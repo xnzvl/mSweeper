@@ -1,5 +1,5 @@
 import tkinter as tk
-from typing import Optional, Dict
+from typing import Optional, Tuple, Dict
 
 import main
 import minesweeper as ms
@@ -7,30 +7,43 @@ import minesweeper as ms
 import uber
 
 
-Click_t = uber.mClick_t
-Position_t = uber.mPosition_t
 Cell_t = uber.mCell_t
 Cell_state_t = uber.mCell_state_t
 Cell_value_t = uber.mCell_value_t
+Click_t = uber.mClick_t
+Context_t = uber.mContext_t
+Difficulty_t = uber.mDifficulty_t
 Minesweeper_t = uber.mMinesweeper_t
+Position_t = uber.mPosition_t
 
 
-WINDOW_TITLE = "[GAME] :: mSweeper _"
-WINDOW_ADDS = {
+EASY = uber.EASY
+MEDIUM = uber.MEDIUM
+HARD = uber.HARD
+
+WINDOW_TITLE = ":: mSweeper _"
+WINDOW_PREFIXES = {
     ms.UNINITIALIZED: "",
-    ms.PLAYING: "Game in progress - ",
-    ms.GAME_LOST: " Game lost - ",
-    ms.GAME_WON: "Game won! - "
+    ms.PLAYING:       "Game in progress - ",
+    ms.GAME_LOST:     "Game lost - ",
+    ms.GAME_WON:      "Game won! - "
 }
 
-CELL_SIZE = 40
+CONTEXT_MAIN_MENU = uber.CONTEXT_MAIN_MENU
+CONTEXT_SWEEPER = uber.CONTEXT_SWEEPER
+CONTEXT_SWEEPER_HS = uber.CONTEXT_SWEEPER_HS
+CONTEXT_HIGHSCORES = uber.CONTEXT_HIGHSCORES
+CONTEXT_HELP = uber.CONTEXT_HELP
 
+CELL_SIZE = 40
+GAP_SIZE = 25
 DEFAULT_MARGIN = 25
+
 MARGINS: Dict[str, int] = {
-    "top": DEFAULT_MARGIN,
-    "right": DEFAULT_MARGIN,
+    "top":    DEFAULT_MARGIN,
+    "right":  DEFAULT_MARGIN,
     "bottom": DEFAULT_MARGIN,
-    "left": DEFAULT_MARGIN
+    "left":   DEFAULT_MARGIN
 }
 
 NUM_FONT = ('system', 16)
@@ -38,32 +51,28 @@ NUM_COLOUR = "#000000"
 
 DEFAULT_DICT_KEY = -1
 
-
-# ===============================
-#  TODO activefills alternatives
-# ===============================
-
-CELL_COLOURS: Dict[Cell_state_t, Dict[Cell_value_t, str]] = {
+CELL_COLOURS: Dict[Cell_state_t, Dict[Cell_value_t, Tuple[str, str]]] = {
     ms.SHOWN: {
-        0: "#faf3e1",
-        1: "#b4db81",
-        2: "#dbd281",
-        3: "#dbb381",
-        4: "#db8f81",
-        5: "#bf81db",
-        6: "#a081db",
-        7: "#8183db",
-        8: "#595aa8",
-        ms.MINE: "#ff0839"
+        0:       ("#faf3e1", "#ffffff"),
+        1:       ("#b4db81", "#ffffff"),
+        2:       ("#dbd281", "#ffffff"),
+        3:       ("#dbb381", "#ffffff"),
+        4:       ("#db8f81", "#ffffff"),
+        5:       ("#bf81db", "#ffffff"),
+        6:       ("#a081db", "#ffffff"),
+        7:       ("#8183db", "#ffffff"),
+        8:       ("#595aa8", "#ffffff"),
+        ms.MINE: ("#ff0839", "#ffffff")
     },
     ms.FLAG: {
-        ms.MINE: "#a39676",
-        ms.UNKNOWN: "#a39676",
-        DEFAULT_DICT_KEY: "#a67e6f"  # misplaced flag
+        ms.MINE:          ("#a39676", "#ffffff"),
+        ms.UNKNOWN:       ("#a39676", "#ffffff"),
+        DEFAULT_DICT_KEY: ("#a67e6f", "#ffffff")
+        # ^ misplaced flag ^
     },
     ms.COVERED: {
-        ms.MINE: "#a39676",
-        DEFAULT_DICT_KEY: "#dbcead"
+        ms.MINE:          ("#a39676", "#ffffff"),
+        DEFAULT_DICT_KEY: ("#dbcead", "#ffffff")
     }
 }
 
@@ -79,20 +88,23 @@ class Gui:
         is_interactive: bool
     ) -> None:
         self.session = session
+        self.deets = self.session.deets
         self.is_interactive = is_interactive
-        self.width, self.height = session.dimensions
 
         self.root = tk.Tk()
         self.root.title(WINDOW_TITLE)
+        self.root.resizable(False, False)
+        self.root.bind_all("q", lambda _: self.root.destroy())
+
         self.canvas = tk.Canvas(
-            width=self.width * CELL_SIZE + MARGINS["right"] + MARGINS["left"],
-            height=self.height * CELL_SIZE + MARGINS["top"] + MARGINS["bottom"]
+            width=self.deets["width"] * CELL_SIZE + MARGINS["left"]
+                                                  + MARGINS["right"],
+            height=self.deets["width"] * CELL_SIZE + MARGINS["top"]
+                                                   + MARGINS["bottom"]
         )
+
+        self._sweeper_reset()
         self.canvas.pack()
-
-        self.canvas.bind_all("q", lambda _: self.root.destroy())
-
-        self._reset()
         self.root.mainloop()
 
     def _draw_cell(
@@ -101,13 +113,13 @@ class Gui:
         cx: int,
         cy: int
     ) -> None:
-        def get_colour() -> str:
-            colour = CELL_COLOURS[state].get(value)
+        def get_colours() -> Tuple[str, str]:
+            colours = CELL_COLOURS[state].get(value)
 
-            if colour is None:
-                colour = CELL_COLOURS[state][DEFAULT_DICT_KEY]
+            if colours is None:
+                colours = CELL_COLOURS[state][DEFAULT_DICT_KEY]
 
-            return colour
+            return colours
 
         def get_txt() -> str:
             if state == ms.FLAG:
@@ -120,25 +132,29 @@ class Gui:
                 return str(value)
 
         state, value = ms.get_cell_state(cell), ms.get_cell_value(cell)
+        main_clr, active_clr = get_colours()
 
         self.canvas.create_rectangle(
             cx, cy, cx + CELL_SIZE, cy + CELL_SIZE,
-            fill=get_colour()
+            fill=main_clr,
+            activefill=active_clr
         )
 
         self.canvas.create_text(
             cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
             text=get_txt(),
-            font=NUM_FONT
+            font=NUM_FONT,
+            activefill="#ffffff",
+            state="disabled"
         )
 
-    def _refresh(
+    def _sweeper_refresh(
         self
     ) -> None:
         ms_state = self.session.ms.get_state()
-        self.root.title(WINDOW_ADDS[ms_state] + WINDOW_TITLE)
+        self.root.title(WINDOW_PREFIXES[ms_state] + WINDOW_TITLE)
 
-        self.canvas.delete("all")
+        self.canvas.delete(tk.ALL)
         for y, row in enumerate(self.ms_data):
             for x, cell in enumerate(row):
                 cy = y * CELL_SIZE + MARGINS["top"] + 1
@@ -146,23 +162,27 @@ class Gui:
 
                 self._draw_cell(cell, cx, cy)
 
-    def _reset(
+    def _sweeper_reset(
         self
     ) -> None:  # reset()/init()
         self.session.get_new_ms()
+
         assert self.session.ms is not None
         self.ms_data: Minesweeper_t = self.session.ms.get_data()
 
         if self.is_interactive:
             self._bind_actions()
 
-        self._refresh()
+        self._sweeper_refresh()
 
     def _bind_actions(
         self
     ) -> None:
-        self.canvas.bind_all("r", lambda _: self._reset())
+        self.canvas.bind_all("r", lambda _: self._sweeper_reset())
+
         # TODO button for menu?
+        # TODO <ButtonRelease-1>
+
         self.canvas.bind(
             "<Button-1>",
             lambda event: self._click(self.session.ms_lmb, event)
@@ -181,7 +201,8 @@ class Gui:
         y_pos = (y - MARGINS["top"] - 1) // CELL_SIZE
 
         return (x_pos, y_pos) \
-            if 0 <= x_pos < self.width and 0 <= y_pos < self.height \
+            if 0 <= x_pos < self.deets["width"] \
+            and 0 <= y_pos < self.deets["height"] \
             else None
 
     def _click(
@@ -196,4 +217,4 @@ class Gui:
             return
 
         click_fun(position)
-        self._refresh()
+        self._sweeper_refresh()

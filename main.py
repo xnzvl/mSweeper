@@ -8,6 +8,7 @@ import uber
 
 
 Click_t = uber.mClick_t
+Context_t = uber.mContext_t
 Position_t = uber.mPosition_t
 Difficulty_t = uber.mDifficulty_t
 Dimensions_t = uber.mDimensions_t
@@ -21,11 +22,22 @@ EASY = uber.EASY
 MEDIUM = uber.MEDIUM
 HARD = uber.HARD
 
-
-DIFFICULTY_CONSTANTS: Dict[str, Difficulty_t] = {
-    "EASY": EASY,
-    "MEDIUM": MEDIUM,
-    "HARD": HARD
+DIFFICULTY_DICT: Dict[Difficulty_t, Dict[str, int]] = {
+    EASY: {
+        "mines":  10,
+        "width":   8,
+        "height":  8
+    },
+    MEDIUM: {
+        "mines":  40,
+        "width":  16,
+        "height": 16
+    },
+    HARD: {
+        "mines":  99,
+        "width":  30,
+        "height": 16
+    }
 }
 
 
@@ -47,16 +59,27 @@ class Session:
             and isinstance(difficulties_dict, dict) \
             and isinstance(highscore_file, str)
 
-        field_config = difficulties_dict[current_diff_str]
+        self.difficulty = 0
+        self.deets: Dict[str, int] = {
+            "mines":   0,
+            "width":   0,
+            "height":  0
+        }
 
-        self.mines = field_config["mines"]
-        self.dimensions: Dimensions_t = (
-            field_config["width"],
-            field_config["height"]
-        )
+        # testing
+        self.set_difficulty(MEDIUM)
 
         self._hs_manager = fm.Highscores(highscore_file, DEFAULT_CYPHER)
         self.game_gui = gui.Gui(self, ai_player is None)
+
+    def set_difficulty(
+        self,
+        diff: Difficulty_t
+    ) -> None:
+        self.difficulty = diff
+
+        for attr in ["mines", "width", "height"]:
+            self.deets[attr] = DIFFICULTY_DICT[diff][attr]
 
     def _victory_routine(
         self
@@ -70,7 +93,7 @@ class Session:
         diff_str = self._cnfg["DEFAULT_DIFFICULTY"]
         assert isinstance(nick, str) and isinstance(diff_str, str)
 
-        self._hs_manager.score(t, nick, DIFFICULTY_CONSTANTS[diff_str])
+        self._hs_manager.score(t, nick, self.difficulty)
 
     def _ms_click_wrapper(
         self,
@@ -88,7 +111,10 @@ class Session:
     def get_new_ms(
         self
     ) -> None:
-        self.ms = ms.Minesweeper(self.dimensions, self.mines)
+        self.ms = ms.Minesweeper(
+            (self.deets["width"], self.deets["height"]),
+            self.deets["mines"]
+        )
         self._current_ms_lmb = self.ms.lmb
         self._current_ms_rmb = self.ms.rmb
         self._waiting_for_win = True

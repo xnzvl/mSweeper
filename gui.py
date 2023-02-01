@@ -88,7 +88,6 @@ class Gui:
         is_interactive: bool
     ) -> None:
         self.session = session
-        self.deets = self.session.deets
         self.is_interactive = is_interactive
 
         self.root = tk.Tk()
@@ -96,16 +95,54 @@ class Gui:
         self.root.resizable(False, False)
         self.root.bind_all("q", lambda _: self.root.destroy())
 
-        self.canvas = tk.Canvas(
-            width=self.deets["width"] * CELL_SIZE + MARGINS["left"]
-                                                  + MARGINS["right"],
-            height=self.deets["width"] * CELL_SIZE + MARGINS["top"]
-                                                   + MARGINS["bottom"]
+        self.change_context(CONTEXT_MAIN_MENU)
+        self.root.mainloop()
+
+    def change_context(
+        self,
+        new_context: Context_t
+    ) -> None:
+        if new_context == CONTEXT_MAIN_MENU:
+            C_minesweeper(self)
+
+
+class Context:
+    def __init__(
+        self,
+        gui_root: Gui,
+        width: int,
+        height: int
+    ) -> None:
+        self.gui_root = gui_root
+        self.session = gui_root.session
+        self.canvas = tk.Canvas(width=width, height=height)
+        self.canvas.pack()
+
+    def quit_context_for(
+        self,
+        new_context: Context_t
+    ) -> None:
+        self.canvas.destroy()
+        self.gui_root.change_context(new_context)
+
+
+class C_minesweeper(Context):
+    def __init__(
+        self,
+        gui_root: Gui
+    ) -> None:
+        self.deets = gui_root.session.deets
+        self.root = gui_root.root
+
+        super().__init__(
+            gui_root,
+            self.deets["width"] * CELL_SIZE + MARGINS["left"]
+                                            + MARGINS["right"],
+            self.deets["width"] * CELL_SIZE + MARGINS["top"]
+                                            + MARGINS["bottom"]
         )
 
         self._sweeper_reset()
-        self.canvas.pack()
-        self.root.mainloop()
 
     def _draw_cell(
         self,
@@ -170,7 +207,7 @@ class Gui:
         assert self.session.ms is not None
         self.ms_data: Minesweeper_t = self.session.ms.get_data()
 
-        if self.is_interactive:
+        if self.gui_root.is_interactive:
             self._bind_actions()
 
         self._sweeper_refresh()

@@ -1,5 +1,5 @@
 import tkinter as tk
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, Dict, List
 
 import main
 import minesweeper as ms
@@ -51,7 +51,7 @@ NUM_COLOUR = "#000000"
 
 DEFAULT_DICT_KEY = -1
 
-CELL_COLOURS: Dict[Cell_state_t, Dict[Cell_value_t, Tuple[str, str]]] = {
+COLOUR_CELLS: Dict[Cell_state_t, Dict[Cell_value_t, Tuple[str, str]]] = {
     ms.SHOWN: {
         0:       ("#faf3e1", "#ffffff"),
         1:       ("#b4db81", "#ffffff"),
@@ -76,9 +76,32 @@ CELL_COLOURS: Dict[Cell_state_t, Dict[Cell_value_t, Tuple[str, str]]] = {
     }
 }
 
-STR_FLAG = "!!"
-STR_MINE_SHOWN = "X"
-STR_MINE = "x"
+COLOUR_FLAG = "#ff0000"
+COLOUR_MINE = "#000000"
+
+SIGN_A = CELL_SIZE // 13
+SHAPE_MINE_MAIN: List[int] = []
+SHAPE_MINE_TEMPLATE: List[int] = [  # deltas
+    1, 2, 3, -1, -1, 3, 2
+]
+
+
+def init_mine_shape() -> None:  # kinda clumsy
+    x, y = 4, 0
+    even = True
+
+    SHAPE_MINE_MAIN.append(x)
+    SHAPE_MINE_MAIN.append(y)
+
+    for x_sign, y_sign in [(1, 1), (-1, 1), (-1, -1), (1, -1)]:
+        for coord in SHAPE_MINE_TEMPLATE:
+            x += (coord * x_sign) if even else 0
+            y += (coord * y_sign) if not even else 0
+
+            SHAPE_MINE_MAIN.append(x)
+            SHAPE_MINE_MAIN.append(y)
+
+            even = not even
 
 
 class Gui:
@@ -87,6 +110,8 @@ class Gui:
         session: main.Session,
         is_interactive: bool
     ) -> None:
+        init_mine_shape()
+
         self.session = session
         self.is_interactive = is_interactive
 
@@ -150,26 +175,57 @@ class C_minesweeper(Context):
         cx: int,
         cy: int
     ) -> None:
-        def get_colours() -> Tuple[str, str]:
-            colours = CELL_COLOURS[state].get(value)
+        def get_colours(
+            state: Cell_state_t,
+            value: Cell_value_t
+        ) -> Tuple[str, str]:
+            colours = COLOUR_CELLS[state].get(value)
 
             if colours is None:
-                colours = CELL_COLOURS[state][DEFAULT_DICT_KEY]
+                colours = COLOUR_CELLS[state][DEFAULT_DICT_KEY]
 
             return colours
 
-        def get_txt() -> str:
+        def fill_cell() -> None:
             if state == ms.FLAG:
-                return STR_FLAG
+                draw_flag()
             elif value == ms.MINE:
-                return STR_MINE_SHOWN if state == ms.SHOWN else STR_MINE
+                draw_mine()
             elif value == 0 or state == ms.COVERED:
-                return ""
+                return
             else:
-                return str(value)
+                self.canvas.create_text(
+                    cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
+                    text=str(value),
+                    font=NUM_FONT,
+                    state="disabled"
+                )
+
+        def draw_flag() -> None:
+            pass
+
+        def draw_mine() -> None:
+            adapted_coords: List[int] = []
+
+            for i, coord in enumerate(SHAPE_MINE_MAIN):
+                adapted_coords.append(coord * SIGN_A + 2 * SIGN_A + 1 +
+                                      (cx if i % 2 == 0 else cy))
+
+            self.canvas.create_polygon(
+                adapted_coords,
+                fill=COLOUR_MINE,
+                state="disabled"
+            )
+
+            self.canvas.create_rectangle(
+                cx + 5 * SIGN_A, cy + 5 * SIGN_A,
+                cx + 6 * SIGN_A + 1, cy + 6 * SIGN_A + 1,
+                fill="#ffffff",
+                state="disabled"
+            )
 
         state, value = ms.get_cell_state(cell), ms.get_cell_value(cell)
-        main_clr, active_clr = get_colours()
+        main_clr, active_clr = get_colours(state, value)
 
         self.canvas.create_rectangle(
             cx, cy, cx + CELL_SIZE, cy + CELL_SIZE,
@@ -177,13 +233,7 @@ class C_minesweeper(Context):
             activefill=active_clr
         )
 
-        self.canvas.create_text(
-            cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
-            text=get_txt(),
-            font=NUM_FONT,
-            activefill="#ffffff",
-            state="disabled"
-        )
+        fill_cell()
 
     def _sweeper_refresh(
         self

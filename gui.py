@@ -4,22 +4,8 @@ from typing import Optional, Tuple, Dict, List
 import main
 import minesweeper as ms
 
-import uber
+import uber as u
 
-
-Cell_t = uber.mCell_t
-Cell_state_t = uber.mCell_state_t
-Cell_value_t = uber.mCell_value_t
-Click_t = uber.mClick_t
-Context_t = uber.mContext_t
-Difficulty_t = uber.mDifficulty_t
-Minesweeper_t = uber.mMinesweeper_t
-Position_t = uber.mPosition_t
-
-
-EASY = uber.EASY
-MEDIUM = uber.MEDIUM
-HARD = uber.HARD
 
 WINDOW_TITLE = ":: mSweeper _"
 WINDOW_PREFIXES = {
@@ -29,11 +15,11 @@ WINDOW_PREFIXES = {
     ms.GAME_WON:      "Game won! - "
 }
 
-CONTEXT_MAIN_MENU = uber.CONTEXT_MAIN_MENU
-CONTEXT_SWEEPER = uber.CONTEXT_SWEEPER
-CONTEXT_SWEEPER_HS = uber.CONTEXT_SWEEPER_HS
-CONTEXT_HIGHSCORES = uber.CONTEXT_HIGHSCORES
-CONTEXT_HELP = uber.CONTEXT_HELP
+CONTEXT_MAIN_MENU = 0
+CONTEXT_SWEEPER = 1
+CONTEXT_SWEEPER_HS = 2
+CONTEXT_HIGHSCORES = 3
+CONTEXT_HELP = 4
 
 CELL_SIZE = 40
 GAP_SIZE = 25
@@ -56,7 +42,7 @@ NUM_COLOUR = COLOUR_BLACK
 
 DEFAULT_DICT_KEY = -1
 
-COLOUR_CELLS: Dict[Cell_state_t, Dict[Cell_value_t, Tuple[str, str]]] = {
+COLOUR_CELLS: Dict[u.mCell_state_t, Dict[u.mCell_value_t, Tuple[str, str]]] = {
     ms.SHOWN: {
         0:       ("#faf3e1", "#ffffff"),
         1:       ("#b4db81", "#ffffff"),
@@ -82,21 +68,11 @@ COLOUR_CELLS: Dict[Cell_state_t, Dict[Cell_value_t, Tuple[str, str]]] = {
 }
 
 SIGN_A = CELL_SIZE // 13
+assert CELL_SIZE % 13 == 1
 
 SHAPE_MINE: List[int] = []
 SHAPE_FLAG: List[int] = []
 SHAPE_STAND: List[int] = []
-
-SHAPE_MINE_TEMPLATE: List[int] = [
-    1, 2, 3, -1, -1, 3, 2, 1, -2, 3, 1, -1, -3, 2,
-    -1, -2, -3, 1, 1, -3, -2, -1, 2, -3, -1, 1, 3
-]
-SHAPE_FLAG_TEMPLATE: List[int] = [
-    1, 1, 3, -1, 1, 5, -1, 1, -3, -1, -1, -5
-]
-SHAPE_STAND_TEMPLATE: List[int] = [
-    3, -1, 1, 1, 3, 1, -3, 6, 1, 1, -3, -1, 1, -6, -3
-]
 
 
 def from_template(
@@ -121,9 +97,20 @@ def from_template(
 
 
 def init_shapes() -> None:
-    from_template(SHAPE_MINE, SHAPE_MINE_TEMPLATE, 4, 0)
-    from_template(SHAPE_FLAG, SHAPE_FLAG_TEMPLATE, 2, 1)
-    from_template(SHAPE_STAND, SHAPE_STAND_TEMPLATE, 1, 1)
+    mine_template: List[int] = [
+        1, 2, 3, -1, -1, 3, 2, 1, -2, 3, 1, -1, -3, 2,
+        -1, -2, -3, 1, 1, -3, -2, -1, 2, -3, -1, 1, 3
+    ]
+    flag_template: List[int] = [
+        1, 1, 3, -1, 1, 5, -1, 1, -3, -1, -1, -5
+    ]
+    stand_template: List[int] = [
+        3, -1, 1, 1, 3, 1, -3, 6, 1, 1, -3, -1, 1, -6, -3
+    ]
+
+    from_template(SHAPE_MINE, mine_template, 4, 0)
+    from_template(SHAPE_FLAG, flag_template, 2, 1)
+    from_template(SHAPE_STAND, stand_template, 1, 1)
 
 
 class Gui:
@@ -147,10 +134,14 @@ class Gui:
 
     def change_context(
         self,
-        new_context: Context_t
+        new_context: u.mContext_t
     ) -> None:
         if new_context == CONTEXT_MAIN_MENU:
+            pass
+        elif new_context == CONTEXT_MAIN_MENU:
             C_minesweeper(self)
+        elif new_context == CONTEXT_HIGHSCORES:
+            pass
 
 
 class Context:
@@ -162,14 +153,14 @@ class Context:
     ) -> None:
         self.gui_root = gui_root
         self.session = gui_root.session
-        self.press_position: Optional[Position_t] = 0, 0
+        self.press_position: Optional[u.mPosition_t] = 0, 0
 
         self.canvas = tk.Canvas(width=width, height=height)
         self.canvas.pack()
 
     def quit_context_for(
         self,
-        new_context: Context_t
+        new_context: u.mContext_t
     ) -> None:
         self.canvas.destroy()
         self.gui_root.change_context(new_context)
@@ -195,13 +186,13 @@ class C_minesweeper(Context):
 
     def draw_cell(
         self,
-        cell: Cell_t,
+        cell: u.mCell_t,
         cx: int,
         cy: int
     ) -> None:
         def get_colours(
-            state: Cell_state_t,
-            value: Cell_value_t
+            state: u.mCell_state_t,
+            value: u.mCell_value_t
         ) -> Tuple[str, str]:
             colours = COLOUR_CELLS[state].get(value)
 
@@ -295,7 +286,7 @@ class C_minesweeper(Context):
         self.session.get_new_ms()
 
         assert self.session.ms is not None
-        self.ms_data: Minesweeper_t = self.session.ms.get_data()
+        self.ms_data: u.mMinesweeper_t = self.session.ms.get_data()
 
         if self.gui_root.is_interactive:
             self.bind_actions()
@@ -321,7 +312,7 @@ class C_minesweeper(Context):
         self,
         x: int,
         y: int
-    ) -> Optional[Position_t]:
+    ) -> Optional[u.mPosition_t]:
         x_pos = (x - MARGINS["left"] - 1) // CELL_SIZE
         y_pos = (y - MARGINS["top"] - 1) // CELL_SIZE
 
@@ -332,7 +323,7 @@ class C_minesweeper(Context):
 
     def click(
         self,
-        click_fun: Click_t,
+        click_fun: u.mClick_t,
         event: tk.Event  # type: ignore
     ) -> None:
         position = self.get_position(event.x, event.y)

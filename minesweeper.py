@@ -307,11 +307,11 @@ class Minesweeper:
         self,
         position: Position_t
     ) -> None:
-        if self._state == UNINITIALIZED:
-            self._field_init(position)
-
         x, y = position
         c_state = self._field.get_inner_state(x, y)
+
+        if self._state == UNINITIALIZED and c_state != FLAG:
+            self._field_init(position)
 
         if c_state == COVERED:
             self._flood_reveal(position)

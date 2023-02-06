@@ -47,13 +47,14 @@ class Session:
         ai_player: Optional[Ai_player_t] = None
     ) -> None:
         self.ai_player = ai_player
-        self._waiting_for_win = True
+        self.waiting_for_win = True
+        self.ms_state = ms.UNINITIALIZED
 
-        self._cnfg = fm.get_config()
+        self.cnfg = fm.get_config()
 
-        current_diff_str = self._cnfg["DEFAULT_DIFFICULTY"]
-        difficulties_dict = self._cnfg["DIFFICULTIES"]
-        highscore_file = self._cnfg["HIGHSCORE_FILE"]
+        current_diff_str = self.cnfg["DEFAULT_DIFFICULTY"]
+        difficulties_dict = self.cnfg["DIFFICULTIES"]
+        highscore_file = self.cnfg["HIGHSCORE_FILE"]
 
         assert isinstance(current_diff_str, str) \
             and isinstance(difficulties_dict, dict) \
@@ -69,7 +70,7 @@ class Session:
         # testing
         self.set_difficulty(MEDIUM)
 
-        self._hs_manager = fm.Highscores(highscore_file, DEFAULT_CYPHER)
+        self.hs_manager = fm.Highscores(highscore_file, DEFAULT_CYPHER)
         self.game_gui = gui.Gui(self, ai_player is None)
 
     def set_difficulty(
@@ -89,11 +90,11 @@ class Session:
         print("\nVICTORY!")
         print("time:", t)
 
-        nick = self._cnfg["NICK"]
-        diff_str = self._cnfg["DEFAULT_DIFFICULTY"]
+        nick = self.cnfg["NICK"]
+        diff_str = self.cnfg["DEFAULT_DIFFICULTY"]
         assert isinstance(nick, str) and isinstance(diff_str, str)
 
-        self._hs_manager.score(t, nick, self.difficulty)
+        self.hs_manager.score(t, nick, self.difficulty)
 
     def _ms_click_wrapper(
         self,
@@ -103,7 +104,7 @@ class Session:
         click(position)
 
         assert self.ms is not None
-        if self.ms.get_state() == ms.GAME_WON and self._waiting_for_win:
+        if self.ms.get_state() == ms.GAME_WON and self.waiting_for_win:
             self._victory_routine()
 
     ################################################
@@ -117,13 +118,14 @@ class Session:
         )
         self._current_ms_lmb = self.ms.lmb
         self._current_ms_rmb = self.ms.rmb
-        self._waiting_for_win = True
+        self.waiting_for_win = True
 
     def ms_lmb(
         self,
         position: Position_t
     ) -> None:
         self._ms_click_wrapper(self._current_ms_lmb, position)
+        self.ms_state = self.ms.get_state()
 
     def ms_rmb(
         self,

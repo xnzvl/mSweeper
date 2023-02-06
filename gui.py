@@ -46,8 +46,13 @@ MARGINS: Dict[str, int] = {
     "left":   DEFAULT_MARGIN
 }
 
+COLOUR_RED = "#ff0839"
+COLOUR_BLACK = "#000000"
+COLOUR_FLAG = COLOUR_RED
+COLOUR_BAD_FLAG = "#633840"
+
 NUM_FONT = ('system', 16)
-NUM_COLOUR = "#000000"
+NUM_COLOUR = COLOUR_BLACK
 
 DEFAULT_DICT_KEY = -1
 
@@ -62,7 +67,7 @@ COLOUR_CELLS: Dict[Cell_state_t, Dict[Cell_value_t, Tuple[str, str]]] = {
         6:       ("#a081db", "#ffffff"),
         7:       ("#8183db", "#ffffff"),
         8:       ("#595aa8", "#ffffff"),
-        ms.MINE: ("#ff0839", "#ffffff")
+        ms.MINE: (COLOUR_RED, "#ffffff")
     },
     ms.FLAG: {
         ms.MINE:          ("#a39676", "#ffffff"),
@@ -76,32 +81,49 @@ COLOUR_CELLS: Dict[Cell_state_t, Dict[Cell_value_t, Tuple[str, str]]] = {
     }
 }
 
-COLOUR_FLAG = "#ff0000"
-COLOUR_MINE = "#000000"
-
 SIGN_A = CELL_SIZE // 13
-SHAPE_MINE_MAIN: List[int] = []
-SHAPE_MINE_TEMPLATE: List[int] = [  # deltas
-    1, 2, 3, -1, -1, 3, 2
+
+SHAPE_MINE: List[int] = []
+SHAPE_FLAG: List[int] = []
+SHAPE_STAND: List[int] = []
+
+SHAPE_MINE_TEMPLATE: List[int] = [
+    1, 2, 3, -1, -1, 3, 2, 1, -2, 3, 1, -1, -3, 2,
+    -1, -2, -3, 1, 1, -3, -2, -1, 2, -3, -1, 1, 3
+]
+SHAPE_FLAG_TEMPLATE: List[int] = [
+    1, 1, 3, -1, 1, 5, -1, 1, -3, -1, -1, -5
+]
+SHAPE_STAND_TEMPLATE: List[int] = [
+    3, -1, 1, 1, 3, 1, -3, 6, 1, 1, -3, -1, 1, -6, -3
 ]
 
 
-def init_mine_shape() -> None:  # kinda clumsy
-    x, y = 4, 0
+def from_template(
+    shape: List[int],
+    template: List[int],
+    x: int,
+    y: int
+) -> None:
     even = True
 
-    SHAPE_MINE_MAIN.append(x)
-    SHAPE_MINE_MAIN.append(y)
+    shape.append(x)
+    shape.append(y)
 
-    for x_sign, y_sign in [(1, 1), (-1, 1), (-1, -1), (1, -1)]:
-        for coord in SHAPE_MINE_TEMPLATE:
-            x += (coord * x_sign) if even else 0
-            y += (coord * y_sign) if not even else 0
+    for coord in template:
+        x += coord if even else 0
+        y += coord if not even else 0
 
-            SHAPE_MINE_MAIN.append(x)
-            SHAPE_MINE_MAIN.append(y)
+        shape.append(x)
+        shape.append(y)
 
-            even = not even
+        even = not even
+
+
+def init_shapes() -> None:
+    from_template(SHAPE_MINE, SHAPE_MINE_TEMPLATE, 4, 0)
+    from_template(SHAPE_FLAG, SHAPE_FLAG_TEMPLATE, 2, 1)
+    from_template(SHAPE_STAND, SHAPE_STAND_TEMPLATE, 1, 1)
 
 
 class Gui:
@@ -110,7 +132,7 @@ class Gui:
         session: main.Session,
         is_interactive: bool
     ) -> None:
-        init_mine_shape()
+        init_shapes()
 
         self.session = session
         self.is_interactive = is_interactive
@@ -140,6 +162,8 @@ class Context:
     ) -> None:
         self.gui_root = gui_root
         self.session = gui_root.session
+        self.press_position: Optional[Position_t] = 0, 0
+
         self.canvas = tk.Canvas(width=width, height=height)
         self.canvas.pack()
 
@@ -167,9 +191,9 @@ class C_minesweeper(Context):
                                             + MARGINS["bottom"]
         )
 
-        self._sweeper_reset()
+        self.reset()
 
-    def _draw_cell(
+    def draw_cell(
         self,
         cell: Cell_t,
         cx: int,
@@ -186,34 +210,38 @@ class C_minesweeper(Context):
 
             return colours
 
-        def fill_cell() -> None:
-            if state == ms.FLAG:
-                draw_flag()
-            elif value == ms.MINE:
-                draw_mine()
-            elif value == 0 or state == ms.COVERED:
-                return
-            else:
-                self.canvas.create_text(
-                    cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
-                    text=str(value),
-                    font=NUM_FONT,
-                    state="disabled"
-                )
-
-        def draw_flag() -> None:
-            pass
-
-        def draw_mine() -> None:
+        def adapt_coords(
+            template: List[int]
+        ) -> List[int]:
             adapted_coords: List[int] = []
-
-            for i, coord in enumerate(SHAPE_MINE_MAIN):
+            for i, coord in enumerate(template):
                 adapted_coords.append(coord * SIGN_A + 2 * SIGN_A + 1 +
                                       (cx if i % 2 == 0 else cy))
+            return adapted_coords
+
+        def draw_flag() -> None:
+            ms_state = self.session.ms_state
+            flag_colour = COLOUR_FLAG \
+                if (ms_state != ms.GAME_WON and ms_state != ms.GAME_LOST) or \
+                value == ms.MINE \
+                else COLOUR_BAD_FLAG
 
             self.canvas.create_polygon(
-                adapted_coords,
-                fill=COLOUR_MINE,
+                adapt_coords(SHAPE_STAND),
+                fill=COLOUR_BLACK,
+                state="disabled"
+            )
+
+            self.canvas.create_polygon(
+                adapt_coords(SHAPE_FLAG),
+                fill=flag_colour,
+                state="disabled"
+            )
+
+        def draw_mine() -> None:
+            self.canvas.create_polygon(
+                adapt_coords(SHAPE_MINE),
+                fill=COLOUR_BLACK,
                 state="disabled"
             )
 
@@ -233,9 +261,21 @@ class C_minesweeper(Context):
             activefill=active_clr
         )
 
-        fill_cell()
+        if state == ms.FLAG:
+            draw_flag()
+        elif value == ms.MINE:
+            draw_mine()
+        elif value == 0 or state == ms.COVERED:
+            return
+        else:
+            self.canvas.create_text(
+                cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
+                text=str(value),
+                font=NUM_FONT,
+                state="disabled"
+            )
 
-    def _sweeper_refresh(
+    def refresh(
         self
     ) -> None:
         ms_state = self.session.ms.get_state()
@@ -247,9 +287,9 @@ class C_minesweeper(Context):
                 cy = y * CELL_SIZE + MARGINS["top"] + 1
                 cx = x * CELL_SIZE + MARGINS["left"] + 1
 
-                self._draw_cell(cell, cx, cy)
+                self.draw_cell(cell, cx, cy)
 
-    def _sweeper_reset(
+    def reset(
         self
     ) -> None:  # reset()/init()
         self.session.get_new_ms()
@@ -258,28 +298,26 @@ class C_minesweeper(Context):
         self.ms_data: Minesweeper_t = self.session.ms.get_data()
 
         if self.gui_root.is_interactive:
-            self._bind_actions()
+            self.bind_actions()
 
-        self._sweeper_refresh()
+        self.refresh()
 
-    def _bind_actions(
+    def bind_actions(
         self
     ) -> None:
-        self.canvas.bind_all("r", lambda _: self._sweeper_reset())
-
-        # TODO button for menu?
-        # TODO <ButtonRelease-1>
+        self.canvas.bind_all("r", lambda _: self.reset())
 
         self.canvas.bind(
             "<Button-1>",
-            lambda event: self._click(self.session.ms_lmb, event)
-        )
-        self.canvas.bind(
-            "<Button-3>",
-            lambda event: self._click(self.session.ms_rmb, event)
+            lambda event: self.click(self.session.ms_lmb, event)
         )
 
-    def _get_position(
+        self.canvas.bind(
+            "<Button-3>",
+            lambda event: self.click(self.session.ms_rmb, event)
+        )
+
+    def get_position(
         self,
         x: int,
         y: int
@@ -292,16 +330,15 @@ class C_minesweeper(Context):
             and 0 <= y_pos < self.deets["height"] \
             else None
 
-    def _click(
+    def click(
         self,
         click_fun: Click_t,
         event: tk.Event  # type: ignore
     ) -> None:
-        x, y = event.x, event.y
-        position = self._get_position(x, y)
+        position = self.get_position(event.x, event.y)
 
         if position is None:
             return
 
         click_fun(position)
-        self._sweeper_refresh()
+        self.refresh()

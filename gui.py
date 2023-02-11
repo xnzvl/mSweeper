@@ -7,7 +7,8 @@ import minesweeper as ms
 import uber as u
 
 
-WINDOW_TITLE = ":: mSweeper _"
+SW_TITLE = ":: mSweeper _"
+SW_VERSION = "1.00"
 WINDOW_PREFIXES = {
     ms.UNINITIALIZED: "",
     ms.PLAYING:       "Game in progress - ",
@@ -22,7 +23,9 @@ CONTEXT_HIGHSCORES = 3
 CONTEXT_HELP = 4
 
 CELL_SIZE = 40
-GAP_SIZE = 25
+SIGN_A = CELL_SIZE // 13
+assert CELL_SIZE % 13 == 1
+GAP_SIZE = 30
 DEFAULT_MARGIN = 25
 
 MARGINS: Dict[str, int] = {
@@ -36,9 +39,8 @@ COLOUR_RED = "#ff0839"
 COLOUR_BLACK = "#000000"
 COLOUR_FLAG = COLOUR_RED
 COLOUR_BAD_FLAG = "#633840"
-
-NUM_FONT = ('system', 16)
-NUM_COLOUR = COLOUR_BLACK
+COLOUR_BACKGROUND = "#202020"
+COLOUR_FONT = "#ffffff"
 
 DEFAULT_DICT_KEY = -1
 
@@ -67,50 +69,135 @@ COLOUR_CELLS: Dict[u.mCell_state_t, Dict[u.mCell_value_t, Tuple[str, str]]] = {
     }
 }
 
-SIGN_A = CELL_SIZE // 13
-assert CELL_SIZE % 13 == 1
+FONT = "system"
+NUM_COLOUR = COLOUR_BLACK
 
-SHAPE_MINE: List[int] = []
-SHAPE_FLAG: List[int] = []
-SHAPE_STAND: List[int] = []
+TEMPLATE: Dict[str, Tuple[Tuple[int, int], List[int]]] = {
+    "mine":        ((4, 0), [1, 2, 3, -1, -1, 3, 2, 1, -2, 3, 1, -1, -3, 2,
+                             -1, -2, -3, 1, 1, -3, -2, -1, 2, -3, -1, 1, 3]
+                    ),
+    "flag":        ((2, 1), [1, 1, 3, -1, 1, 5, -1, 1, -3, -1, -1, -5]),
+    "stand":       ((1, 1), [3, -1, 1, 1, 3, 1, -3, 6, 1, 1, -3, -1, 1,
+                             -6, -3]
+                    ),
+    "trophy_body": ((2, 1), [5, 1, 1, 1, -1, 2, -1, 1, -1, 2, 2, 1, -5, -1, 2,
+                             -2, -1, -1, -1, -2, -1, -1, 1]
+                    ),
+    "trophy_ears": ((0, 0), [2, 1, 5, -1, 2, 2, -1, -1, -7, 1, -1])
+}
+
+SHAPE: Dict[str, List[int]] = {}
 
 
-def from_template(
-    shape: List[int],
-    template: List[int],
-    x: int,
-    y: int
-) -> None:
-    even = True
-
-    shape.append(x)
-    shape.append(y)
-
-    for coord in template:
-        x += coord if even else 0
-        y += coord if not even else 0
+def init_shapes() -> None:
+    def from_template(
+        template: List[int],
+        x: int,
+        y: int
+    ) -> List[int]:
+        even = True
+        shape = []
 
         shape.append(x)
         shape.append(y)
 
-        even = not even
+        for coord in template:
+            x += coord if even else 0
+            y += coord if not even else 0
+
+            shape.append(x)
+            shape.append(y)
+
+            even = not even
+
+        return shape
+
+    global TEMPLATE
+
+    for shape, ((x0, y0), template) in TEMPLATE.items():
+        SHAPE[shape] = from_template(template, x0, y0)
+
+    del TEMPLATE
 
 
-def init_shapes() -> None:
-    mine_template: List[int] = [
-        1, 2, 3, -1, -1, 3, 2, 1, -2, 3, 1, -1, -3, 2,
-        -1, -2, -3, 1, 1, -3, -2, -1, 2, -3, -1, 1, 3
-    ]
-    flag_template: List[int] = [
-        1, 1, 3, -1, 1, 5, -1, 1, -3, -1, -1, -5
-    ]
-    stand_template: List[int] = [
-        3, -1, 1, 1, 3, 1, -3, 6, 1, 1, -3, -1, 1, -6, -3
-    ]
+def adapt_coords(
+    x: int,
+    y: int,
+    side: int,
+    template: List[int]
+) -> List[int]:
+    adapted_coords: List[int] = []
 
-    from_template(SHAPE_MINE, mine_template, 4, 0)
-    from_template(SHAPE_FLAG, flag_template, 2, 1)
-    from_template(SHAPE_STAND, stand_template, 1, 1)
+    for i, coord in enumerate(template):
+        adapted_coords.append(
+            coord * side + 2 * side + 1 + (x if i % 2 == 0 else y)
+        )
+
+    return adapted_coords
+
+
+def draw_mine(
+    canvas: tk.Canvas,
+    x: int,
+    y: int,
+    side: int
+) -> None:
+    canvas.create_polygon(
+        adapt_coords(x, y, side, SHAPE["mine"]),
+        fill=COLOUR_BLACK,
+        state="disabled"
+    )
+
+    canvas.create_rectangle(
+        x + 5 * side, y + 5 * side,
+        x + 6 * side + 1, y + 6 * side + 1,
+        fill="#ffffff",
+        state="disabled"
+    )
+
+
+def draw_flag(
+    canvas: tk.Canvas,
+    x: int,
+    y: int,
+    side: int,
+    is_default_flag: bool
+) -> None:
+    canvas.create_polygon(
+        adapt_coords(x, y, side, SHAPE["stand"]),
+        fill=COLOUR_BLACK,
+        state="disabled"
+    )
+
+    canvas.create_polygon(
+        adapt_coords(x, y, side, SHAPE["flag"]),
+        fill=COLOUR_FLAG if is_default_flag else COLOUR_BAD_FLAG,
+        state="disabled"
+    )
+
+
+def draw_trophy(
+    canvas: tk.Canvas,
+    x: int,
+    y: int,
+    side: int
+) -> None:
+    for shape in ["trophy_body", "trophy_ears"]:
+        canvas.create_polygon(
+            adapt_coords(x, y, side, SHAPE[shape]),
+            fill=COLOUR_BLACK,
+            state="disabled"
+        )
+
+    canvas.create_rectangle(
+        x + 5 * side, y + 4 * side, x + 6 * side, y + 5 * side,
+        fill="#ffffff",
+        state="disabled"
+    )
+
+
+def draw_menu_sign() -> None:
+    pass
 
 
 class Gui:
@@ -124,11 +211,15 @@ class Gui:
         self.session = session
         self.is_interactive = is_interactive
 
+        self.hor_margin = MARGINS["left"] + MARGINS["right"]
+        self.ver_margin = MARGINS["top"] + MARGINS["bottom"]
+
         self.root = tk.Tk()
-        self.root.title(WINDOW_TITLE)
+        self.root.title(SW_TITLE)
         self.root.resizable(False, False)
         self.root.bind_all("q", lambda _: self.root.destroy())
 
+        # self.change_context(CONTEXT_SWEEPER)
         self.change_context(CONTEXT_MAIN_MENU)
         self.root.mainloop()
 
@@ -137,11 +228,21 @@ class Gui:
         new_context: u.mContext_t
     ) -> None:
         if new_context == CONTEXT_MAIN_MENU:
-            pass
-        elif new_context == CONTEXT_MAIN_MENU:
-            C_minesweeper(self)
+            C_main_menu(
+                self,
+                main.DIFFICULTY_DICT[u.HARD]["width"] * CELL_SIZE
+                + self.hor_margin,
+                main.DIFFICULTY_DICT[u.HARD]["height"] * CELL_SIZE
+                + self.ver_margin
+            )
+        elif new_context == CONTEXT_SWEEPER:
+            C_minesweeper(
+                self,
+                self.session.deets["width"] * CELL_SIZE + self.hor_margin,
+                self.session.deets["height"] * CELL_SIZE + self.ver_margin
+            )
         elif new_context == CONTEXT_HIGHSCORES:
-            pass
+            C_highscores(self, 1, 1)
 
 
 class Context:
@@ -151,11 +252,14 @@ class Context:
         width: int,
         height: int
     ) -> None:
+        self.root = gui_root.root
         self.gui_root = gui_root
         self.session = gui_root.session
-        self.press_position: Optional[u.mPosition_t] = 0, 0
 
-        self.canvas = tk.Canvas(width=width, height=height)
+        self.canvas = tk.Canvas(
+            width=width, height=height,
+            background=COLOUR_BACKGROUND
+        )
         self.canvas.pack()
 
     def quit_context_for(
@@ -166,21 +270,135 @@ class Context:
         self.gui_root.change_context(new_context)
 
 
+class C_main_menu(Context):
+    def __init__(
+        self,
+        gui_root: Gui,
+        width: int,
+        height: int
+    ) -> None:
+        def draw_title() -> None:
+            self.canvas.create_text(
+                MARGINS["left"] + GAP_SIZE,
+                (height - 3 * GAP_SIZE - box_height - d_a) // 2 + 10,
+                anchor="sw",
+                fill=COLOUR_FONT,
+                font=(FONT, 30),
+                text=SW_TITLE
+            )
+
+        def draw_header() -> None:
+            for i, tag in enumerate(["tbox_nick", "b_highscores"]):
+                self.canvas.create_rectangle(
+                    MARGINS["left"] + b_a * i + GAP_SIZE * i,
+                    butts_anchor,
+                    MARGINS["left"] + b_a * (i + 1) + GAP_SIZE * i,
+                    butts_anchor + box_height,
+                    activefill="#ffffff",
+                    tags=tag
+                )
+
+            trophy_offset = int((box_height // 16) * 1.5)
+
+            draw_trophy(
+                self.canvas,
+                MARGINS["left"] + b_a + GAP_SIZE + trophy_offset,
+                butts_anchor + trophy_offset,
+                box_height // 16
+            )
+
+            self.canvas.create_text(
+                MARGINS["left"] + b_a + GAP_SIZE + box_height,
+                butts_anchor + box_height // 2,
+                anchor="w",
+                fill=COLOUR_FONT,
+                font=(FONT, buttons_font_size),
+                state="disabled",
+                text="Highscores"
+            )
+
+        def draw_diffs() -> None:
+            def create_ctext(
+                x_anchor: int,
+                y_delta: int,
+                font_size: int,
+                text: str
+            ) -> None:
+                self.canvas.create_text(
+                    x_anchor + d_a // 2, diffbox_anchor + d_a // 2 + y_delta,
+                    fill=COLOUR_FONT,
+                    font=(FONT, font_size),
+                    state="disabled",
+                    text=text
+                )
+
+            e = "=="
+
+            for i, (diff, diff_str) in enumerate([
+                (u.EASY, "EASY"),
+                (u.MEDIUM, "MEDIUM"),
+                (u.HARD, "HARD")
+            ]):
+                tmp_x_anchor = MARGINS["left"] + d_a * i + GAP_SIZE * i
+                diff_dict = main.DIFFICULTY_DICT[diff]
+
+                button = self.canvas.create_rectangle(
+                    tmp_x_anchor, diffbox_anchor,
+                    tmp_x_anchor + d_a, diffbox_anchor + d_a,
+                    activefill="#ff00ff",
+                    tags=diff_str
+                )
+
+                self.canvas.tag_bind(
+                    button, "<Button-1>", lambda _, d=diff_str: print(d)
+                )
+
+                create_ctext(
+                    tmp_x_anchor, -80, 28,
+                    f'{e * 2} {diff_str} {e * 2}'
+                )
+                create_ctext(
+                    tmp_x_anchor, 0, 42,
+                    f'{diff_dict["width"]} x {diff_dict["height"]}'
+                )
+                create_ctext(
+                    tmp_x_anchor, 80, 28,
+                    f'{e} mines: {diff_dict["mines"]} {e}'
+                )
+
+        def draw_footer() -> None:
+            self.canvas.create_text(
+                width - MARGINS["right"] - GAP_SIZE, height - GAP_SIZE,
+                anchor="se",
+                fill="#484848",
+                font=(FONT, 15),
+                text="v" + SW_VERSION
+            )
+
+        super().__init__(gui_root, width, height)
+
+        box_height = 80
+        buttons_font_size = 24
+        b_a = (width - self.gui_root.hor_margin - GAP_SIZE) // 2
+        d_a = (width - self.gui_root.hor_margin - 2 * GAP_SIZE) // 3
+
+        butts_anchor = (height - GAP_SIZE - d_a - box_height) // 2
+        diffbox_anchor = butts_anchor + GAP_SIZE + box_height
+
+        draw_title()
+        draw_header()
+        draw_diffs()
+        draw_footer()
+
+
 class C_minesweeper(Context):
     def __init__(
         self,
-        gui_root: Gui
+        gui_root: Gui,
+        width: int,
+        height: int
     ) -> None:
-        self.deets = gui_root.session.deets
-        self.root = gui_root.root
-
-        super().__init__(
-            gui_root,
-            self.deets["width"] * CELL_SIZE + MARGINS["left"]
-                                            + MARGINS["right"],
-            self.deets["width"] * CELL_SIZE + MARGINS["top"]
-                                            + MARGINS["bottom"]
-        )
+        super().__init__(gui_root, width, height)
 
         self.reset()
 
@@ -201,48 +419,6 @@ class C_minesweeper(Context):
 
             return colours
 
-        def adapt_coords(
-            template: List[int]
-        ) -> List[int]:
-            adapted_coords: List[int] = []
-            for i, coord in enumerate(template):
-                adapted_coords.append(coord * SIGN_A + 2 * SIGN_A + 1 +
-                                      (cx if i % 2 == 0 else cy))
-            return adapted_coords
-
-        def draw_flag() -> None:
-            ms_state = self.session.ms_state
-            flag_colour = COLOUR_FLAG \
-                if (ms_state != ms.GAME_WON and ms_state != ms.GAME_LOST) or \
-                value == ms.MINE \
-                else COLOUR_BAD_FLAG
-
-            self.canvas.create_polygon(
-                adapt_coords(SHAPE_STAND),
-                fill=COLOUR_BLACK,
-                state="disabled"
-            )
-
-            self.canvas.create_polygon(
-                adapt_coords(SHAPE_FLAG),
-                fill=flag_colour,
-                state="disabled"
-            )
-
-        def draw_mine() -> None:
-            self.canvas.create_polygon(
-                adapt_coords(SHAPE_MINE),
-                fill=COLOUR_BLACK,
-                state="disabled"
-            )
-
-            self.canvas.create_rectangle(
-                cx + 5 * SIGN_A, cy + 5 * SIGN_A,
-                cx + 6 * SIGN_A + 1, cy + 6 * SIGN_A + 1,
-                fill="#ffffff",
-                state="disabled"
-            )
-
         state, value = ms.get_cell_state(cell), ms.get_cell_value(cell)
         main_clr, active_clr = get_colours(state, value)
 
@@ -253,24 +429,29 @@ class C_minesweeper(Context):
         )
 
         if state == ms.FLAG:
-            draw_flag()
+            draw_flag(
+                self.canvas, cx, cy, SIGN_A,
+                value == ms.MINE
+                or self.session.ms_state == ms.UNINITIALIZED
+                or self.session.ms_state == ms.PLAYING
+            )
         elif value == ms.MINE:
-            draw_mine()
+            draw_mine(self.canvas, cx, cy, SIGN_A)
         elif value == 0 or state == ms.COVERED:
             return
         else:
             self.canvas.create_text(
                 cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
-                text=str(value),
-                font=NUM_FONT,
-                state="disabled"
+                font=(FONT, 16),
+                state="disabled",
+                text=str(value)
             )
 
     def refresh(
         self
     ) -> None:
         ms_state = self.session.ms.get_state()
-        self.root.title(WINDOW_PREFIXES[ms_state] + WINDOW_TITLE)
+        self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)
 
         self.canvas.delete(tk.ALL)
         for y, row in enumerate(self.ms_data):
@@ -317,8 +498,8 @@ class C_minesweeper(Context):
         y_pos = (y - MARGINS["top"] - 1) // CELL_SIZE
 
         return (x_pos, y_pos) \
-            if 0 <= x_pos < self.deets["width"] \
-            and 0 <= y_pos < self.deets["height"] \
+            if 0 <= x_pos < self.session.deets["width"] \
+            and 0 <= y_pos < self.session.deets["height"] \
             else None
 
     def click(
@@ -333,3 +514,7 @@ class C_minesweeper(Context):
 
         click_fun(position)
         self.refresh()
+
+
+class C_highscores(Context):
+    pass

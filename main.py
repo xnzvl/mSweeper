@@ -54,9 +54,6 @@ class Session:
             "height":  0
         }
 
-        # testing
-        self.set_difficulty(u.MEDIUM)
-
         self.hs_manager = fm.Highscores(highscore_file, DEFAULT_CYPHER)
         self.game_gui = gui.Gui(self, ai_player is None)
 
@@ -65,9 +62,7 @@ class Session:
         diff: u.mDifficulty_t
     ) -> None:
         self.difficulty = diff
-
-        for attr in ["mines", "width", "height"]:
-            self.deets[attr] = DIFFICULTY_DICT[diff][attr]
+        self.deets = DIFFICULTY_DICT[diff]
 
     def _victory_routine(
         self
@@ -82,6 +77,8 @@ class Session:
         assert isinstance(nick, str) and isinstance(diff_str, str)
 
         self.hs_manager.score(t, nick, self.difficulty)
+
+        self.waiting_for_win = False
 
     def _ms_click_wrapper(
         self,

@@ -8,7 +8,7 @@ import uber as u
 
 
 SW_TITLE = ":: mSweeper _"
-SW_VERSION = "1.00"
+SW_VERSION = "1.10"
 WINDOW_PREFIXES = {
     ms.UNINITIALIZED: "",
     ms.PLAYING:       "Game in progress - ",
@@ -69,7 +69,7 @@ COLOUR_CELLS: Dict[u.mCell_state_t, Dict[u.mCell_value_t, Tuple[str, str]]] = {
     }
 }
 
-FONT = "system"
+FONT = "System"
 NUM_COLOUR = COLOUR_BLACK
 
 TEMPLATE: Dict[str, Tuple[Tuple[int, int], List[int]]] = {
@@ -219,7 +219,6 @@ class Gui:
         self.root.resizable(False, False)
         self.root.bind_all("q", lambda _: self.root.destroy())
 
-        # self.change_context(CONTEXT_SWEEPER)
         self.change_context(CONTEXT_MAIN_MENU)
         self.root.mainloop()
 
@@ -294,7 +293,7 @@ class C_main_menu(Context):
                     butts_anchor,
                     MARGINS["left"] + b_a * (i + 1) + GAP_SIZE * i,
                     butts_anchor + box_height,
-                    activefill="#ffffff",
+                    activefill="#404040",
                     tags=tag
                 )
 
@@ -345,12 +344,13 @@ class C_main_menu(Context):
                 button = self.canvas.create_rectangle(
                     tmp_x_anchor, diffbox_anchor,
                     tmp_x_anchor + d_a, diffbox_anchor + d_a,
-                    activefill="#ff00ff",
+                    activefill="#404040",
                     tags=diff_str
                 )
 
                 self.canvas.tag_bind(
-                    button, "<Button-1>", lambda _, d=diff_str: print(d)
+                    button, "<Button-1>",
+                    lambda _, d=diff: self.set_diff_quit(d)
                 )
 
                 create_ctext(
@@ -389,6 +389,13 @@ class C_main_menu(Context):
         draw_header()
         draw_diffs()
         draw_footer()
+
+    def set_diff_quit(
+        self,
+        difficulty: u.mDifficulty_t
+    ) -> None:
+        self.session.set_difficulty(difficulty)
+        self.quit_context_for(CONTEXT_SWEEPER)
 
 
 class C_minesweeper(Context):

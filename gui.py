@@ -22,6 +22,7 @@ CONTEXT_SWEEPER_HS = 2
 CONTEXT_HIGHSCORES = 3
 CONTEXT_HELP = 4
 
+BOX_HEIGTH = 90
 CELL_SIZE = 40
 SIGN_A = CELL_SIZE // 13
 assert CELL_SIZE % 13 == 1
@@ -279,7 +280,7 @@ class C_main_menu(Context):
         def draw_title() -> None:
             self.canvas.create_text(
                 MARGINS["left"] + GAP_SIZE,
-                (height - 3 * GAP_SIZE - box_height - d_a) // 2 + 10,
+                (height - 3 * GAP_SIZE - BOX_HEIGTH - d_a) // 2 + 10,
                 anchor="sw",
                 fill=COLOUR_FONT,
                 font=(FONT, 30),
@@ -292,23 +293,23 @@ class C_main_menu(Context):
                     MARGINS["left"] + b_a * i + GAP_SIZE * i,
                     butts_anchor,
                     MARGINS["left"] + b_a * (i + 1) + GAP_SIZE * i,
-                    butts_anchor + box_height,
+                    butts_anchor + BOX_HEIGTH,
                     activefill="#404040",
                     tags=tag
                 )
 
-            trophy_offset = int((box_height // 16) * 1.5)
+            trophy_box_a = BOX_HEIGTH // 15
 
             draw_trophy(
                 self.canvas,
-                MARGINS["left"] + b_a + GAP_SIZE + trophy_offset,
-                butts_anchor + trophy_offset,
-                box_height // 16
+                MARGINS["left"] + b_a + GAP_SIZE + trophy_box_a,
+                butts_anchor + trophy_box_a,
+                BOX_HEIGTH // 15
             )
 
             self.canvas.create_text(
-                MARGINS["left"] + b_a + GAP_SIZE + box_height,
-                butts_anchor + box_height // 2,
+                MARGINS["left"] + b_a + GAP_SIZE + BOX_HEIGTH,
+                butts_anchor + BOX_HEIGTH // 2,
                 anchor="w",
                 fill=COLOUR_FONT,
                 font=(FONT, buttons_font_size),
@@ -344,13 +345,16 @@ class C_main_menu(Context):
                 button = self.canvas.create_rectangle(
                     tmp_x_anchor, diffbox_anchor,
                     tmp_x_anchor + d_a, diffbox_anchor + d_a,
-                    activefill="#404040",
+                    fill=COLOUR_BACKGROUND,
+                    outline=COLOUR_BLACK,
+                    activeoutline="#ff0000",
+                    activewidth=3,
                     tags=diff_str
                 )
 
                 self.canvas.tag_bind(
                     button, "<Button-1>",
-                    lambda _, d=diff: self.set_diff_quit(d)
+                    lambda _, d=diff: self.set_diff_and_quit(d)
                 )
 
                 create_ctext(
@@ -377,20 +381,19 @@ class C_main_menu(Context):
 
         super().__init__(gui_root, width, height)
 
-        box_height = 80
         buttons_font_size = 24
         b_a = (width - self.gui_root.hor_margin - GAP_SIZE) // 2
         d_a = (width - self.gui_root.hor_margin - 2 * GAP_SIZE) // 3
 
-        butts_anchor = (height - GAP_SIZE - d_a - box_height) // 2
-        diffbox_anchor = butts_anchor + GAP_SIZE + box_height
+        butts_anchor = (height - GAP_SIZE - d_a - BOX_HEIGTH) // 2
+        diffbox_anchor = butts_anchor + GAP_SIZE + BOX_HEIGTH
 
         draw_title()
         draw_header()
         draw_diffs()
         draw_footer()
 
-    def set_diff_quit(
+    def set_diff_and_quit(
         self,
         difficulty: u.mDifficulty_t
     ) -> None:

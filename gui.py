@@ -22,12 +22,14 @@ CONTEXT_SWEEPER_HS = 2
 CONTEXT_HIGHSCORES = 3
 CONTEXT_HELP = 4
 
-BOX_HEIGTH = 90
+BOX_A = 90
 CELL_SIZE = 40
-SIGN_A = CELL_SIZE // 13
-assert CELL_SIZE % 13 == 1
 GAP_SIZE = 30
 DEFAULT_MARGIN = 25
+
+ICON_PARTS = 13
+ICON_A = CELL_SIZE // ICON_PARTS
+assert CELL_SIZE % ICON_PARTS == 1
 
 MARGINS: Dict[str, int] = {
     "top":    DEFAULT_MARGIN,
@@ -74,17 +76,17 @@ FONT = "System"
 NUM_COLOUR = COLOUR_BLACK
 
 TEMPLATE: Dict[str, Tuple[Tuple[int, int], List[int]]] = {
-    "mine":        ((4, 0), [1, 2, 3, -1, -1, 3, 2, 1, -2, 3, 1, -1, -3, 2,
+    "mine":        ((6, 2), [1, 2, 3, -1, -1, 3, 2, 1, -2, 3, 1, -1, -3, 2,
                              -1, -2, -3, 1, 1, -3, -2, -1, 2, -3, -1, 1, 3]
                     ),
-    "flag":        ((2, 1), [1, 1, 3, -1, 1, 5, -1, 1, -3, -1, -1, -5]),
-    "stand":       ((1, 1), [3, -1, 1, 1, 3, 1, -3, 6, 1, 1, -3, -1, 1,
-                             -6, -3]
+    "flag":        ((4, 3), [1, 1, 3, -1, 1, 5, -1, 1, -3, -1, -1, -5]),
+    "stand":       ((3, 3), [3, -1, 1, 1, 3, 1, -3, 6, 1, 1, -3, -1, 1, -6, -3]
                     ),
-    "trophy_body": ((2, 1), [5, 1, 1, 1, -1, 2, -1, 1, -1, 2, 2, 1, -5, -1, 2,
+    "trophy_body": ((4, 3), [5, 1, 1, 1, -1, 2, -1, 1, -1, 2, 2, 1, -5, -1, 2,
                              -2, -1, -1, -1, -2, -1, -1, 1]
                     ),
-    "trophy_ears": ((0, 0), [2, 1, 5, -1, 2, 2, -1, -1, -7, 1, -1])
+    "trophy_ears": ((2, 2), [2, 1, 5, -1, 2, 2, -1, -1, -7, 1, -1]),
+    "smile":       ((2, 7), [2, 1, 5, -1, 2, 2, -2, 1, -5, -1, -2])
 }
 
 SHAPE: Dict[str, List[int]] = {}
@@ -125,14 +127,21 @@ def adapt_coords(
     x: int,
     y: int,
     side: int,
-    template: List[int]
+    shape: List[int],
+    flip_x: bool = False,
+    flip_y: bool = False
 ) -> List[int]:
+    even = True
     adapted_coords: List[int] = []
 
-    for i, coord in enumerate(template):
-        adapted_coords.append(
-            coord * side + 2 * side + 1 + (x if i % 2 == 0 else y)
-        )
+    x0 = (0 if not flip_x else ICON_PARTS * side) + x + 1
+    y0 = (0 if not flip_y else ICON_PARTS * side) + y + 1
+
+    for coord in shape:
+        polarity = -1 if (even and flip_x) or (not even and flip_y) else 1
+        adapted_coords.append(coord * side * polarity + (x0 if even else y0))
+
+        even = not even
 
     return adapted_coords
 
@@ -141,17 +150,20 @@ def draw_mine(
     canvas: tk.Canvas,
     x: int,
     y: int,
-    side: int
+    side: int,
+    indent: bool = False
 ) -> None:
+    n_x, n_y = (x + side, y + side) if indent else (x, y)
+
     canvas.create_polygon(
-        adapt_coords(x, y, side, SHAPE["mine"]),
+        adapt_coords(n_x, n_y, side, SHAPE["mine"]),
         fill=COLOUR_BLACK,
         state="disabled"
     )
 
     canvas.create_rectangle(
-        x + 5 * side, y + 5 * side,
-        x + 6 * side + 1, y + 6 * side + 1,
+        n_x + 5 * side, n_y + 5 * side,
+        n_x + 6 * side + 1, n_y + 6 * side + 1,
         fill="#ffffff",
         state="disabled"
     )
@@ -162,16 +174,19 @@ def draw_flag(
     x: int,
     y: int,
     side: int,
-    is_default_flag: bool
+    is_default_flag: bool,
+    indent: bool = False
 ) -> None:
+    n_x, n_y = (x + side, y + side) if indent else (x, y)
+
     canvas.create_polygon(
-        adapt_coords(x, y, side, SHAPE["stand"]),
+        adapt_coords(n_x, n_y, side, SHAPE["stand"]),
         fill=COLOUR_BLACK,
         state="disabled"
     )
 
     canvas.create_polygon(
-        adapt_coords(x, y, side, SHAPE["flag"]),
+        adapt_coords(n_x, n_y, side, SHAPE["flag"]),
         fill=COLOUR_FLAG if is_default_flag else COLOUR_BAD_FLAG,
         state="disabled"
     )
@@ -183,22 +198,65 @@ def draw_trophy(
     y: int,
     side: int
 ) -> None:
+    n_x, n_y = x + side, y + side
+
     for shape in ["trophy_body", "trophy_ears"]:
         canvas.create_polygon(
-            adapt_coords(x, y, side, SHAPE[shape]),
+            adapt_coords(n_x, n_y, side, SHAPE[shape]),
             fill=COLOUR_BLACK,
             state="disabled"
         )
 
     canvas.create_rectangle(
-        x + 5 * side, y + 4 * side, x + 6 * side, y + 5 * side,
+        n_x + 5 * side, n_y + 4 * side, n_x + 6 * side, n_y + 5 * side,
         fill="#ffffff",
         state="disabled"
     )
 
 
-def draw_menu_sign() -> None:
-    pass
+def draw_menu_sign(
+    canvas: tk.Canvas,
+    x: int,
+    y: int,
+    side: int
+) -> None:
+    n_x, n_y = x + side, y + side
+
+    for i in range(3):
+        canvas.create_rectangle(
+            n_x + 3 * side + 1, n_y + (3 + i * 3) * side + 1,
+            n_x + 10 * side, n_y + (4 + i * 3) * side,
+            fill=COLOUR_BLACK,
+            state="disabled"
+        )
+
+
+def draw_face(
+    canvas: tk.Canvas,
+    x: int,
+    y: int,
+    side: int,
+    expression: int
+) -> None:
+    for i in [3, 8]:
+        canvas.create_rectangle(
+            x + i * side, y + 3 * side, x + (i + 2) * side, y + 6 * side,
+            fill=COLOUR_BLACK, state="disabled"
+        )
+
+    if expression == 0:
+        canvas.create_rectangle(
+            x + 2 * side, y + 7 * side, x + 11 * side, y + 9 * side,
+            fill=COLOUR_BLACK, state="disabled"
+        )
+    else:
+        canvas.create_polygon(
+            adapt_coords(
+                x, y if expression > 0 else y + 4 * side,  # flip -> realign
+                side, SHAPE["smile"], flip_y=expression < 0
+            ),
+            fill=COLOUR_BLACK, state="disabled"
+        )
 
 
 class Gui:
@@ -233,16 +291,17 @@ class Gui:
                 main.DIFFICULTY_DICT[u.HARD]["width"] * CELL_SIZE
                 + self.hor_margin,
                 main.DIFFICULTY_DICT[u.HARD]["height"] * CELL_SIZE
-                + self.ver_margin
+                + self.ver_margin + GAP_SIZE + BOX_A
             )
         elif new_context == CONTEXT_SWEEPER:
             C_minesweeper(
                 self,
                 self.session.deets["width"] * CELL_SIZE + self.hor_margin,
                 self.session.deets["height"] * CELL_SIZE + self.ver_margin
+                + GAP_SIZE + BOX_A
             )
         elif new_context == CONTEXT_HIGHSCORES:
-            C_highscores(self, 1, 1)
+            C_highscores(self, 1, 1)  # TODO
 
 
 class Context:
@@ -280,7 +339,7 @@ class C_main_menu(Context):
         def draw_title() -> None:
             self.canvas.create_text(
                 MARGINS["left"] + GAP_SIZE,
-                (height - 3 * GAP_SIZE - BOX_HEIGTH - d_a) // 2 + 10,
+                (height - 3 * GAP_SIZE - BOX_A - diff_b_a) // 2 + 10,
                 anchor="sw",
                 fill=COLOUR_FONT,
                 font=(FONT, 30),
@@ -290,26 +349,26 @@ class C_main_menu(Context):
         def draw_header() -> None:
             for i, tag in enumerate(["tbox_nick", "b_highscores"]):
                 self.canvas.create_rectangle(
-                    MARGINS["left"] + b_a * i + GAP_SIZE * i,
+                    MARGINS["left"] + header_b_width * i + GAP_SIZE * i,
                     butts_anchor,
-                    MARGINS["left"] + b_a * (i + 1) + GAP_SIZE * i,
-                    butts_anchor + BOX_HEIGTH,
+                    MARGINS["left"] + header_b_width * (i + 1) + GAP_SIZE * i,
+                    butts_anchor + BOX_A,
                     activefill="#404040",
                     tags=tag
                 )
 
-            trophy_box_a = BOX_HEIGTH // 15
+            trophy_box_a = BOX_A // 15
 
             draw_trophy(
                 self.canvas,
-                MARGINS["left"] + b_a + GAP_SIZE + trophy_box_a,
-                butts_anchor + trophy_box_a,
-                BOX_HEIGTH // 15
+                MARGINS["left"] + header_b_width + GAP_SIZE,
+                butts_anchor,
+                trophy_box_a
             )
 
             self.canvas.create_text(
-                MARGINS["left"] + b_a + GAP_SIZE + BOX_HEIGTH,
-                butts_anchor + BOX_HEIGTH // 2,
+                MARGINS["left"] + header_b_width + GAP_SIZE + BOX_A,
+                butts_anchor + BOX_A // 2,
                 anchor="w",
                 fill=COLOUR_FONT,
                 font=(FONT, buttons_font_size),
@@ -325,7 +384,8 @@ class C_main_menu(Context):
                 text: str
             ) -> None:
                 self.canvas.create_text(
-                    x_anchor + d_a // 2, diffbox_anchor + d_a // 2 + y_delta,
+                    x_anchor + diff_b_a // 2,
+                    diffbox_anchor + diff_b_a // 2 + y_delta,
                     fill=COLOUR_FONT,
                     font=(FONT, font_size),
                     state="disabled",
@@ -339,12 +399,12 @@ class C_main_menu(Context):
                 (u.MEDIUM, "MEDIUM"),
                 (u.HARD, "HARD")
             ]):
-                tmp_x_anchor = MARGINS["left"] + d_a * i + GAP_SIZE * i
+                tmp_x_anchor = MARGINS["left"] + diff_b_a * i + GAP_SIZE * i
                 diff_dict = main.DIFFICULTY_DICT[diff]
 
                 button = self.canvas.create_rectangle(
                     tmp_x_anchor, diffbox_anchor,
-                    tmp_x_anchor + d_a, diffbox_anchor + d_a,
+                    tmp_x_anchor + diff_b_a, diffbox_anchor + diff_b_a,
                     fill=COLOUR_BACKGROUND,
                     outline=COLOUR_BLACK,
                     activeoutline="#ff0000",
@@ -382,11 +442,11 @@ class C_main_menu(Context):
         super().__init__(gui_root, width, height)
 
         buttons_font_size = 24
-        b_a = (width - self.gui_root.hor_margin - GAP_SIZE) // 2
-        d_a = (width - self.gui_root.hor_margin - 2 * GAP_SIZE) // 3
+        header_b_width = (width - self.gui_root.hor_margin - GAP_SIZE) // 2
+        diff_b_a = (width - self.gui_root.hor_margin - 2 * GAP_SIZE) // 3
 
-        butts_anchor = (height - GAP_SIZE - d_a - BOX_HEIGTH) // 2
-        diffbox_anchor = butts_anchor + GAP_SIZE + BOX_HEIGTH
+        butts_anchor = (height - GAP_SIZE - diff_b_a - BOX_A) // 2
+        diffbox_anchor = butts_anchor + GAP_SIZE + BOX_A
 
         draw_title()
         draw_header()
@@ -410,13 +470,16 @@ class C_minesweeper(Context):
     ) -> None:
         super().__init__(gui_root, width, height)
 
+        self.width = width
+        self.height = height
+
         self.reset()
 
     def draw_cell(
         self,
         cell: u.mCell_t,
-        cx: int,
-        cy: int
+        x: int,
+        y: int
     ) -> None:
         def get_colours(
             state: u.mCell_state_t,
@@ -433,25 +496,25 @@ class C_minesweeper(Context):
         main_clr, active_clr = get_colours(state, value)
 
         self.canvas.create_rectangle(
-            cx, cy, cx + CELL_SIZE, cy + CELL_SIZE,
+            x, y, x + CELL_SIZE, y + CELL_SIZE,
             fill=main_clr,
             activefill=active_clr
         )
 
         if state == ms.FLAG:
             draw_flag(
-                self.canvas, cx, cy, SIGN_A,
+                self.canvas, x, y, ICON_A,
                 value == ms.MINE
                 or self.session.ms_state == ms.UNINITIALIZED
                 or self.session.ms_state == ms.PLAYING
             )
         elif value == ms.MINE:
-            draw_mine(self.canvas, cx, cy, SIGN_A)
+            draw_mine(self.canvas, x, y, ICON_A)
         elif value == 0 or state == ms.COVERED:
             return
         else:
             self.canvas.create_text(
-                cx + CELL_SIZE // 2, cy + CELL_SIZE // 2,
+                x + CELL_SIZE // 2, y + CELL_SIZE // 2,
                 font=(FONT, 16),
                 state="disabled",
                 text=str(value)
@@ -460,14 +523,46 @@ class C_minesweeper(Context):
     def refresh(
         self
     ) -> None:
+        def draw_header() -> None:
+            if self.session.difficulty != u.EASY:
+                butt_width = (self.width - self.gui_root.ver_margin
+                              - 2 * GAP_SIZE - BOX_A) // 2
+
+            else:
+                info_butt = self.width - self.gui_root.ver_margin - GAP_SIZE - BOX_A
+
+                for i in range(2):
+                    button = self.canvas.create_rectangle(
+                        MARGINS["left"] + i * (info_butt + GAP_SIZE),
+                        MARGINS["top"],
+                        MARGINS["left"] + info_butt + i * (GAP_SIZE + BOX_A),
+                        MARGINS["top"] + BOX_A,
+                        fill=COLOUR_BACKGROUND,
+                        activeoutline="red"
+                    )
+
+                self.canvas.tag_bind(
+                    button, "<Button-1>", lambda _,
+                    c=CONTEXT_MAIN_MENU: self.quit_context_for(c)
+                )
+
+                draw_menu_sign(
+                    self.canvas,
+                    MARGINS["left"] + info_butt + GAP_SIZE,
+                    MARGINS["top"],
+                    BOX_A // 15
+                )
+
         ms_state = self.session.ms.get_state()
         self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)
 
         self.canvas.delete(tk.ALL)
+
+        draw_header()
         for y, row in enumerate(self.ms_data):
             for x, cell in enumerate(row):
-                cy = y * CELL_SIZE + MARGINS["top"] + 1
                 cx = x * CELL_SIZE + MARGINS["left"] + 1
+                cy = y * CELL_SIZE + MARGINS["top"] + GAP_SIZE + BOX_A + 1
 
                 self.draw_cell(cell, cx, cy)
 

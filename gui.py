@@ -600,7 +600,9 @@ class C_minesweeper(Context):
         y: int
     ) -> Optional[u.mPosition_t]:
         x_pos = (x - MARGINS["left"] - 1) // CELL_SIZE
-        y_pos = (y - MARGINS["top"] - 1) // CELL_SIZE
+        y_pos = (y - MARGINS["top"] - GAP_SIZE - BOX_A - 1) // CELL_SIZE
+
+        print(x_pos, y_pos)
 
         return (x_pos, y_pos) \
             if 0 <= x_pos < self.session.deets["width"] \

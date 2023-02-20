@@ -1,4 +1,3 @@
-GUI         -> [BUG]: fix `get_position()`
 GUI         -> "?" button in main menu
 GUI         -> *help* context, (CS/EN)
 MAINSWEEPER -> flag special move

@@ -1,10 +1,14 @@
 import tkinter as tk
-from typing import Optional, Tuple, Dict, List
+from typing import Callable, Optional, Tuple, Dict, List
 
 import main
 import minesweeper as ms
 
 import uber as u
+
+
+Context_t = int
+Quit_context_lambda = Callable[[tk.Event], None]
 
 
 SW_TITLE = ":: mSweeper _"
@@ -18,9 +22,8 @@ WINDOW_PREFIXES = {
 
 CONTEXT_MAIN_MENU = 0
 CONTEXT_SWEEPER = 1
-CONTEXT_SWEEPER_HS = 2
-CONTEXT_HIGHSCORES = 3
-CONTEXT_HELP = 4
+CONTEXT_HIGHSCORES = 2
+CONTEXT_HELP = 3
 
 BOX_A = 90
 CELL_SIZE = 40
@@ -316,10 +319,19 @@ class Context:
         self.session = gui_root.session
 
         self.canvas = tk.Canvas(
-            width=width, height=height,
+            width=width - 2, height=height - 2,  # to fix symmetry
             background=COLOUR_BACKGROUND
         )
         self.canvas.pack()
+
+        self.q_to_main_menu: Quit_context_lambda = \
+            lambda _: self.quit_context_for(CONTEXT_MAIN_MENU)
+        self.q_to_sweeper: Quit_context_lambda = \
+            lambda _: self.quit_context_for(CONTEXT_SWEEPER)
+        self.q_to_highscores: Quit_context_lambda = \
+            lambda _: self.quit_context_for(CONTEXT_HIGHSCORES)
+        self.q_to_help: Quit_context_lambda = \
+            lambda _: self.quit_context_for(CONTEXT_HELP)
 
     def quit_context_for(
         self,
@@ -523,46 +535,58 @@ class C_minesweeper(Context):
     def refresh(
         self
     ) -> None:
-        def draw_header() -> None:
-            if self.session.difficulty != u.EASY:
-                butt_width = (self.width - self.gui_root.ver_margin
-                              - 2 * GAP_SIZE - BOX_A) // 2
+        def draw_deets() -> None:
+            width = effective_width - GAP_SIZE - BOX_A \
+                if special_case \
+                else (effective_width - 2 * GAP_SIZE - BOX_A) // 2
+            flag_str = f"{self.session.ms.flags:0>2d}" + (
+                f" / {self.session.ms.mines}" if not special_case else ""
+            )
 
-            else:
-                info_butt = self.width - self.gui_root.ver_margin - GAP_SIZE - BOX_A
+            self.canvas.create_rectangle(
+                MARGINS["left"], MARGINS["top"],
+                MARGINS["left"] + width, MARGINS["top"] + BOX_A,
+                fill=COLOUR_BACKGROUND,
+                activeoutline="red"
+            )
 
-                for i in range(2):
-                    button = self.canvas.create_rectangle(
-                        MARGINS["left"] + i * (info_butt + GAP_SIZE),
-                        MARGINS["top"],
-                        MARGINS["left"] + info_butt + i * (GAP_SIZE + BOX_A),
-                        MARGINS["top"] + BOX_A,
-                        fill=COLOUR_BACKGROUND,
-                        activeoutline="red"
-                    )
+            self.canvas.create_text(
+                MARGINS["left"] + GAP_SIZE // 2 + BOX_A,
+                MARGINS["top"] + BOX_A // 2,
+                anchor="w",
+                font=(FONT, 28),
+                state="disabled",
+                text=flag_str
+            )
 
-                self.canvas.tag_bind(
-                    button, "<Button-1>", lambda _,
-                    c=CONTEXT_MAIN_MENU: self.quit_context_for(c)
-                )
+            draw_flag(
+                self.canvas,
+                MARGINS["left"], MARGINS["top"], BOX_A // 15,
+                True, True
+            )
 
-                draw_menu_sign(
-                    self.canvas,
-                    MARGINS["left"] + info_butt + GAP_SIZE,
-                    MARGINS["top"],
-                    BOX_A // 15
-                )
+        def draw_observer() -> None:
+            if special_case:
+                return
+
+        def draw_menu_button() -> None:
+            pass
 
         ms_state = self.session.ms.get_state()
-        self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)
+        effective_width = self.width - self.gui_root.hor_margin
+        special_case = self.session.difficulty == u.EASY
 
         self.canvas.delete(tk.ALL)
+        self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)
 
-        draw_header()
+        draw_deets()
+        draw_observer()
+        draw_menu_button()
+
         for y, row in enumerate(self.ms_data):
             for x, cell in enumerate(row):
-                cx = x * CELL_SIZE + MARGINS["left"] + 1
-                cy = y * CELL_SIZE + MARGINS["top"] + GAP_SIZE + BOX_A + 1
+                cx = x * CELL_SIZE + MARGINS["left"]
+                cy = y * CELL_SIZE + MARGINS["top"] + GAP_SIZE + BOX_A
 
                 self.draw_cell(cell, cx, cy)
 

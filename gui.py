@@ -414,18 +414,17 @@ class C_main_menu(Context):
                 tmp_x_anchor = MARGINS["left"] + diff_b_a * i + GAP_SIZE * i
                 diff_dict = main.DIFFICULTY_DICT[diff]
 
-                button = self.canvas.create_rectangle(
-                    tmp_x_anchor, diffbox_anchor,
-                    tmp_x_anchor + diff_b_a, diffbox_anchor + diff_b_a,
-                    fill=COLOUR_BACKGROUND,
-                    outline=COLOUR_BLACK,
-                    activeoutline="#ff0000",
-                    activewidth=3,
-                    tags=diff_str
-                )
-
                 self.canvas.tag_bind(
-                    button, "<Button-1>",
+                    self.canvas.create_rectangle(
+                        tmp_x_anchor, diffbox_anchor,
+                        tmp_x_anchor + diff_b_a, diffbox_anchor + diff_b_a,
+                        fill=COLOUR_BACKGROUND,
+                        outline=COLOUR_BLACK,
+                        activeoutline="#ff0000",
+                        activewidth=3,
+                        tags=diff_str
+                    ),
+                    "<Button-1>",
                     lambda _, d=diff: self.set_diff_and_quit(d)
                 )
 
@@ -537,8 +536,7 @@ class C_minesweeper(Context):
     ) -> None:
         def draw_deets() -> None:
             width = effective_width - GAP_SIZE - BOX_A \
-                if special_case \
-                else (effective_width - 2 * GAP_SIZE - BOX_A) // 2
+                if special_case else b_width
             flag_str = f"{self.session.ms.flags:0>2d}" + (
                 f" / {self.session.ms.mines}" if not special_case else ""
             )
@@ -554,7 +552,7 @@ class C_minesweeper(Context):
                 MARGINS["left"] + GAP_SIZE // 2 + BOX_A,
                 MARGINS["top"] + BOX_A // 2,
                 anchor="w",
-                font=(FONT, 28),
+                font=(FONT, font_size),
                 state="disabled",
                 text=flag_str
             )
@@ -570,13 +568,37 @@ class C_minesweeper(Context):
                 return
 
         def draw_menu_button() -> None:
-            pass
+            menu_width = BOX_A if special_case else b_width
+            x_anchor = self.width - MARGINS["right"] - menu_width
+
+            self.canvas.tag_bind(
+                self.canvas.create_rectangle(
+                    x_anchor, MARGINS["top"],
+                    self.width - MARGINS["right"], MARGINS["top"] + BOX_A,
+                    fill=COLOUR_BACKGROUND,
+                    activeoutline="red"
+                ),
+                "<Button-1>", self.q_to_main_menu
+            )
+
+            if not special_case:
+                self.canvas.create_text(
+                    x_anchor + BOX_A, MARGINS["top"] + BOX_A // 2,
+                    anchor="w",
+                    font=(FONT, font_size),
+                    state="disabled",
+                    text="Menu"
+                )
+
+            draw_menu_sign(self.canvas, x_anchor, MARGINS["top"], BOX_A // 13)
 
         ms_state = self.session.ms.get_state()
         effective_width = self.width - self.gui_root.hor_margin
         special_case = self.session.difficulty == u.EASY
+        b_width = (effective_width - 2 * GAP_SIZE - BOX_A) // 2
+        font_size = 28
 
-        self.canvas.delete(tk.ALL)
+        self.canvas.delete(tk.ALL)  # TODO
         self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)
 
         draw_deets()

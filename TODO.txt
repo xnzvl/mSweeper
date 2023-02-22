@@ -2,4 +2,3 @@ GUI         -> "?" button in main menu
 GUI         -> *help* context, (CS/EN)
 MAINSWEEPER -> flag special move
 HIGHSCORER  -> delete highscores
-MAIN        -> FIX multi one highscore

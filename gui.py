@@ -594,7 +594,9 @@ class C_minesweeper(Context):
                 if self.session.top_ten:
                     draw_trophy(self.canvas, x_anchor, MARGINS["top"], BOX_A)
                 else:
-                    draw_face(self.canvas, x_anchor, MARGINS["top"], BOX_A, ms_state)
+                    draw_face(
+                        self.canvas, x_anchor, MARGINS["top"], BOX_A, ms_state
+                    )
 
         def draw_menu_button() -> None:
             menu_width = BOX_A if special_case else b_width

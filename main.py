@@ -102,8 +102,10 @@ class Session:
         )
         self._current_ms_lmb = self.ms.lmb
         self._current_ms_rmb = self.ms.rmb
+
         self.waiting_for_win = True
         self.top_ten = False
+        self.ms_state = ms.UNINITIALIZED
 
     def ms_lmb(
         self,

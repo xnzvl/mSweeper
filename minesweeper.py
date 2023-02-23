@@ -300,7 +300,6 @@ class Minesweeper:
 
         self._stopwatch.stop()
         button(position)
-        print(f"flagged mines:\t{self.flags}/{self.mines}")
         self._stopwatch.resume()
 
     def _lmb(  # PRESS

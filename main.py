@@ -35,7 +35,7 @@ class Session:
     ) -> None:
         self.ai_player = ai_player
         self.waiting_for_win = True
-        self.ms_state = ms.UNINITIALIZED
+        self.top_ten = False
 
         self.cnfg = fm.get_config()
 
@@ -76,8 +76,7 @@ class Session:
         diff_str = self.cnfg["DEFAULT_DIFFICULTY"]
         assert isinstance(nick, str) and isinstance(diff_str, str)
 
-        self.hs_manager.score(t, nick, self.difficulty)
-
+        self.top_ten = self.hs_manager.score(t, nick, self.difficulty)
         self.waiting_for_win = False
 
     def _ms_click_wrapper(
@@ -103,6 +102,7 @@ class Session:
         self._current_ms_lmb = self.ms.lmb
         self._current_ms_rmb = self.ms.rmb
         self.waiting_for_win = True
+        self.top_ten = False
 
     def ms_lmb(
         self,

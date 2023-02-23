@@ -101,12 +101,12 @@ class Highscores:
         time: Time_tuple_t,
         nick: str,
         difficulty: Difficult_t
-    ) -> None:
+    ) -> bool:
         score = time, datetime.date.today().strftime("%Y-%m-%d"), nick
 
         if not self._should_be_recorded(score, difficulty):
             print("not quick enough")
-            return
+            return False
 
         diff = self._difficulties[difficulty]
         diff.append(score)
@@ -116,6 +116,7 @@ class Highscores:
             diff.pop()
 
         self._write_hfile()
+        return True
 
     def _check_order(
         self

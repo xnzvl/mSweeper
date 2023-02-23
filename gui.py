@@ -31,7 +31,7 @@ GAP_SIZE = 30
 DEFAULT_MARGIN = 25
 
 ICON_PARTS = 13
-ICON_A = CELL_SIZE // ICON_PARTS
+ICON_INDENT = 1  # from one side
 assert CELL_SIZE % ICON_PARTS == 1
 
 MARGINS: Dict[str, int] = {
@@ -153,10 +153,12 @@ def draw_mine(
     canvas: tk.Canvas,
     x: int,
     y: int,
-    side: int,
+    whole_side: int,
     indent: bool = False
 ) -> None:
-    n_x, n_y = (x + side, y + side) if indent else (x, y)
+    side = whole_side // (ICON_PARTS + (2 * ICON_INDENT if indent else 0))
+    n_x, n_y = (x + side * ICON_INDENT, y + side * ICON_INDENT) \
+        if indent else (x, y)
 
     canvas.create_polygon(
         adapt_coords(n_x, n_y, side, SHAPE["mine"]),
@@ -176,11 +178,13 @@ def draw_flag(
     canvas: tk.Canvas,
     x: int,
     y: int,
-    side: int,
+    whole_side: int,
     is_default_flag: bool,
     indent: bool = False
 ) -> None:
-    n_x, n_y = (x + side, y + side) if indent else (x, y)
+    side = whole_side // (ICON_PARTS + (2 * ICON_INDENT if indent else 0))
+    n_x, n_y = (x + side * ICON_INDENT, y + side * ICON_INDENT) \
+        if indent else (x, y)
 
     canvas.create_polygon(
         adapt_coords(n_x, n_y, side, SHAPE["stand"]),
@@ -199,9 +203,10 @@ def draw_trophy(
     canvas: tk.Canvas,
     x: int,
     y: int,
-    side: int
+    whole_side: int
 ) -> None:
-    n_x, n_y = x + side, y + side
+    side = whole_side // (ICON_PARTS + 2 * ICON_INDENT)
+    n_x, n_y = x + side * ICON_INDENT, y + side * ICON_INDENT
 
     for shape in ["trophy_body", "trophy_ears"]:
         canvas.create_polygon(
@@ -221,9 +226,10 @@ def draw_menu_sign(
     canvas: tk.Canvas,
     x: int,
     y: int,
-    side: int
+    whole_side: int
 ) -> None:
-    n_x, n_y = x + side, y + side
+    side = whole_side // (ICON_PARTS + 2 * ICON_INDENT)
+    n_x, n_y = x + side * ICON_INDENT, y + side * ICON_INDENT
 
     for i in range(3):
         canvas.create_rectangle(
@@ -238,27 +244,30 @@ def draw_face(
     canvas: tk.Canvas,
     x: int,
     y: int,
-    side: int,
+    whole_side: int,
     ms_state: u.mSweeper_state_t
 ) -> None:
-    n_x, n_y = x + side, y + side
+    side = whole_side // (ICON_PARTS + 2 * ICON_INDENT)
+    n_x, n_y = x + side * ICON_INDENT, y + side * ICON_INDENT
 
     for i in [3, 8]:
         canvas.create_rectangle(
-            n_x + i * side, n_y + 3 * side, n_x + (i + 2) * side, n_y + 6 * side,
+            n_x + i * side, n_y + 3 * side,
+            n_x + (i + 2) * side, n_y + 6 * side,
             fill=COLOUR_BLACK, state="disabled"
         )
 
     if ms_state == ms.PLAYING:
         canvas.create_rectangle(
-            n_x + 2 * side, n_y + 8 * side, n_x + 11 * side, n_y + 10 * side,
+            n_x + 2 * side, n_y + 8 * side,
+            n_x + 11 * side, n_y + 10 * side,
             fill=COLOUR_BLACK, state="disabled"
         )
     else:
         canvas.create_polygon(
             adapt_coords(
                 n_x, n_y if ms_state == ms.GAME_WON else n_y + 4 * side,
-                #    flip -> realign
+                #    ^^ flip -> realign
                 side, SHAPE["smile"], flip_y=ms_state != ms.GAME_WON
             ),
             fill=COLOUR_BLACK, state="disabled"
@@ -372,13 +381,11 @@ class C_main_menu(Context):
                     tags=tag
                 )
 
-            trophy_box_a = BOX_A // 15
-
             draw_trophy(
                 self.canvas,
                 MARGINS["left"] + header_b_width + GAP_SIZE,
                 butts_anchor,
-                trophy_box_a
+                BOX_A
             )
 
             self.canvas.create_text(
@@ -517,13 +524,13 @@ class C_minesweeper(Context):
 
         if state == ms.FLAG:
             draw_flag(
-                self.canvas, x, y, ICON_A,
+                self.canvas, x, y, CELL_SIZE,
                 value == ms.MINE
                 or self.session.ms_state == ms.UNINITIALIZED
                 or self.session.ms_state == ms.PLAYING
             )
         elif value == ms.MINE:
-            draw_mine(self.canvas, x, y, ICON_A)
+            draw_mine(self.canvas, x, y, CELL_SIZE)
         elif value == 0 or state == ms.COVERED:
             return
         else:
@@ -562,7 +569,7 @@ class C_minesweeper(Context):
 
             draw_flag(
                 self.canvas,
-                MARGINS["left"], MARGINS["top"], BOX_A // 15,
+                MARGINS["left"], MARGINS["top"], BOX_A,
                 True, True
             )
 
@@ -581,13 +588,13 @@ class C_minesweeper(Context):
 
             if ms_state == ms.UNINITIALIZED:
                 draw_mine(
-                    self.canvas, x_anchor, MARGINS["top"], BOX_A // 15, True
+                    self.canvas, x_anchor, MARGINS["top"], BOX_A, True
                 )
             else:
                 if self.session.top_ten:
-                    draw_trophy(self.canvas, x_anchor, MARGINS["top"], BOX_A // 15)
+                    draw_trophy(self.canvas, x_anchor, MARGINS["top"], BOX_A)
                 else:
-                    draw_face(self.canvas, x_anchor, MARGINS["top"], BOX_A // 15, ms_state)
+                    draw_face(self.canvas, x_anchor, MARGINS["top"], BOX_A, ms_state)
 
         def draw_menu_button() -> None:
             menu_width = BOX_A if special_case else b_width
@@ -612,7 +619,7 @@ class C_minesweeper(Context):
                     text="Menu"
                 )
 
-            draw_menu_sign(self.canvas, x_anchor, MARGINS["top"], BOX_A // 13)
+            draw_menu_sign(self.canvas, x_anchor, MARGINS["top"], BOX_A)
 
         ms_state = self.session.ms.get_state()
         effective_width = self.width - self.gui_root.hor_margin

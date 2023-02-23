@@ -36,6 +36,7 @@ class Session:
         self.ai_player = ai_player
         self.waiting_for_win = True
         self.top_ten = False
+        self.ms_state = ms.UNINITIALIZED
 
         self.cnfg = fm.get_config()
 

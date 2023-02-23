@@ -239,24 +239,27 @@ def draw_face(
     x: int,
     y: int,
     side: int,
-    expression: int
+    ms_state: u.mSweeper_state_t
 ) -> None:
+    n_x, n_y = x + side, y + side
+
     for i in [3, 8]:
         canvas.create_rectangle(
-            x + i * side, y + 3 * side, x + (i + 2) * side, y + 6 * side,
+            n_x + i * side, n_y + 3 * side, n_x + (i + 2) * side, n_y + 6 * side,
             fill=COLOUR_BLACK, state="disabled"
         )
 
-    if expression == 0:
+    if ms_state == ms.PLAYING:
         canvas.create_rectangle(
-            x + 2 * side, y + 7 * side, x + 11 * side, y + 9 * side,
+            n_x + 2 * side, n_y + 8 * side, n_x + 11 * side, n_y + 10 * side,
             fill=COLOUR_BLACK, state="disabled"
         )
     else:
         canvas.create_polygon(
             adapt_coords(
-                x, y if expression > 0 else y + 4 * side,  # flip -> realign
-                side, SHAPE["smile"], flip_y=expression < 0
+                n_x, n_y if ms_state == ms.GAME_WON else n_y + 4 * side,
+                #    flip -> realign
+                side, SHAPE["smile"], flip_y=ms_state != ms.GAME_WON
             ),
             fill=COLOUR_BLACK, state="disabled"
         )
@@ -567,6 +570,25 @@ class C_minesweeper(Context):
             if special_case:
                 return
 
+            x_anchor = b_width + MARGINS["left"] + GAP_SIZE
+            face = self.canvas.create_rectangle(
+                x_anchor, MARGINS["top"],
+                x_anchor + BOX_A, MARGINS["top"] + BOX_A,
+                fill=COLOUR_BACKGROUND,
+                activeoutline="red"
+            )
+            self.canvas.tag_bind(face, "<Button-1>", lambda _: self.reset())
+
+            if ms_state == ms.UNINITIALIZED:
+                draw_mine(
+                    self.canvas, x_anchor, MARGINS["top"], BOX_A // 15, True
+                )
+            else:
+                if self.session.top_ten:
+                    draw_trophy(self.canvas, x_anchor, MARGINS["top"], BOX_A // 15)
+                else:
+                    draw_face(self.canvas, x_anchor, MARGINS["top"], BOX_A // 15, ms_state)
+
         def draw_menu_button() -> None:
             menu_width = BOX_A if special_case else b_width
             x_anchor = self.width - MARGINS["right"] - menu_width
@@ -647,8 +669,6 @@ class C_minesweeper(Context):
     ) -> Optional[u.mPosition_t]:
         x_pos = (x - MARGINS["left"] - 1) // CELL_SIZE
         y_pos = (y - MARGINS["top"] - GAP_SIZE - BOX_A - 1) // CELL_SIZE
-
-        print(x_pos, y_pos)
 
         return (x_pos, y_pos) \
             if 0 <= x_pos < self.session.deets["width"] \

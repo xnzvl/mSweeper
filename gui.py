@@ -12,7 +12,7 @@ Quit_context_lambda = Callable[[tk.Event], None]
 
 
 SW_TITLE = ":: mSweeper _"
-SW_VERSION = "1.10"
+SW_VERSION = "1.30"
 WINDOW_PREFIXES = {
     ms.UNINITIALIZED: "",
     ms.PLAYING:       "Game in progress - ",
@@ -47,6 +47,7 @@ COLOUR_FLAG = COLOUR_RED
 COLOUR_BAD_FLAG = "#633840"
 COLOUR_BACKGROUND = "#202020"
 COLOUR_FONT = "#ffffff"
+COLOUR_OUTLINE = "#000000"
 
 DEFAULT_DICT_KEY = -1
 
@@ -89,7 +90,8 @@ TEMPLATE: Dict[str, Tuple[Tuple[int, int], List[int]]] = {
                              -2, -1, -1, -1, -2, -1, -1, 1]
                     ),
     "trophy_ears": ((2, 2), [2, 1, 5, -1, 2, 2, -1, -1, -7, 1, -1]),
-    "smile":       ((2, 7), [2, 1, 5, -1, 2, 2, -2, 1, -5, -1, -2])
+    "smile":       ((2, 7), [2, 1, 5, -1, 2, 2, -2, 1, -5, -1, -2]),
+    "question":    ((0, 1), [1, -1, 5, 1, 1, 3, -1, 1, -2, 1, -2, -2, 1, -1, 2, -1, -3, 1, -2])
 }
 
 SHAPE: Dict[str, List[int]] = {}
@@ -274,6 +276,30 @@ def draw_face(
         )
 
 
+def draw_question_mark(
+    canvas: tk.Canvas,
+    x: int,
+    y: int,
+    whole_side: int
+) -> None:
+    side = whole_side // (ICON_PARTS + 2 * ICON_INDENT)
+    n_x = x + 4 * side
+    n_y = y + 3 * side
+
+    canvas.create_polygon(
+        adapt_coords(n_x, n_y, side, SHAPE["question"]),
+        fill="white", outline=COLOUR_OUTLINE, state="disabled"
+    )
+
+    n_x += 1
+    n_y += 1
+    canvas.create_rectangle(
+        n_x + 2 * side, n_y + 7 * side,
+        n_x + 4 * side, n_y + 9 * side,
+        fill="white", outline=COLOUR_OUTLINE, state="disabled"
+    )
+
+
 class Gui:
     def __init__(
         self,
@@ -360,37 +386,40 @@ class C_main_menu(Context):
         width: int,
         height: int
     ) -> None:
-        def draw_title() -> None:
+        def draw_title(
+            y: int
+        ) -> int:
             self.canvas.create_text(
-                MARGINS["left"] + GAP_SIZE,
-                (height - 3 * GAP_SIZE - BOX_A - diff_b_a) // 2 + 10,
+                MARGINS["left"] + GAP_SIZE, y,
                 anchor="sw",
                 fill=COLOUR_FONT,
                 font=(FONT, 30),
                 text=SW_TITLE
             )
+            return 0
 
-        def draw_header() -> None:
+        def draw_header(
+            y: int
+        ) -> int:
             for i, tag in enumerate(["tbox_nick", "b_highscores"]):
                 self.canvas.create_rectangle(
                     MARGINS["left"] + header_b_width * i + GAP_SIZE * i,
-                    butts_anchor,
+                    y,
                     MARGINS["left"] + header_b_width * (i + 1) + GAP_SIZE * i,
-                    butts_anchor + BOX_A,
+                    y + BOX_A,
                     activefill="#404040",
                     tags=tag
                 )
 
             draw_trophy(
                 self.canvas,
-                MARGINS["left"] + header_b_width + GAP_SIZE,
-                butts_anchor,
+                MARGINS["left"] + header_b_width + GAP_SIZE, y,
                 BOX_A
             )
 
             self.canvas.create_text(
                 MARGINS["left"] + header_b_width + GAP_SIZE + BOX_A,
-                butts_anchor + BOX_A // 2,
+                y + BOX_A // 2,
                 anchor="w",
                 fill=COLOUR_FONT,
                 font=(FONT, buttons_font_size),
@@ -398,7 +427,11 @@ class C_main_menu(Context):
                 text="Highscores"
             )
 
-        def draw_diffs() -> None:
+            return BOX_A
+
+        def draw_diffs(
+            y: int
+        ) -> int:
             def create_ctext(
                 x_anchor: int,
                 y_delta: int,
@@ -407,7 +440,7 @@ class C_main_menu(Context):
             ) -> None:
                 self.canvas.create_text(
                     x_anchor + diff_b_a // 2,
-                    diffbox_anchor + diff_b_a // 2 + y_delta,
+                    y + diff_b_a // 2 + y_delta,
                     fill=COLOUR_FONT,
                     font=(FONT, font_size),
                     state="disabled",
@@ -426,8 +459,8 @@ class C_main_menu(Context):
 
                 self.canvas.tag_bind(
                     self.canvas.create_rectangle(
-                        tmp_x_anchor, diffbox_anchor,
-                        tmp_x_anchor + diff_b_a, diffbox_anchor + diff_b_a,
+                        tmp_x_anchor, y,
+                        tmp_x_anchor + diff_b_a, y + diff_b_a,
                         fill=COLOUR_BACKGROUND,
                         outline=COLOUR_BLACK,
                         activeoutline="#ff0000",
@@ -451,14 +484,35 @@ class C_main_menu(Context):
                     f'{e} mines: {diff_dict["mines"]} {e}'
                 )
 
-        def draw_footer() -> None:
+            return diff_b_a
+
+        def draw_footer(
+            y: int
+        ) -> int:
+            qm_box_a = round(BOX_A * (2 / 3))
+
+            self.canvas.tag_bind(
+                self.canvas.create_rectangle(
+                    MARGINS["left"], y,
+                    MARGINS["left"] + qm_box_a, y + qm_box_a,
+                    activeoutline="red",
+                    fill=COLOUR_BACKGROUND
+                ),
+                "<Button-1>",
+                self.q_to_help
+            )
+
+            draw_question_mark(self.canvas, MARGINS["left"], y, qm_box_a)
+
             self.canvas.create_text(
-                width - MARGINS["right"] - GAP_SIZE, height - GAP_SIZE,
+                width - MARGINS["right"] - GAP_SIZE, height,
                 anchor="se",
                 fill="#484848",
                 font=(FONT, 15),
                 text="v" + SW_VERSION
             )
+
+            return qm_box_a
 
         super().__init__(gui_root, width, height)
 
@@ -466,13 +520,14 @@ class C_main_menu(Context):
         header_b_width = (width - self.gui_root.hor_margin - GAP_SIZE) // 2
         diff_b_a = (width - self.gui_root.hor_margin - 2 * GAP_SIZE) // 3
 
-        butts_anchor = (height - GAP_SIZE - diff_b_a - BOX_A) // 2
-        diffbox_anchor = butts_anchor + GAP_SIZE + BOX_A
+        y_anchor = 150
+        y_anchor += draw_title(y_anchor) + GAP_SIZE
+        y_anchor += draw_header(y_anchor) + GAP_SIZE
+        y_anchor += draw_diffs(y_anchor) + GAP_SIZE
+        y_anchor += draw_footer(y_anchor)
 
-        draw_title()
-        draw_header()
-        draw_diffs()
-        draw_footer()
+        if y_anchor > height - MARGINS["bottom"]:
+            raise ValueError("Content out of bounds (margins)")
 
     def set_diff_and_quit(
         self,

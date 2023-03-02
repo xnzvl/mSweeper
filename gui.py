@@ -90,8 +90,7 @@ TEMPLATE: Dict[str, Tuple[Tuple[int, int], List[int]]] = {
                              -2, -1, -1, -1, -2, -1, -1, 1]
                     ),
     "trophy_ears": ((2, 2), [2, 1, 5, -1, 2, 2, -1, -1, -7, 1, -1]),
-    "smile":       ((2, 7), [2, 1, 5, -1, 2, 2, -2, 1, -5, -1, -2]),
-    "question":    ((0, 1), [1, -1, 5, 1, 1, 3, -1, 1, -2, 1, -2, -2, 1, -1, 2, -1, -3, 1, -2])
+    "smile":       ((2, 7), [2, 1, 5, -1, 2, 2, -2, 1, -5, -1, -2])
 }
 
 SHAPE: Dict[str, List[int]] = {}
@@ -276,30 +275,6 @@ def draw_face(
         )
 
 
-def draw_question_mark(
-    canvas: tk.Canvas,
-    x: int,
-    y: int,
-    whole_side: int
-) -> None:
-    side = whole_side // (ICON_PARTS + 2 * ICON_INDENT)
-    n_x = x + 4 * side
-    n_y = y + 3 * side
-
-    canvas.create_polygon(
-        adapt_coords(n_x, n_y, side, SHAPE["question"]),
-        fill="white", outline=COLOUR_OUTLINE, state="disabled"
-    )
-
-    n_x += 1
-    n_y += 1
-    canvas.create_rectangle(
-        n_x + 2 * side, n_y + 7 * side,
-        n_x + 4 * side, n_y + 9 * side,
-        fill="white", outline=COLOUR_OUTLINE, state="disabled"
-    )
-
-
 class Gui:
     def __init__(
         self,
@@ -393,7 +368,7 @@ class C_main_menu(Context):
                 MARGINS["left"] + GAP_SIZE, y,
                 anchor="sw",
                 fill=COLOUR_FONT,
-                font=(FONT, 30),
+                font=(FONT, 64),
                 text=SW_TITLE
             )
             return 0
@@ -502,13 +477,20 @@ class C_main_menu(Context):
                 self.q_to_help
             )
 
-            draw_question_mark(self.canvas, MARGINS["left"], y, qm_box_a)
+            self.canvas.create_text(
+                MARGINS["left"] + qm_box_a / 2, y + qm_box_a / 2,
+                fill="#484848",
+                font=(FONT, 22),
+                state="disabled",
+                text="?"
+            )
 
             self.canvas.create_text(
                 width - MARGINS["right"] - GAP_SIZE, height,
                 anchor="se",
                 fill="#484848",
                 font=(FONT, 15),
+                state="disabled",
                 text="v" + SW_VERSION
             )
 
@@ -520,7 +502,7 @@ class C_main_menu(Context):
         header_b_width = (width - self.gui_root.hor_margin - GAP_SIZE) // 2
         diff_b_a = (width - self.gui_root.hor_margin - 2 * GAP_SIZE) // 3
 
-        y_anchor = 150
+        y_anchor = height - (3 * GAP_SIZE + 2 * BOX_A + diff_b_a)
         y_anchor += draw_title(y_anchor) + GAP_SIZE
         y_anchor += draw_header(y_anchor) + GAP_SIZE
         y_anchor += draw_diffs(y_anchor) + GAP_SIZE

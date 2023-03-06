@@ -50,6 +50,7 @@ COLOUR_FONT = "#ffffff"
 COLOUR_OUTLINE = "#000000"
 
 DEFAULT_DICT_KEY = -1
+DISPOSABLE = "disposable"
 
 COLOUR_CELLS: Dict[u.mCell_state_t, Dict[u.mCell_value_t, Tuple[str, str]]] = {
     ms.SHOWN: {
@@ -289,6 +290,11 @@ class Gui:
         self.hor_margin = MARGINS["left"] + MARGINS["right"]
         self.ver_margin = MARGINS["top"] + MARGINS["bottom"]
 
+        self.max_width = main.DIFFICULTY_DICT[u.HARD]["width"] * CELL_SIZE \
+            + self.hor_margin
+        self.max_height = main.DIFFICULTY_DICT[u.HARD]["height"] * CELL_SIZE \
+            + self.ver_margin + GAP_SIZE + BOX_A
+
         self.root = tk.Tk()
         self.root.title(SW_TITLE)
         self.root.resizable(False, False)
@@ -304,10 +310,8 @@ class Gui:
         if new_context == CONTEXT_MAIN_MENU:
             C_main_menu(
                 self,
-                main.DIFFICULTY_DICT[u.HARD]["width"] * CELL_SIZE
-                + self.hor_margin,
-                main.DIFFICULTY_DICT[u.HARD]["height"] * CELL_SIZE
-                + self.ver_margin + GAP_SIZE + BOX_A
+                self.max_width,
+                self.max_height
             )
         elif new_context == CONTEXT_SWEEPER:
             C_minesweeper(
@@ -317,7 +321,14 @@ class Gui:
                 + GAP_SIZE + BOX_A
             )
         elif new_context == CONTEXT_HIGHSCORES:
-            C_highscores(self, 1, 1)  # TODO
+            C_highscores(
+                self,
+                self.max_width,
+                self.max_height
+            )
+        elif new_context == CONTEXT_HELP:
+            assert False, "WIP"
+            C_help(self, 1, 1)  # TODO
 
 
 class Context:
@@ -330,6 +341,8 @@ class Context:
         self.root = gui_root.root
         self.gui_root = gui_root
         self.session = gui_root.session
+        self.width = width
+        self.height = height
 
         self.canvas = tk.Canvas(
             width=width - 2, height=height - 2,  # to fix symmetry
@@ -376,15 +389,29 @@ class C_main_menu(Context):
         def draw_header(
             y: int
         ) -> int:
-            for i, tag in enumerate(["tbox_nick", "b_highscores"]):
+            # for i, tag in enumerate(["tbox_nick", "b_highscores"]):
+            #     self.canvas.create_rectangle(
+            #         MARGINS["left"] + header_b_width * i + GAP_SIZE * i,
+            #         y,
+            #         MARGINS["left"] + header_b_width * (i + 1) + GAP_SIZE * i,
+            #         y + BOX_A,
+            #         activeoutline="red",
+            #         activewidth=3,
+            #         fill=COLOUR_BACKGROUND,
+            #         tags=tag
+            #     )
+
+            self.canvas.tag_bind(
                 self.canvas.create_rectangle(
-                    MARGINS["left"] + header_b_width * i + GAP_SIZE * i,
-                    y,
-                    MARGINS["left"] + header_b_width * (i + 1) + GAP_SIZE * i,
-                    y + BOX_A,
-                    activefill="#404040",
-                    tags=tag
-                )
+                    MARGINS["left"] + header_b_width + GAP_SIZE, y,
+                    MARGINS["left"] + header_b_width * 2 + GAP_SIZE, y + BOX_A,
+                    activeoutline="red",
+                    activewidth=3,
+                    fill=COLOUR_BACKGROUND
+                ),
+                "<Button-1>",
+                self.q_to_highscores
+            )
 
             draw_trophy(
                 self.canvas,
@@ -736,4 +763,43 @@ class C_minesweeper(Context):
 
 
 class C_highscores(Context):
+    def __init__(
+        self,
+        gui_root: Gui,
+        width: int,
+        height: int
+    ) -> None:
+        super().__init__(gui_root, width, height)
+
+        self.canvas.tag_bind(
+            self.canvas.create_rectangle(
+                self.width - BOX_A - MARGINS["right"], MARGINS["top"],
+                self.width - MARGINS["right"], MARGINS["top"] + BOX_A,
+                fill=COLOUR_BACKGROUND,
+                activeoutline="red",
+                activewidth=3
+            ),
+            "<Button-1>",
+            self.q_to_main_menu
+        )
+
+        draw_menu_sign(
+            self.canvas,
+            self.width - BOX_A - MARGINS["right"], MARGINS["top"],
+            BOX_A
+        )
+
+        draw_trophy(
+            self.canvas,
+            MARGINS["left"], MARGINS["top"],
+            BOX_A
+        )
+
+        self.canvas.create_rectangle(
+            MARGINS["right"], MARGINS["top"],
+            width - MARGINS["right"] - BOX_A - GAP_SIZE, MARGINS["top"] + BOX_A
+        )
+
+
+class C_help(Context):
     pass

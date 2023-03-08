@@ -77,7 +77,8 @@ COLOUR_CELLS: Dict[u.mCell_state_t, Dict[u.mCell_value_t, Tuple[str, str]]] = {
     }
 }
 
-FONT = "System"
+DEF_FONT = "System"
+DEF_FONT_SIZE = 28
 NUM_COLOUR = COLOUR_BLACK
 
 TEMPLATE: Dict[str, Tuple[Tuple[int, int], List[int]]] = {
@@ -381,7 +382,7 @@ class C_main_menu(Context):
                 MARGINS["left"] + GAP_SIZE, y,
                 anchor="sw",
                 fill=COLOUR_FONT,
-                font=(FONT, 64),
+                font=(DEF_FONT, 64),
                 text=SW_TITLE
             )
             return 0
@@ -424,7 +425,7 @@ class C_main_menu(Context):
                 y + BOX_A // 2,
                 anchor="w",
                 fill=COLOUR_FONT,
-                font=(FONT, buttons_font_size),
+                font=(DEF_FONT, DEF_FONT_SIZE),
                 state="disabled",
                 text="Highscores"
             )
@@ -444,7 +445,7 @@ class C_main_menu(Context):
                     x_anchor + diff_b_a // 2,
                     y + diff_b_a // 2 + y_delta,
                     fill=COLOUR_FONT,
-                    font=(FONT, font_size),
+                    font=(DEF_FONT, font_size),
                     state="disabled",
                     text=text
                 )
@@ -507,7 +508,7 @@ class C_main_menu(Context):
             self.canvas.create_text(
                 MARGINS["left"] + qm_box_a / 2, y + qm_box_a / 2,
                 fill="#484848",
-                font=(FONT, 22),
+                font=(DEF_FONT, 22),
                 state="disabled",
                 text="?"
             )
@@ -516,7 +517,7 @@ class C_main_menu(Context):
                 width - MARGINS["right"] - GAP_SIZE, height,
                 anchor="se",
                 fill="#484848",
-                font=(FONT, 15),
+                font=(DEF_FONT, 15),
                 state="disabled",
                 text="v" + SW_VERSION
             )
@@ -525,7 +526,6 @@ class C_main_menu(Context):
 
         super().__init__(gui_root, width, height)
 
-        buttons_font_size = 24
         header_b_width = (width - self.gui_root.hor_margin - GAP_SIZE) // 2
         diff_b_a = (width - self.gui_root.hor_margin - 2 * GAP_SIZE) // 3
 
@@ -600,7 +600,7 @@ class C_minesweeper(Context):
         else:
             self.canvas.create_text(
                 x + CELL_SIZE // 2, y + CELL_SIZE // 2,
-                font=(FONT, 16),
+                font=(DEF_FONT, 16),
                 state="disabled",
                 text=str(value)
             )
@@ -626,7 +626,7 @@ class C_minesweeper(Context):
                 MARGINS["left"] + GAP_SIZE // 2 + BOX_A,
                 MARGINS["top"] + BOX_A // 2,
                 anchor="w",
-                font=(FONT, font_size),
+                font=(DEF_FONT, DEF_FONT_SIZE),
                 state="disabled",
                 text=flag_str
             )
@@ -680,7 +680,7 @@ class C_minesweeper(Context):
                 self.canvas.create_text(
                     x_anchor + BOX_A, MARGINS["top"] + BOX_A // 2,
                     anchor="w",
-                    font=(FONT, font_size),
+                    font=(DEF_FONT, DEF_FONT_SIZE),
                     state="disabled",
                     text="Menu"
                 )
@@ -691,7 +691,6 @@ class C_minesweeper(Context):
         effective_width = self.width - self.gui_root.hor_margin
         special_case = self.session.difficulty == u.EASY
         b_width = (effective_width - 2 * GAP_SIZE - BOX_A) // 2
-        font_size = 28
 
         self.canvas.delete(tk.ALL)  # TODO
         self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)
@@ -771,6 +770,19 @@ class C_highscores(Context):
     ) -> None:
         super().__init__(gui_root, width, height)
 
+        self.init_draw()
+
+    def change_shown_diff(
+        self,
+        difficulty: u.Difficulty
+    ) -> None:
+        self.canvas.delete(DISPOSABLE)
+
+        print(difficulty)
+
+    def init_draw(
+        self
+    ) -> None:
         self.canvas.tag_bind(
             self.canvas.create_rectangle(
                 self.width - BOX_A - MARGINS["right"], MARGINS["top"],
@@ -797,8 +809,38 @@ class C_highscores(Context):
 
         self.canvas.create_rectangle(
             MARGINS["right"], MARGINS["top"],
-            width - MARGINS["right"] - BOX_A - GAP_SIZE, MARGINS["top"] + BOX_A
+            MARGINS["right"] + BOX_A, MARGINS["top"] + BOX_A
         )
+
+        x_anchor = MARGINS["left"] + BOX_A + GAP_SIZE
+        diff_b = (self.width - 4 * GAP_SIZE - 2 * BOX_A -
+                  self.gui_root.hor_margin) // 3
+
+        for i, diff_enum in enumerate(
+            [u.Difficulty.EASY, u.Difficulty.MEDIUM, u.Difficulty.HARD]
+        ):
+            self.canvas.tag_bind(
+                self.canvas.create_rectangle(
+                    x_anchor + i * (diff_b + GAP_SIZE),
+                    MARGINS["top"],
+                    x_anchor + (i + 1) * diff_b + i * GAP_SIZE,
+                    MARGINS["top"] + BOX_A,
+                    fill=COLOUR_BACKGROUND,
+                    activeoutline="red",
+                    activewidth=3
+                ),
+                "<Button-1>",
+                lambda _, d=diff_enum: self.change_shown_diff(d)
+            )
+
+            self.canvas.create_text(
+                x_anchor + i * (diff_b + GAP_SIZE) + diff_b // 2,
+                MARGINS["top"] + BOX_A // 2,
+                fill="white",
+                font=(DEF_FONT, DEF_FONT_SIZE),
+                state="disabled",
+                text=str(diff_enum).split('.')[-1]
+            )
 
 
 class C_help(Context):

@@ -90,11 +90,11 @@ class Highscores:
         diff: u.Difficulty
     ) -> int:
         if diff == u.Difficulty.EASY:
-            return 1
+            return 0
         elif diff == u.Difficulty.MEDIUM:
-            return 2
+            return 1
         else:
-            return 3
+            return 2
 
     def _should_be_recorded(
         self,

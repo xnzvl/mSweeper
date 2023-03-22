@@ -291,9 +291,9 @@ class Gui:
         self.hor_margin = MARGINS["left"] + MARGINS["right"]
         self.ver_margin = MARGINS["top"] + MARGINS["bottom"]
 
-        self.max_width = main.DIFFICULTY_DICT[u.HARD]["width"] * CELL_SIZE \
+        self.max_width = main.DIFFICULTY_DICT[u.Difficulty.HARD]["width"] * CELL_SIZE \
             + self.hor_margin
-        self.max_height = main.DIFFICULTY_DICT[u.HARD]["height"] * CELL_SIZE \
+        self.max_height = main.DIFFICULTY_DICT[u.Difficulty.HARD]["height"] * CELL_SIZE \
             + self.ver_margin + GAP_SIZE + BOX_A
 
         self.root = tk.Tk()
@@ -440,11 +440,7 @@ class C_main_menu(Context):
 
             e = "=="
 
-            for i, (diff, diff_str) in enumerate([
-                (u.EASY, "EASY"),
-                (u.MEDIUM, "MEDIUM"),
-                (u.HARD, "HARD")
-            ]):
+            for i, diff in enumerate(u.Difficulty):
                 tmp_x_anchor = MARGINS["left"] + diff_b_a * i + GAP_SIZE * i
                 diff_dict = main.DIFFICULTY_DICT[diff]
 
@@ -455,8 +451,7 @@ class C_main_menu(Context):
                         fill=COLOUR_BACKGROUND,
                         outline=COLOUR_BLACK,
                         activeoutline="#ff0000",
-                        activewidth=3,
-                        tags=diff_str
+                        activewidth=3
                     ),
                     "<Button-1>",
                     lambda _, d=diff: self.set_diff_and_quit(d)
@@ -464,7 +459,7 @@ class C_main_menu(Context):
 
                 create_ctext(
                     tmp_x_anchor, -80, 28,
-                    f'{e * 2} {diff_str} {e * 2}'
+                    f'{e * 2} {str(diff)} {e * 2}'
                 )
                 create_ctext(
                     tmp_x_anchor, 0, 42,
@@ -528,7 +523,7 @@ class C_main_menu(Context):
 
     def set_diff_and_quit(
         self,
-        difficulty: u.mDifficulty_t
+        difficulty: u.Difficulty
     ) -> None:
         self.session.set_difficulty(difficulty)
         self.quit_context_for(CONTEXT_SWEEPER)
@@ -677,7 +672,7 @@ class C_minesweeper(Context):
 
         ms_state = self.session.ms.get_state()
         effective_width = self.width - self.gui_root.hor_margin
-        special_case = self.session.difficulty == u.EASY
+        special_case = self.session.difficulty == u.Difficulty.EASY
         b_width = (effective_width - 2 * GAP_SIZE - BOX_A) // 2
 
         self.canvas.delete(tk.ALL)  # TODO

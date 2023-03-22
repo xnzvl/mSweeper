@@ -3,7 +3,6 @@ from enum import Enum
 
 
 mTime_tuple_t = Tuple[int, int, int, int]
-mDifficulty_t = int
 mScore_record_t = Tuple[mTime_tuple_t, str, str]
 
 mCell_t = int

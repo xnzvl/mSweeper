@@ -7,7 +7,6 @@ import uber as u
 
 
 Score_record_t = u.mScore_record_t
-Difficult_t = u.mDifficulty_t
 Time_tuple_t = u.mTime_tuple_t
 
 Config_dict = u.mConfig_dict
@@ -63,6 +62,7 @@ class Highscores:
         hfile: str,
         cypher: Cypher
     ) -> None:
+
         def create_default_hfile(
             filename: str
         ) -> None:

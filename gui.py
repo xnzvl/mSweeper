@@ -758,6 +758,7 @@ class C_highscores(Context):
     ) -> None:
         super().__init__(gui_root, width, height)
 
+        self.diff_b = (self.width - 4 * GAP_SIZE - 2 * BOX_A - self.gui_root.hor_margin) // 3
         self.subheader_h = 60
         self.rows_gap = 5
 
@@ -766,6 +767,7 @@ class C_highscores(Context):
         self.row_h = (self.height - self.row_y_anchor - MARGINS["bottom"]) // 10
 
         self.init_draw()
+        self.change_shown_diff(u.Difficulty.MEDIUM)
 
     def change_shown_diff(
             self,
@@ -825,9 +827,30 @@ class C_highscores(Context):
                 "e"
             )
 
+        def mark_current(
+                difficulty: u.Difficulty
+        ) -> None:
+            chop = self.diff_b // 4
+            x = MARGINS["left"] + BOX_A + GAP_SIZE + chop
+
+            if difficulty == u.Difficulty.MEDIUM:
+                x += self.diff_b + GAP_SIZE
+            elif difficulty == u.Difficulty.HARD:
+                x += 2 * (self.diff_b + GAP_SIZE)
+
+            self.canvas.create_rectangle(
+                x, MARGINS["top"] + BOX_A,
+                x + self.diff_b - 2 * chop, MARGINS["top"] + BOX_A - 5,
+                fill="red",
+                tags=DISPOSABLE
+            )
+
         record_font_size = 16
+
         self.canvas.delete(DISPOSABLE)
         diff_records = self.session.hs_manager.get_diff_scores(difficulty)
+
+        mark_current(difficulty)
 
         for i in range(10):
             text(
@@ -877,17 +900,15 @@ class C_highscores(Context):
         )
 
         x_anchor = MARGINS["left"] + BOX_A + GAP_SIZE
-        diff_b = (self.width - 4 * GAP_SIZE - 2 * BOX_A -
-                  self.gui_root.hor_margin) // 3
 
         for i, diff_enum in enumerate(
             [u.Difficulty.EASY, u.Difficulty.MEDIUM, u.Difficulty.HARD]
         ):
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
-                    x_anchor + i * (diff_b + GAP_SIZE),
+                    x_anchor + i * (self.diff_b + GAP_SIZE),
                     MARGINS["top"],
-                    x_anchor + (i + 1) * diff_b + i * GAP_SIZE,
+                    x_anchor + (i + 1) * self.diff_b + i * GAP_SIZE,
                     MARGINS["top"] + BOX_A,
                     fill=COLOUR_BACKGROUND,
                     activeoutline="red",
@@ -898,7 +919,7 @@ class C_highscores(Context):
             )
 
             self.canvas.create_text(
-                x_anchor + i * (diff_b + GAP_SIZE) + diff_b // 2,
+                x_anchor + i * (self.diff_b + GAP_SIZE) + self.diff_b // 2,
                 MARGINS["top"] + BOX_A // 2,
                 fill="white",
                 font=(DEF_FONT, DEF_FONT_SIZE),

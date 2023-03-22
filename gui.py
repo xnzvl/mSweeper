@@ -390,18 +390,6 @@ class C_main_menu(Context):
         def draw_header(
             y: int
         ) -> int:
-            # for i, tag in enumerate(["tbox_nick", "b_highscores"]):
-            #     self.canvas.create_rectangle(
-            #         MARGINS["left"] + header_b_width * i + GAP_SIZE * i,
-            #         y,
-            #         MARGINS["left"] + header_b_width * (i + 1) + GAP_SIZE * i,
-            #         y + BOX_A,
-            #         activeoutline="red",
-            #         activewidth=3,
-            #         fill=COLOUR_BACKGROUND,
-            #         tags=tag
-            #     )
-
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
                     MARGINS["left"] + header_b_width + GAP_SIZE, y,
@@ -770,15 +758,86 @@ class C_highscores(Context):
     ) -> None:
         super().__init__(gui_root, width, height)
 
+        self.row_y_anchor = MARGINS["top"] + BOX_A + GAP_SIZE
+        self.row_w = self.width - self.gui_root.hor_margin
+        self.row_h = \
+            (self.height - self.gui_root.ver_margin - GAP_SIZE - BOX_A) // 10
+
         self.init_draw()
 
     def change_shown_diff(
-        self,
-        difficulty: u.Difficulty
+            self,
+            difficulty: u.Difficulty
     ) -> None:
-        self.canvas.delete(DISPOSABLE)
 
-        print(difficulty)
+        def draw_time(
+                row: int,
+                time: Optional[u.mTime_tuple_t]
+        ) -> None:
+            if time is not None:
+                h, m, s, _ = time
+                time_str = "{:02d}:{:02d}:{:02d}".format(h, m, s)
+            else:
+                time_str = "##:##:##"
+
+            self.canvas.create_text(
+                MARGINS["left"] + 4 * GAP_SIZE,
+                self.row_y_anchor + (row + 0.5) * self.row_h,
+                anchor="w",
+                fill="white",
+                font=(DEF_FONT, DEF_FONT_SIZE),
+                tags=DISPOSABLE,
+                text=time_str
+            )
+
+        def draw_nick(
+                row: int,
+                nick: Optional[str]
+        ) -> None:
+            self.canvas.create_text(
+                MARGINS["left"] + GAP_SIZE + 250,
+                self.row_y_anchor + (row + 0.5) * self.row_h,
+                anchor="w",
+                fill="white",
+                font=(DEF_FONT, DEF_FONT_SIZE),
+                tags=DISPOSABLE,
+                text=nick if nick is not None else "-------"
+            )
+
+        def draw_date(
+                row: int,
+                nick: Optional[str]
+        ) -> None:
+            self.canvas.create_text(
+                self.width - MARGINS["right"] - 2 * GAP_SIZE,
+                self.row_y_anchor + (row + 0.5) * self.row_h,
+                anchor="e",
+                fill="white",
+                font=(DEF_FONT, DEF_FONT_SIZE),
+                tags=DISPOSABLE,
+                text=nick if nick is not None else "####-##-##"
+            )
+
+        self.canvas.delete(DISPOSABLE)
+        diff_records = self.session.hs_manager.get_diff_scores(difficulty)
+
+        for i in range(10):
+            self.canvas.create_text(
+                MARGINS["left"] + GAP_SIZE,
+                self.row_y_anchor + (i + 0.5) * self.row_h,
+                anchor="w",
+                fill="white",
+                font=(DEF_FONT, DEF_FONT_SIZE),
+                text=f"{i + 1}."
+            )
+
+            time, date, nick = (None, None, None) \
+                if i >= len(diff_records) \
+                else diff_records[i]
+
+            draw_time(i, time)
+            draw_nick(i, nick)
+            draw_date(i, date)
 
     def init_draw(
         self
@@ -840,6 +899,14 @@ class C_highscores(Context):
                 font=(DEF_FONT, DEF_FONT_SIZE),
                 state="disabled",
                 text=str(diff_enum).split('.')[-1]
+            )
+
+        for i in range(10):
+            self.canvas.create_rectangle(
+                MARGINS["left"],
+                self.row_y_anchor + i * self.row_h,
+                MARGINS["left"] + self.row_w,
+                self.row_y_anchor + (i + 1) * self.row_h
             )
 
 

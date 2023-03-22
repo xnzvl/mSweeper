@@ -758,10 +758,12 @@ class C_highscores(Context):
     ) -> None:
         super().__init__(gui_root, width, height)
 
-        self.row_y_anchor = MARGINS["top"] + BOX_A + GAP_SIZE
+        self.subheader_h = 60
+        self.rows_gap = 5
+
+        self.row_y_anchor = MARGINS["top"] + BOX_A + GAP_SIZE + self.subheader_h + GAP_SIZE // 2 - self.rows_gap
         self.row_w = self.width - self.gui_root.hor_margin
-        self.row_h = \
-            (self.height - self.gui_root.ver_margin - GAP_SIZE - BOX_A) // 10
+        self.row_h = (self.height - self.row_y_anchor - MARGINS["bottom"]) // 10
 
         self.init_draw()
 
@@ -769,6 +771,22 @@ class C_highscores(Context):
             self,
             difficulty: u.Difficulty
     ) -> None:
+
+        def text(
+                row: int,
+                txt: str,
+                x: int,
+                anchor: str = "w"
+        ) -> None:
+            self.canvas.create_text(
+                x, self.row_y_anchor + row * self.row_h + (self.row_h - self.rows_gap) * 0.5 + self.rows_gap,
+                anchor=anchor,
+                fill="white",
+                font=(DEF_FONT, record_font_size),
+                state="disabled",
+                tags=DISPOSABLE,
+                text=txt
+            )
 
         def draw_time(
                 row: int,
@@ -780,55 +798,42 @@ class C_highscores(Context):
             else:
                 time_str = "##:##:##"
 
-            self.canvas.create_text(
-                MARGINS["left"] + 4 * GAP_SIZE,
-                self.row_y_anchor + (row + 0.5) * self.row_h,
-                anchor="w",
-                fill="white",
-                font=(DEF_FONT, DEF_FONT_SIZE),
-                tags=DISPOSABLE,
-                text=time_str
+            text(
+                row,
+                time_str,
+                MARGINS["left"] + 4 * GAP_SIZE
             )
 
         def draw_nick(
                 row: int,
                 nick: Optional[str]
         ) -> None:
-            self.canvas.create_text(
-                MARGINS["left"] + GAP_SIZE + 250,
-                self.row_y_anchor + (row + 0.5) * self.row_h,
-                anchor="w",
-                fill="white",
-                font=(DEF_FONT, DEF_FONT_SIZE),
-                tags=DISPOSABLE,
-                text=nick if nick is not None else "-------"
+            text(
+                row,
+                nick if nick is not None else "< BLANK >",
+                MARGINS["left"] + GAP_SIZE + 250
             )
 
         def draw_date(
                 row: int,
-                nick: Optional[str]
+                date: Optional[str]
         ) -> None:
-            self.canvas.create_text(
+            text(
+                row,
+                date if date is not None else "####-##-##",
                 self.width - MARGINS["right"] - 2 * GAP_SIZE,
-                self.row_y_anchor + (row + 0.5) * self.row_h,
-                anchor="e",
-                fill="white",
-                font=(DEF_FONT, DEF_FONT_SIZE),
-                tags=DISPOSABLE,
-                text=nick if nick is not None else "####-##-##"
+                "e"
             )
 
+        record_font_size = 16
         self.canvas.delete(DISPOSABLE)
         diff_records = self.session.hs_manager.get_diff_scores(difficulty)
 
         for i in range(10):
-            self.canvas.create_text(
-                MARGINS["left"] + GAP_SIZE,
-                self.row_y_anchor + (i + 0.5) * self.row_h,
-                anchor="w",
-                fill="white",
-                font=(DEF_FONT, DEF_FONT_SIZE),
-                text=f"{i + 1}."
+            text(
+                i,
+                f"{i + 1}.",
+                MARGINS["left"] + GAP_SIZE
             )
 
             time, date, nick = (None, None, None) \
@@ -860,15 +865,15 @@ class C_highscores(Context):
             BOX_A
         )
 
+        self.canvas.create_rectangle(
+            MARGINS["right"], MARGINS["top"],
+            MARGINS["right"] + BOX_A, MARGINS["top"] + BOX_A
+        )
+
         draw_trophy(
             self.canvas,
             MARGINS["left"], MARGINS["top"],
             BOX_A
-        )
-
-        self.canvas.create_rectangle(
-            MARGINS["right"], MARGINS["top"],
-            MARGINS["right"] + BOX_A, MARGINS["top"] + BOX_A
         )
 
         x_anchor = MARGINS["left"] + BOX_A + GAP_SIZE
@@ -901,12 +906,57 @@ class C_highscores(Context):
                 text=str(diff_enum).split('.')[-1]
             )
 
+        self.canvas.create_rectangle(
+            MARGINS["left"],
+            MARGINS["top"] + BOX_A + GAP_SIZE,
+            self.width - MARGINS["right"],
+            MARGINS["top"] + BOX_A + GAP_SIZE + self.subheader_h
+        )
+
+        self.canvas.create_text(
+            MARGINS["left"] + GAP_SIZE,
+            MARGINS["top"] + BOX_A + GAP_SIZE + self.subheader_h // 2,
+            anchor="w",
+            fill="white",
+            font=(DEF_FONT, DEF_FONT_SIZE),
+            text="#"
+        )
+
+        self.canvas.create_text(
+            MARGINS["left"] + 4 * GAP_SIZE,
+            MARGINS["top"] + BOX_A + GAP_SIZE + self.subheader_h // 2,
+            anchor="w",
+            fill="white",
+            font=(DEF_FONT, DEF_FONT_SIZE),
+            text="Time"
+        )
+
+        self.canvas.create_text(
+            MARGINS["left"] + GAP_SIZE + 250,
+            MARGINS["top"] + BOX_A + GAP_SIZE + self.subheader_h // 2,
+            anchor="w",
+            fill="white",
+            font=(DEF_FONT, DEF_FONT_SIZE),
+            text="Nickname"
+        )
+
+        self.canvas.create_text(
+            self.width - MARGINS["right"] - 5 * GAP_SIZE,
+            MARGINS["top"] + BOX_A + GAP_SIZE + self.subheader_h // 2,
+            anchor="w",
+            fill="white",
+            font=(DEF_FONT, DEF_FONT_SIZE),
+            text="Date"
+        )
+
         for i in range(10):
             self.canvas.create_rectangle(
                 MARGINS["left"],
-                self.row_y_anchor + i * self.row_h,
+                self.row_y_anchor + i * self.row_h + self.rows_gap,
                 MARGINS["left"] + self.row_w,
-                self.row_y_anchor + (i + 1) * self.row_h
+                self.row_y_anchor + (i + 1) * self.row_h,
+                activeoutline="red",
+                fill=COLOUR_BACKGROUND
             )
 
 

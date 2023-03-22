@@ -12,7 +12,7 @@ Quit_context_lambda = Callable[[tk.Event], None]
 
 
 SW_TITLE = ":: mSweeper _"
-SW_VERSION = "1.30"
+SW_VERSION = "1.40"
 WINDOW_PREFIXES = {
     ms.UNINITIALIZED: "",
     ms.PLAYING:       "Game in progress - ",

@@ -214,7 +214,6 @@ class Highscores:
 
                     if i == 10:
                         break
-                    i += 1
 
             for line in f:
                 if line.strip() != "":

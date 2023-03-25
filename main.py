@@ -71,7 +71,7 @@ class Session:
         assert self.ms is not None
         t = self.ms.get_time()
         print("\nVICTORY!")
-        print("time:", t)
+        print("time:", t, "\n")
 
         nick = self.cnfg["NICK"]
         diff_str = self.cnfg["DEFAULT_DIFFICULTY"]

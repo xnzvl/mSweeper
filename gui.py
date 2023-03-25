@@ -12,7 +12,7 @@ Quit_context_lambda = Callable[[tk.Event], None]
 
 
 SW_TITLE = ":: mSweeper _"
-SW_VERSION = "1.40"
+SW_VERSION = "1.41"
 WINDOW_PREFIXES = {
     ms.UNINITIALIZED: "",
     ms.PLAYING:       "Game in progress - ",
@@ -459,7 +459,7 @@ class C_main_menu(Context):
 
                 create_ctext(
                     tmp_x_anchor, -80, 28,
-                    f'{e * 2} {str(diff)} {e * 2}'
+                    f'{e * 2} {str(diff).split(".")[1]} {e * 2}'
                 )
                 create_ctext(
                     tmp_x_anchor, 0, 42,

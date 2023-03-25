@@ -181,21 +181,6 @@ class Highscores:
         datetime.date.fromisoformat(date_str)
         return date_str
 
-    def test_print(
-        self
-    ) -> None:
-        dd = ["\nEASY:", "MEDIUM:", "HARD:"]
-
-        print("\n== SCORES ============================")
-        for i, diff in enumerate(self._difficulties):
-            print(dd[i])
-
-            for k, row in enumerate(diff):
-                print(f"[{k + 1:02}]", row)
-
-            print()
-        print("======================================")
-
     def _load_hfile(
         self
     ) -> None:
@@ -213,6 +198,7 @@ class Highscores:
                             .append(self._try_parse_line(line))
 
                     if i == 10:
+                        i = 0
                         break
 
             for line in f:
@@ -220,8 +206,6 @@ class Highscores:
                     raise INVALID_FORMAT
 
         self._check_order()
-
-        self.test_print()
 
     def _score_to_str(
         _,
@@ -250,8 +234,6 @@ class Highscores:
                     output.write(self._cypher.encrypt(DEFAULT_LINE) + '\n')
 
                 output.write('\n')
-
-        self.test_print()
 
 
 def def_cypher_encrypt(

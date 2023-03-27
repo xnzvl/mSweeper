@@ -3,20 +3,19 @@ import datetime
 import json
 import os
 
-import uber
+import uber as u
 
 
-Score_record_t = uber.mScore_record_t
-Difficult_t = uber.mDifficulty_t
-Time_tuple_t = uber.mTime_tuple_t
+Score_record_t = u.mScore_record_t
+Time_tuple_t = u.mTime_tuple_t
 
-Config_dict = uber.mConfig_dict
+Config_dict = u.mConfig_dict
 
 
-CONFIG_FILE = uber.CONFIG_FILE
-CONFIG_DEFAULT = uber.DEFAULT_CONFIG
+CONFIG_FILE = u.CONFIG_FILE
+CONFIG_DEFAULT = u.DEFAULT_CONFIG
 
-ALLOWED_CHARS = uber.ALLOWED_CHARS
+ALLOWED_CHARS = u.ALLOWED_CHARS
 INVALID_RECORD = ValueError("Highscore record is invalid")
 INVALID_FORMAT = ValueError("Highscore file has invalid format")
 INVALID_CONFIG = ValueError("Invalid config file")
@@ -78,9 +77,7 @@ class Highscores:
         self._cypher = cypher
 
         self._difficulties: List[List[Score_record_t]] = [
-            [],  # easy   difficulty
-            [],  # medium difficulty
-            []   # hard   difficulty
+            [], [], []  # easy, medium, hard
         ]
 
         if not os.path.isfile(hfile):
@@ -88,19 +85,32 @@ class Highscores:
 
         self._load_hfile()
 
+    def diff_to_int(
+        _,
+        diff: u.Difficulty
+    ) -> int:
+        if diff == u.Difficulty.EASY:
+            return 0
+        elif diff == u.Difficulty.MEDIUM:
+            return 1
+        else:
+            return 2
+
     def _should_be_recorded(
         self,
         score: Score_record_t,
-        difficulty: Difficult_t
+        difficulty: u.Difficulty
     ) -> bool:
-        return len(self._difficulties[difficulty]) < 10 \
-            or score < self._difficulties[difficulty][-1]
+        diff_int = self.diff_to_int(difficulty)
+
+        return len(self._difficulties[diff_int]) < 10 \
+            or score < self._difficulties[diff_int][-1]
 
     def score(
         self,
         time: Time_tuple_t,
         nick: str,
-        difficulty: Difficult_t
+        difficulty: u.Difficulty
     ) -> bool:
         score = time, datetime.date.today().strftime("%Y-%m-%d"), nick
 
@@ -108,7 +118,7 @@ class Highscores:
             print("not quick enough")
             return False
 
-        diff = self._difficulties[difficulty]
+        diff = self._difficulties[self.diff_to_int(difficulty)]
         diff.append(score)
         diff.sort()
 
@@ -117,6 +127,12 @@ class Highscores:
 
         self._write_hfile()
         return True
+
+    def get_diff_scores(
+        self,
+        diff: u.Difficulty
+    ) -> List[Score_record_t]:
+        return self._difficulties[self.diff_to_int(diff)]
 
     def _check_order(
         self
@@ -165,44 +181,31 @@ class Highscores:
         datetime.date.fromisoformat(date_str)
         return date_str
 
-    def test_print(
-        self
-    ) -> None:
-        dd = ["\nEASY:", "MEDIUM:", "HARD:"]
-
-        print("\n== SCORES ============================")
-        for i, diff in enumerate(self._difficulties):
-            print(dd[i])
-
-            for k, row in enumerate(diff):
-                print(f"[{k + 1:02}]", row)
-
-            print()
-        print("======================================")
-
     def _load_hfile(
         self
     ) -> None:
         with open(self._filename, 'r') as f:
             i = 0
-            diff = 0
+
+            for diff in u.Difficulty:
+                diff_int = self.diff_to_int(diff)
+
+                for line in f:
+                    i += 1 if line != '\n' else 0
+
+                    if line != DEFAULT_LINE + '\n' and line != '\n':
+                        self._difficulties[diff_int]\
+                            .append(self._try_parse_line(line))
+
+                    if i == 10:
+                        i = 0
+                        break
 
             for line in f:
-                i += 1 if line != '\n' else 0
-
-                if line != DEFAULT_LINE + '\n' and line != '\n':
-                    self._difficulties[diff].append(self._try_parse_line(line))
-
-                if i == 10:
-                    i += 1
-                    diff += 1
-
-                    if diff > 2:
-                        raise INVALID_FORMAT
+                if line.strip() != "":
+                    raise INVALID_FORMAT
 
         self._check_order()
-
-        self.test_print()
 
     def _score_to_str(
         _,
@@ -231,8 +234,6 @@ class Highscores:
                     output.write(self._cypher.encrypt(DEFAULT_LINE) + '\n')
 
                 output.write('\n')
-
-        self.test_print()
 
 
 def def_cypher_encrypt(

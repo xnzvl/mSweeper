@@ -9,18 +9,18 @@ import uber as u
 
 DEFAULT_CYPHER = fm.DEFAULT_CYPHER
 
-DIFFICULTY_DICT: Dict[u.mDifficulty_t, Dict[str, int]] = {
-    u.EASY: {
+DIFFICULTY_DICT: Dict[u.Difficulty, Dict[str, int]] = {
+    u.Difficulty.EASY: {
         "mines":  10,
         "width":   8,
         "height":  8
     },
-    u.MEDIUM: {
+    u.Difficulty.MEDIUM: {
         "mines":  40,
         "width":  16,
         "height": 16
     },
-    u.HARD: {
+    u.Difficulty.HARD: {
         "mines":  99,
         "width":  30,
         "height": 16
@@ -48,7 +48,7 @@ class Session:
             and isinstance(difficulties_dict, dict) \
             and isinstance(highscore_file, str)
 
-        self.difficulty = 0
+        self.difficulty = u.Difficulty.MEDIUM
         self.deets: Dict[str, int] = {
             "mines":   0,
             "width":   0,
@@ -60,7 +60,7 @@ class Session:
 
     def set_difficulty(
         self,
-        diff: u.mDifficulty_t
+        diff: u.Difficulty
     ) -> None:
         self.difficulty = diff
         self.deets = DIFFICULTY_DICT[diff]
@@ -71,7 +71,7 @@ class Session:
         assert self.ms is not None
         t = self.ms.get_time()
         print("\nVICTORY!")
-        print("time:", t)
+        print("time:", t, "\n")
 
         nick = self.cnfg["NICK"]
         diff_str = self.cnfg["DEFAULT_DIFFICULTY"]

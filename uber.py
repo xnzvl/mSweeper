@@ -1,8 +1,8 @@
 from typing import Callable, Union, Tuple, List, Dict, Any
+from enum import Enum
 
 
 mTime_tuple_t = Tuple[int, int, int, int]
-mDifficulty_t = int
 mScore_record_t = Tuple[mTime_tuple_t, str, str]
 
 mCell_t = int
@@ -63,3 +63,9 @@ DEFAULT_CONFIG: mConfig_dict = {
         }
     }
 }
+
+
+class Difficulty(Enum):
+    EASY = "Easy"
+    MEDIUM = "Medium"
+    HARD = "Hard"

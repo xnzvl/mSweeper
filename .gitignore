@@ -1,7 +1,5 @@
-# every python file should be included (?) 
-! *.py
-! *.pyc
-
-# everything else is ignore
+# IGNORE EVERYTHING!
 *
 
+!.gitignore
+!README.md

@@ -65,7 +65,7 @@ DEFAULT_CONFIG: mConfig_dict = {
 }
 
 
-class Difficulty(Enum):
+class Difficulty_t(Enum):
     EASY = "Easy"
     MEDIUM = "Medium"
     HARD = "Hard"

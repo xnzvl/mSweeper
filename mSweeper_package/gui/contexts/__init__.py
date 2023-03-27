@@ -2,6 +2,11 @@ from enum import Enum
 from typing import Dict, List, Tuple
 import tkinter as tk
 
+from .Help import Help
+from .Highscores import Highscores
+from .Main_menu import Main_menu
+from .Minesweeper import Minesweeper
+
 from ... import minesweeper as ms
 
 

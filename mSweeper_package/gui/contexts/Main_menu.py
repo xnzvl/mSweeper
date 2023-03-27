@@ -4,7 +4,7 @@ from .. import Context, Core
 from .... import mSweeper_package as mSweeper
 
 
-class C_main_menu(Context.Context):
+class Main_menu(Context.Context):
     def __init__(
         self,
         gui_root: Core.Gui,

@@ -7,25 +7,26 @@ from .... import mSweeper_package as mSweeper
 
 class Main_menu(Context.Context):
     def __init__(
-        self,
-        gui_root: Core.Gui,
-        width: int,
-        height: int
+            self,
+            gui_root: Core.Gui,
+            width: int,
+            height: int
     ) -> None:
+
         def draw_title(
-            y: int
+                y: int
         ) -> int:
             self.canvas.create_text(
                 gui.Margins.LEFT + gui.GAP_SIZE, y,
                 anchor="sw",
-                fill=COLOUR_FONT,
-                font=(DEF_FONT, 64),
+                fill=here.Colour.BLACK,
+                font=(here.FONT, 64),
                 text=SW_TITLE
             )
             return 0
 
         def draw_header(
-            y: int
+                y: int
         ) -> int:
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
@@ -33,9 +34,9 @@ class Main_menu(Context.Context):
                     gui.Margins.LEFT + header_b_width * 2 + gui.GAP_SIZE, y + gui.BOX_A,
                     activeoutline="red",
                     activewidth=3,
-                    fill=COLOUR_BACKGROUND
+                    fill=here.Colour.BACKGROUND
                 ),
-                "<Button-1>",
+                "<Button-1>",  # add RMB button consts
                 self.q_to_highscores
             )
 
@@ -49,8 +50,8 @@ class Main_menu(Context.Context):
                 gui.Margins.LEFT + header_b_width + gui.GAP_SIZE + gui.BOX_A,
                 y + gui.BOX_A // 2,
                 anchor="w",
-                fill=COLOUR_FONT,
-                font=(DEF_FONT, DEF_FONT_SIZE),
+                fill=here.Colour.BLACK,
+                font=(here.FONT, here.Font_size.DEFAULT),
                 state="disabled",
                 text="Highscores"
             )
@@ -58,7 +59,7 @@ class Main_menu(Context.Context):
             return gui.BOX_A
 
         def draw_diffs(
-            y: int
+                y: int
         ) -> int:
             def create_ctext(
                 x_anchor: int,
@@ -69,8 +70,8 @@ class Main_menu(Context.Context):
                 self.canvas.create_text(
                     x_anchor + diff_b_a // 2,
                     y + diff_b_a // 2 + y_delta,
-                    fill=COLOUR_FONT,
-                    font=(DEF_FONT, font_size),
+                    fill=here.Colour.BLACK,
+                    font=(here.FONT, font_size),
                     state="disabled",
                     text=text
                 )
@@ -85,9 +86,9 @@ class Main_menu(Context.Context):
                     self.canvas.create_rectangle(
                         tmp_x_anchor, y,
                         tmp_x_anchor + diff_b_a, y + diff_b_a,
-                        fill=COLOUR_BACKGROUND,
-                        outline=COLOUR_BLACK,
-                        activeoutline="#ff0000",
+                        fill=here.Colour.BACKGROUND,
+                        outline=here.Colour.BLACK,
+                        activeoutline="#ff0000",  # TODO remove colour strings
                         activewidth=3
                     ),
                     "<Button-1>",
@@ -110,7 +111,7 @@ class Main_menu(Context.Context):
             return diff_b_a
 
         def draw_footer(
-            y: int
+                y: int
         ) -> int:
             qm_box_a = round(gui.BOX_A * (2 / 3))
 
@@ -119,7 +120,7 @@ class Main_menu(Context.Context):
                     gui.Margins.LEFT, y,
                     gui.Margins.LEFT + qm_box_a, y + qm_box_a,
                     activeoutline="red",
-                    fill=COLOUR_BACKGROUND
+                    fill=here.Colour.BACKGROUND
                 ),
                 "<Button-1>",
                 self.q_to_help
@@ -128,7 +129,7 @@ class Main_menu(Context.Context):
             self.canvas.create_text(
                 gui.Margins.LEFT + qm_box_a / 2, y + qm_box_a / 2,
                 fill="#484848",
-                font=(DEF_FONT, 22),
+                font=(here.FONT, 22),
                 state="disabled",
                 text="?"
             )
@@ -137,7 +138,7 @@ class Main_menu(Context.Context):
                 width - gui.Margins.RIGHT - gui.GAP_SIZE, height,
                 anchor="se",
                 fill="#484848",
-                font=(DEF_FONT, 15),
+                font=(here.FONT, 15),
                 state="disabled",
                 text="v" + SW_VERSION
             )
@@ -159,8 +160,8 @@ class Main_menu(Context.Context):
             raise ValueError("Content out of bounds (margins)")
 
     def set_diff_and_quit(
-        self,
-        difficulty: mSweeper.Difficulty
+            self,
+            difficulty: mSweeper.Difficulty
     ) -> None:
         self.session.set_difficulty(difficulty)
         self.quit_context_for(here.Context.MINESWEEPER)

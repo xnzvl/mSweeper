@@ -134,7 +134,7 @@ def draw_mine(
 
     canvas.create_polygon(
         adapt_coords(n_x, n_y, side, gui.SHAPE[gui.Shape.MINE]),
-        fill=COLOUR_BLACK,
+        fill=Colour.BLACK,
         state="disabled"
     )
 
@@ -160,13 +160,13 @@ def draw_flag(
 
     canvas.create_polygon(
         adapt_coords(n_x, n_y, side, gui.SHAPE[gui.Shape.STAND]),
-        fill=COLOUR_BLACK,
+        fill=Colour.BLACK,
         state="disabled"
     )
 
     canvas.create_polygon(
         adapt_coords(n_x, n_y, side, gui.SHAPE[gui.Shape.FLAG]),
-        fill=COLOUR_FLAG if is_default_flag else COLOUR_BAD_FLAG,
+        fill=Colour.FLAG if is_default_flag else Colour.BAD_FLAG,
         state="disabled"
     )
 
@@ -183,7 +183,7 @@ def draw_trophy(
     for shape in [gui.Shape.TROPHY_BODY, gui.Shape.TROPHY_EARS]:
         canvas.create_polygon(
             adapt_coords(n_x, n_y, side, gui.SHAPE[shape]),
-            fill=COLOUR_BLACK,
+            fill=Colour.BLACK,
             state="disabled"
         )
 
@@ -207,7 +207,7 @@ def draw_menu_sign(
         canvas.create_rectangle(
             n_x + 3 * side + 1, n_y + (3 + i * 3) * side + 1,
             n_x + 10 * side, n_y + (4 + i * 3) * side,
-            fill=COLOUR_BLACK,
+            fill=Colour.BLACK,
             state="disabled"
         )
 
@@ -226,21 +226,21 @@ def draw_face(
         canvas.create_rectangle(
             n_x + i * side, n_y + 3 * side,
             n_x + (i + 2) * side, n_y + 6 * side,
-            fill=COLOUR_BLACK, state="disabled"
+            fill=Colour.BLACK, state="disabled"
         )
 
     if ms_state == ms.Minesweeper_state.PLAYING:
         canvas.create_rectangle(
             n_x + 2 * side, n_y + 8 * side,
             n_x + 11 * side, n_y + 10 * side,
-            fill=COLOUR_BLACK, state="disabled"
+            fill=Colour.BLACK, state="disabled"
         )
     else:
         canvas.create_polygon(
             adapt_coords(
                 n_x, n_y if ms_state == ms.Minesweeper_state.GAME_WON else n_y + 4 * side,
                 #    ^^ flip -> realign
-                side, SHAPE["smile"], flip_y=ms_state != ms.Minesweeper_state.GAME_WON
+                side, gui.SHAPE[gui.Shape.SMILE], flip_y=ms_state != ms.Minesweeper_state.GAME_WON
             ),
-            fill=COLOUR_BLACK, state="disabled"
+            fill=Colour.BLACK, state="disabled"
         )

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple
 import tkinter as tk
 
 from .Help import Help
@@ -37,6 +37,10 @@ class Context(Enum):
 
 class Font_size(Enum):
     DEFAULT = 28
+
+
+Position_t = Tuple[int, int]
+Click_t = Callable[[Position_t], None]
 
 
 WINDOW_PREFIXES = {

@@ -7,6 +7,7 @@ from .Highscores import Highscores
 from .Main_menu import Main_menu
 from .Minesweeper import Minesweeper
 
+from ... import gui
 from ... import minesweeper as ms
 
 
@@ -38,20 +39,11 @@ class Font_size_t(Enum):
     DEFAULT = 28
 
 
-class Shape_t(Enum):
-    MINE = "mine_shape"
-    FLAG = "flag_shape"
-    STAND = "stand_shape"
-    TROPHY_BODY = "trophy_body_shape"
-    TROPHY_EARS = "trophy_ears_shape"
-    SMILE = "smile_shape"
-
-
 WINDOW_PREFIXES = {
-    ms.Sweeper_state_t.UNINITIALIZED: "",
-    ms.Sweeper_state_t.PLAYING:       "Game in progress - ",
-    ms.Sweeper_state_t.GAME_LOST:     "Game lost - ",
-    ms.Sweeper_state_t.GAME_WON:      "Game won! - "
+    ms.Minesweeper_state.UNINITIALIZED: "",
+    ms.Minesweeper_state.PLAYING:       "Game in progress - ",
+    ms.Minesweeper_state.GAME_LOST:     "Game lost - ",
+    ms.Minesweeper_state.GAME_WON:      "Game won! - "
 }
 
 DISPOSABLE_FLAG = "disposable_flag"
@@ -59,20 +51,12 @@ DISPOSABLE_FLAG = "disposable_flag"
 FONT = "System"
 
 BUTTON_HEIGHT = 90
-CELL_SIZE = 40
-GAP_SIZE = 30
+
 
 ICON_PARTS = 13
 ICON_INDENT = 1  # from one side
-assert CELL_SIZE % ICON_PARTS == 1
+assert gui.CELL_SIZE % ICON_PARTS == 1
 
-DEFAULT_MARGIN = 25
-MARGINS: Dict[str, int] = {
-    "top":    DEFAULT_MARGIN,
-    "right":  DEFAULT_MARGIN,
-    "bottom": DEFAULT_MARGIN,
-    "left":   DEFAULT_MARGIN
-}
 
 DEFAULT_DICT_KEY = -1
 COLOUR_CELLS: Dict[ms.Cell_state_t, Dict[ms.Cell_value_t, Tuple[str, str]]] = {
@@ -100,49 +84,8 @@ COLOUR_CELLS: Dict[ms.Cell_state_t, Dict[ms.Cell_value_t, Tuple[str, str]]] = {
     }
 }
 
-SHAPE: Dict[Shape_t, List[int]] = {}
-TEMPLATE: Dict[Shape_t, Tuple[Tuple[int, int], List[int]]] = {
-    Shape_t.MINE:        ((6, 2), [1, 2, 3, -1, -1, 3, 2, 1, -2, 3, 1, -1, -3, 2, -1, -2, -3, 1, 1, -3, -2, -1, 2, -3, -1, 1, 3]),
-    Shape_t.FLAG:        ((4, 3), [1, 1, 3, -1, 1, 5, -1, 1, -3, -1, -1, -5]),
-    Shape_t.STAND:       ((3, 3), [3, -1, 1, 1, 3, 1, -3, 6, 1, 1, -3, -1, 1, -6, -3]),
-    Shape_t.TROPHY_BODY: ((4, 3), [5, 1, 1, 1, -1, 2, -1, 1, -1, 2, 2, 1, -5, -1, 2, -2, -1, -1, -1, -2, -1, -1, 1]),
-    Shape_t.TROPHY_EARS: ((2, 2), [2, 1, 5, -1, 2, 2, -1, -1, -7, 1, -1]),
-    Shape_t.SMILE:       ((2, 7), [2, 1, 5, -1, 2, 2, -2, 1, -5, -1, -2])
-}
-
 
 # UTILS
-
-def init_shapes() -> None:
-    def from_template(
-        template: List[int],
-        x: int,
-        y: int
-    ) -> List[int]:
-        even = True
-        shape = []
-
-        shape.append(x)
-        shape.append(y)
-
-        for coord in template:
-            x += coord if even else 0
-            y += coord if not even else 0
-
-            shape.append(x)
-            shape.append(y)
-
-            even = not even
-
-        return shape
-
-    global TEMPLATE
-
-    for shape, ((x0, y0), template) in TEMPLATE.items():
-        SHAPE[shape] = from_template(template, x0, y0)
-
-    del TEMPLATE
-
 
 def adapt_coords(
         x: int,
@@ -190,7 +133,7 @@ def draw_mine(
         if indent else (x, y)
 
     canvas.create_polygon(
-        adapt_coords(n_x, n_y, side, SHAPE["mine"]),
+        adapt_coords(n_x, n_y, side, gui.SHAPE[gui.Shape.MINE]),
         fill=COLOUR_BLACK,
         state="disabled"
     )
@@ -216,13 +159,13 @@ def draw_flag(
         if indent else (x, y)
 
     canvas.create_polygon(
-        adapt_coords(n_x, n_y, side, SHAPE["stand"]),
+        adapt_coords(n_x, n_y, side, gui.SHAPE[gui.Shape.STAND]),
         fill=COLOUR_BLACK,
         state="disabled"
     )
 
     canvas.create_polygon(
-        adapt_coords(n_x, n_y, side, SHAPE["flag"]),
+        adapt_coords(n_x, n_y, side, gui.SHAPE[gui.Shape.FLAG]),
         fill=COLOUR_FLAG if is_default_flag else COLOUR_BAD_FLAG,
         state="disabled"
     )
@@ -237,9 +180,9 @@ def draw_trophy(
     side = whole_side // (ICON_PARTS + 2 * ICON_INDENT)
     n_x, n_y = x + side * ICON_INDENT, y + side * ICON_INDENT
 
-    for shape in ["trophy_body", "trophy_ears"]:
+    for shape in [gui.Shape.TROPHY_BODY, gui.Shape.TROPHY_EARS]:
         canvas.create_polygon(
-            adapt_coords(n_x, n_y, side, SHAPE[shape]),
+            adapt_coords(n_x, n_y, side, gui.SHAPE[shape]),
             fill=COLOUR_BLACK,
             state="disabled"
         )
@@ -274,7 +217,7 @@ def draw_face(
         x: int,
         y: int,
         whole_side: int,
-        ms_state: ms.Sweeper_state_t
+        ms_state: ms.Minesweeper_state
 ) -> None:
     side = whole_side // (ICON_PARTS + 2 * ICON_INDENT)
     n_x, n_y = x + side * ICON_INDENT, y + side * ICON_INDENT
@@ -286,7 +229,7 @@ def draw_face(
             fill=COLOUR_BLACK, state="disabled"
         )
 
-    if ms_state == ms.PLAYING:
+    if ms_state == ms.Minesweeper_state.PLAYING:
         canvas.create_rectangle(
             n_x + 2 * side, n_y + 8 * side,
             n_x + 11 * side, n_y + 10 * side,
@@ -295,9 +238,9 @@ def draw_face(
     else:
         canvas.create_polygon(
             adapt_coords(
-                n_x, n_y if ms_state == ms.GAME_WON else n_y + 4 * side,
+                n_x, n_y if ms_state == ms.Minesweeper_state.GAME_WON else n_y + 4 * side,
                 #    ^^ flip -> realign
-                side, SHAPE["smile"], flip_y=ms_state != ms.GAME_WON
+                side, SHAPE["smile"], flip_y=ms_state != ms.Minesweeper_state.GAME_WON
             ),
             fill=COLOUR_BLACK, state="disabled"
         )

@@ -18,7 +18,7 @@ UNKNOWN = 0b1110
 COVERED, FLAG, SHOWN = 0b11_0000, 0b10_0000, 0b01_0000
 
 
-class Sweeper_state_t(Enum):
+class Minesweeper_state(Enum):
     UNINITIALIZED = "UNINITIALIZED"
     PLAYING = "PLAYING"
     GAME_LOST = "GAME_LOST"

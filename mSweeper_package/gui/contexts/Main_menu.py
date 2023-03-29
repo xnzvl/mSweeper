@@ -76,7 +76,7 @@ class Main_menu(Context.Context):
 
             e = "=="
 
-            for i, diff in enumerate(mSweeper.Difficulty_t):
+            for i, diff in enumerate(mSweeper.Difficulty):
                 tmp_x_anchor = MARGINS["left"] + diff_b_a * i + GAP_SIZE * i
                 diff_dict = main.DIFFICULTY_DICT[diff]
 
@@ -159,7 +159,7 @@ class Main_menu(Context.Context):
 
     def set_diff_and_quit(
         self,
-        difficulty: mSweeper.Difficulty_t
+        difficulty: mSweeper.Difficulty
     ) -> None:
         self.session.set_difficulty(difficulty)
         self.quit_context_for(here.Context_t.MINESWEEPER)

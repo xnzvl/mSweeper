@@ -22,9 +22,9 @@ class C_highscores(Context.Context):
         self.subheader_h = 60
         self.rows_gap = 5
 
-        self.row_y_anchor = MARGINS["top"] + gui.BOX_A + gui.GAP_SIZE + self.subheader_h + gui.GAP_SIZE // 2 - self.rows_gap
+        self.row_y_anchor = gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h + gui.GAP_SIZE // 2 - self.rows_gap
         self.row_w = self.width - self.gui_root.hor_margin
-        self.row_h = (self.height - self.row_y_anchor - MARGINS["bottom"]) // 10
+        self.row_h = (self.height - self.row_y_anchor - gui.Margins.BOTTOM) // 10
 
         self.init_draw()
         self.change_shown_diff(mSweeper.Difficulty.MEDIUM)
@@ -63,7 +63,7 @@ class C_highscores(Context.Context):
             text(
                 row,
                 time_str,
-                MARGINS["left"] + 4 * gui.GAP_SIZE
+                gui.Margins.LEFT + 4 * gui.GAP_SIZE
             )
 
         def draw_nick(
@@ -73,7 +73,7 @@ class C_highscores(Context.Context):
             text(
                 row,
                 nick if nick is not None else "< BLANK >",
-                MARGINS["left"] + gui.GAP_SIZE + 250
+                gui.Margins.LEFT + gui.GAP_SIZE + 250
             )
 
         def draw_date(
@@ -83,7 +83,7 @@ class C_highscores(Context.Context):
             text(
                 row,
                 date if date is not None else "####-##-##",
-                self.width - MARGINS["right"] - 2 * gui.GAP_SIZE,
+                self.width - gui.Margins.RIGHT - 2 * gui.GAP_SIZE,
                 "e"
             )
 
@@ -91,7 +91,7 @@ class C_highscores(Context.Context):
                 difficulty: mSweeper.Difficulty
         ) -> None:
             chop = self.diff_b // 4
-            x = MARGINS["left"] + gui.BOX_A + gui.GAP_SIZE + chop
+            x = gui.Margins.LEFT + gui.BOX_A + gui.GAP_SIZE + chop
 
             if difficulty == mSweeper.Difficulty.MEDIUM:
                 x += self.diff_b + gui.GAP_SIZE
@@ -99,8 +99,8 @@ class C_highscores(Context.Context):
                 x += 2 * (self.diff_b + gui.GAP_SIZE)
 
             self.canvas.create_rectangle(
-                x, MARGINS["top"] + gui.BOX_A,
-                x + self.diff_b - 2 * chop, MARGINS["top"] + gui.BOX_A - 5,
+                x, gui.Margins.TOP + gui.BOX_A,
+                x + self.diff_b - 2 * chop, gui.Margins.TOP + gui.BOX_A - 5,
                 fill="red",
                 tags=DISPOSABLE
             )
@@ -116,7 +116,7 @@ class C_highscores(Context.Context):
             text(
                 i,
                 f"{i + 1}.",
-                MARGINS["left"] + gui.GAP_SIZE
+                gui.Margins.LEFT + gui.GAP_SIZE
             )
 
             time, date, nick = (None, None, None) \
@@ -132,8 +132,8 @@ class C_highscores(Context.Context):
     ) -> None:
         self.canvas.tag_bind(
             self.canvas.create_rectangle(
-                self.width - gui.BOX_A - MARGINS["right"], MARGINS["top"],
-                self.width - MARGINS["right"], MARGINS["top"] + gui.BOX_A,
+                self.width - gui.BOX_A - gui.Margins.RIGHT, gui.Margins.TOP,
+                self.width - gui.Margins.RIGHT, gui.Margins.TOP + gui.BOX_A,
                 fill=COLOUR_BACKGROUND,
                 activeoutline="red",
                 activewidth=3
@@ -144,22 +144,22 @@ class C_highscores(Context.Context):
 
         draw_menu_sign(
             self.canvas,
-            self.width - gui.BOX_A - MARGINS["right"], MARGINS["top"],
+            self.width - gui.BOX_A - gui.Margins.RIGHT, gui.Margins.TOP,
             gui.BOX_A
         )
 
         self.canvas.create_rectangle(
-            MARGINS["right"], MARGINS["top"],
-            MARGINS["right"] + gui.BOX_A, MARGINS["top"] + gui.BOX_A
+            gui.Margins.RIGHT, gui.Margins.TOP,
+            gui.Margins.RIGHT + gui.BOX_A, gui.Margins.TOP + gui.BOX_A
         )
 
         draw_trophy(
             self.canvas,
-            MARGINS["left"], MARGINS["top"],
+            gui.Margins.LEFT, gui.Margins.TOP,
             gui.BOX_A
         )
 
-        x_anchor = MARGINS["left"] + gui.BOX_A + gui.GAP_SIZE
+        x_anchor = gui.Margins.LEFT + gui.BOX_A + gui.GAP_SIZE
 
         for i, diff_enum in enumerate(
             [mSweeper.Difficulty.EASY, mSweeper.Difficulty.MEDIUM, mSweeper.Difficulty.HARD]
@@ -167,9 +167,9 @@ class C_highscores(Context.Context):
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
                     x_anchor + i * (self.diff_b + gui.GAP_SIZE),
-                    MARGINS["top"],
+                    gui.Margins.TOP,
                     x_anchor + (i + 1) * self.diff_b + i * gui.GAP_SIZE,
-                    MARGINS["top"] + gui.BOX_A,
+                    gui.Margins.TOP + gui.BOX_A,
                     fill=COLOUR_BACKGROUND,
                     activeoutline="red",
                     activewidth=3
@@ -180,7 +180,7 @@ class C_highscores(Context.Context):
 
             self.canvas.create_text(
                 x_anchor + i * (self.diff_b + gui.GAP_SIZE) + self.diff_b // 2,
-                MARGINS["top"] + gui.BOX_A // 2,
+                gui.Margins.TOP + gui.BOX_A // 2,
                 fill="white",
                 font=(DEF_FONT, DEF_FONT_SIZE),
                 state="disabled",
@@ -188,15 +188,15 @@ class C_highscores(Context.Context):
             )
 
         self.canvas.create_rectangle(
-            MARGINS["left"],
-            MARGINS["top"] + gui.BOX_A + gui.GAP_SIZE,
-            self.width - MARGINS["right"],
-            MARGINS["top"] + gui.BOX_A + gui.GAP_SIZE + self.subheader_h
+            gui.Margins.LEFT,
+            gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE,
+            self.width - gui.Margins.RIGHT,
+            gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h
         )
 
         self.canvas.create_text(
-            MARGINS["left"] + gui.GAP_SIZE,
-            MARGINS["top"] + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
+            gui.Margins.LEFT + gui.GAP_SIZE,
+            gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
             font=(DEF_FONT, DEF_FONT_SIZE),
@@ -204,8 +204,8 @@ class C_highscores(Context.Context):
         )
 
         self.canvas.create_text(
-            MARGINS["left"] + 4 * gui.GAP_SIZE,
-            MARGINS["top"] + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
+            gui.Margins.LEFT + 4 * gui.GAP_SIZE,
+            gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
             font=(DEF_FONT, DEF_FONT_SIZE),
@@ -213,8 +213,8 @@ class C_highscores(Context.Context):
         )
 
         self.canvas.create_text(
-            MARGINS["left"] + gui.GAP_SIZE + 250,
-            MARGINS["top"] + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
+            gui.Margins.LEFT + gui.GAP_SIZE + 250,
+            gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
             font=(DEF_FONT, DEF_FONT_SIZE),
@@ -222,8 +222,8 @@ class C_highscores(Context.Context):
         )
 
         self.canvas.create_text(
-            self.width - MARGINS["right"] - 5 * gui.GAP_SIZE,
-            MARGINS["top"] + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
+            self.width - gui.Margins.RIGHT - 5 * gui.GAP_SIZE,
+            gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
             font=(DEF_FONT, DEF_FONT_SIZE),
@@ -232,9 +232,9 @@ class C_highscores(Context.Context):
 
         for i in range(10):
             self.canvas.create_rectangle(
-                MARGINS["left"],
+                gui.Margins.LEFT,
                 self.row_y_anchor + i * self.row_h + self.rows_gap,
-                MARGINS["left"] + self.row_w,
+                gui.Margins.LEFT + self.row_w,
                 self.row_y_anchor + (i + 1) * self.row_h,
                 activeoutline="red",
                 fill=COLOUR_BACKGROUND

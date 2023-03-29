@@ -29,17 +29,17 @@ class Context:
         self.canvas.pack()
 
         self.q_to_main_menu: Quit_context_lambda = \
-            lambda _: self.quit_context_for(contexts.Context_t.MAIN_MENU)
+            lambda _: self.quit_context_for(contexts.Context.MAIN_MENU)
         self.q_to_sweeper: Quit_context_lambda = \
-            lambda _: self.quit_context_for(contexts.Context_t.MINESWEEPER)
+            lambda _: self.quit_context_for(contexts.Context.MINESWEEPER)
         self.q_to_highscores: Quit_context_lambda = \
-            lambda _: self.quit_context_for(contexts.Context_t.HIGHSCORES)
+            lambda _: self.quit_context_for(contexts.Context.HIGHSCORES)
         self.q_to_help: Quit_context_lambda = \
-            lambda _: self.quit_context_for(contexts.Context_t.HELP)
+            lambda _: self.quit_context_for(contexts.Context.HELP)
 
     def quit_context_for(
         self,
-        new_context: contexts.Context_t
+        new_context: contexts.Context
     ) -> None:
         self.canvas.destroy()
         self.gui_core.change_context(new_context)

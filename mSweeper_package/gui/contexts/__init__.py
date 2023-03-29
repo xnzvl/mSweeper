@@ -11,7 +11,7 @@ from ... import gui
 from ... import minesweeper as ms
 
 
-class Colour_t(Enum):
+class Colour(Enum):
     BLACK = "#000000"
     RED = "#ff0839"
     WHITE = "#ffffff"
@@ -28,14 +28,14 @@ class Colour_t(Enum):
     ACTIVE_OUTLINE = "#ff0000"
 
 
-class Context_t(Enum):
+class Context(Enum):
     MAIN_MENU = "Main menu"
     MINESWEEPER = "Minesweeper"
     HIGHSCORES = "Highscore"
     HELP = "Help"
 
 
-class Font_size_t(Enum):
+class Font_size(Enum):
     DEFAULT = 28
 
 
@@ -70,7 +70,7 @@ COLOUR_CELLS: Dict[ms.Cell_state_t, Dict[ms.Cell_value_t, Tuple[str, str]]] = {
         6:       ("#a081db", "#ffffff"),
         7:       ("#8183db", "#ffffff"),
         8:       ("#595aa8", "#ffffff"),
-        ms.MINE: (Colour_t.RED, "#ffffff")
+        ms.MINE: (Colour.RED, "#ffffff")
     },
     ms.FLAG: {
         ms.MINE:          ("#a39676", "#ffffff"),
@@ -112,7 +112,7 @@ def adapt_coords(
 
 def get_colour(
         cell: ms.Cell_t
-) -> Tuple[Colour_t, Colour_t]:
+) -> Tuple[Colour, Colour]:
     state = ms.get_cell_state(cell)
     value = ms.get_cell_value(cell)
 

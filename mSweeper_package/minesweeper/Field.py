@@ -10,7 +10,7 @@ class Field:
     ) -> None:
         width, height = dimensions
 
-        self.field_pointer: List[here.Field_t] = []  # TODO
+        self.field_pointer: List[here.Field_t] = []  # TODO - implement
 
         self.inner: here.Field_t = [
             [here.COVERED for _ in range(width)] for _ in range(height)

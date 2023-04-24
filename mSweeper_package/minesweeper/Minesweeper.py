@@ -33,7 +33,7 @@ class Minesweeper:
         self._state = here.Minesweeper_state.UNINITIALIZED
 
         self._stopwatch = Stopwatch.Stopwatch()
-        self._time: Optional[Time_tuple_t] = None  # TODO
+        self._time: Optional[Stopwatch.Time_tuple_t] = None  # TODO
 
     def _in_proximity(
             self,
@@ -223,7 +223,7 @@ class Minesweeper:
 
     def get_time(
         self
-    ) -> Time_tuple_t:  # TODO
+    ) -> Stopwatch.Time_tuple_t:  # TODO
         if self._time is None:
             raise ValueError("time is not set")
         return self._time

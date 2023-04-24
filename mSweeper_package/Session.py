@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import mSweeper_package as here
 
@@ -8,7 +8,7 @@ import minesweeper as ms
 class Session:
     def __init__(
         self,
-        ai_player: Optional[u.mAI_player_t] = None  # TODO
+        ai_player: Optional[Any] = None  # TODO
     ) -> None:
         self.ai_player = ai_player
         self.waiting_for_win = True

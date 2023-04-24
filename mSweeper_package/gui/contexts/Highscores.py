@@ -1,29 +1,27 @@
 from typing import Optional
-import tkinter as tk
 
 from .. import contexts as here
 from .. import Context, Core
 
 from ... import gui
-from ... import minesweeper as ms
 from .... import mSweeper_package as mSweeper
 
 
 class C_highscores(Context.Context):
     def __init__(
             self,
-            gui_root: Core.Gui,
+            gui_core: Core.Gui,
             width: int,
             height: int
     ) -> None:
-        super().__init__(gui_root, width, height)
+        super().__init__(gui_core, width, height)
 
-        self.diff_b = (self.width - 4 * gui.GAP_SIZE - 2 * gui.BOX_A - self.gui_root.hor_margin) // 3
+        self.diff_b = (self.width - 4 * gui.GAP_SIZE - 2 * gui.BOX_A - self.gui_core.hor_margin) // 3
         self.subheader_h = 60
         self.rows_gap = 5
 
         self.row_y_anchor = gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h + gui.GAP_SIZE // 2 - self.rows_gap
-        self.row_w = self.width - self.gui_root.hor_margin
+        self.row_w = self.width - self.gui_core.hor_margin
         self.row_h = (self.height - self.row_y_anchor - gui.Margins.BOTTOM) // 10
 
         self.init_draw()
@@ -44,9 +42,9 @@ class C_highscores(Context.Context):
                 x, self.row_y_anchor + row * self.row_h + (self.row_h - self.rows_gap) * 0.5 + self.rows_gap,
                 anchor=anchor,
                 fill="white",
-                font=(DEF_FONT, record_font_size),
+                font=(here.Font_size.DEFAULT, record_font_size),
                 state="disabled",
-                tags=DISPOSABLE,
+                tags=here.DISPOSABLE_FLAG,
                 text=txt
             )
 
@@ -102,12 +100,12 @@ class C_highscores(Context.Context):
                 x, gui.Margins.TOP + gui.BOX_A,
                 x + self.diff_b - 2 * chop, gui.Margins.TOP + gui.BOX_A - 5,
                 fill="red",
-                tags=DISPOSABLE
+                tags=here.DISPOSABLE_FLAG
             )
 
         record_font_size = 16
 
-        self.canvas.delete(DISPOSABLE)
+        self.canvas.delete(here.DISPOSABLE_FLAG)
         diff_records = self.session.hs_manager.get_diff_scores(difficulty)
 
         mark_current(difficulty)
@@ -134,7 +132,7 @@ class C_highscores(Context.Context):
             self.canvas.create_rectangle(
                 self.width - gui.BOX_A - gui.Margins.RIGHT, gui.Margins.TOP,
                 self.width - gui.Margins.RIGHT, gui.Margins.TOP + gui.BOX_A,
-                fill=COLOUR_BACKGROUND,
+                fill=here.Colour.BACKGROUND,
                 activeoutline="red",
                 activewidth=3
             ),
@@ -142,7 +140,7 @@ class C_highscores(Context.Context):
             self.q_to_main_menu
         )
 
-        draw_menu_sign(
+        here.draw_menu_sign(
             self.canvas,
             self.width - gui.BOX_A - gui.Margins.RIGHT, gui.Margins.TOP,
             gui.BOX_A
@@ -153,7 +151,7 @@ class C_highscores(Context.Context):
             gui.Margins.RIGHT + gui.BOX_A, gui.Margins.TOP + gui.BOX_A
         )
 
-        draw_trophy(
+        here.draw_trophy(
             self.canvas,
             gui.Margins.LEFT, gui.Margins.TOP,
             gui.BOX_A
@@ -170,7 +168,7 @@ class C_highscores(Context.Context):
                     gui.Margins.TOP,
                     x_anchor + (i + 1) * self.diff_b + i * gui.GAP_SIZE,
                     gui.Margins.TOP + gui.BOX_A,
-                    fill=COLOUR_BACKGROUND,
+                    fill=here.Colour.BACKGROUND,
                     activeoutline="red",
                     activewidth=3
                 ),
@@ -182,7 +180,7 @@ class C_highscores(Context.Context):
                 x_anchor + i * (self.diff_b + gui.GAP_SIZE) + self.diff_b // 2,
                 gui.Margins.TOP + gui.BOX_A // 2,
                 fill="white",
-                font=(DEF_FONT, DEF_FONT_SIZE),
+                font=(here.FONT, here.Font_size.DEFAULT),
                 state="disabled",
                 text=str(diff_enum).split('.')[-1]
             )
@@ -199,7 +197,7 @@ class C_highscores(Context.Context):
             gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
-            font=(DEF_FONT, DEF_FONT_SIZE),
+            font=(here.FONT, here.Font_size.DEFAULT),
             text="#"
         )
 
@@ -208,7 +206,7 @@ class C_highscores(Context.Context):
             gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
-            font=(DEF_FONT, DEF_FONT_SIZE),
+            font=(here.FONT, here.Font_size.DEFAULT),
             text="Time"
         )
 
@@ -217,7 +215,7 @@ class C_highscores(Context.Context):
             gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
-            font=(DEF_FONT, DEF_FONT_SIZE),
+            font=(here.FONT, here.Font_size.DEFAULT),
             text="Nickname"
         )
 
@@ -226,7 +224,7 @@ class C_highscores(Context.Context):
             gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
-            font=(DEF_FONT, DEF_FONT_SIZE),
+            font=(here.FONT, here.Font_size.DEFAULT),
             text="Date"
         )
 
@@ -237,5 +235,5 @@ class C_highscores(Context.Context):
                 gui.Margins.LEFT + self.row_w,
                 self.row_y_anchor + (i + 1) * self.row_h,
                 activeoutline="red",
-                fill=COLOUR_BACKGROUND
+                fill=here.Colour.BACKGROUND
             )

@@ -42,9 +42,9 @@ TEMPLATE: Dict[Shape, Tuple[Tuple[int, int], List[int]]] = {
 
 def init_shapes() -> None:
     def from_template(
-        template: List[int],
-        x: int,
-        y: int
+            template: List[int],
+            x: int,
+            y: int
     ) -> List[int]:
         even = True
         shape = []

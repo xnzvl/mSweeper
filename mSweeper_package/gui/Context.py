@@ -11,10 +11,10 @@ Quit_context_lambda = Callable[[tk.Event], None]
 
 class Context:
     def __init__(
-        self,
-        gui_core: Core.Gui,
-        width: int,
-        height: int
+            self,
+            gui_core: Core.Gui,
+            width: int,
+            height: int
     ) -> None:
         self.root = gui_core.root
         self.gui_core = gui_core
@@ -38,8 +38,8 @@ class Context:
             lambda _: self.quit_context_for(contexts.Context.HELP)
 
     def quit_context_for(
-        self,
-        new_context: contexts.Context
+            self,
+            new_context: contexts.Context
     ) -> None:
         self.canvas.destroy()
         self.gui_core.change_context(new_context)

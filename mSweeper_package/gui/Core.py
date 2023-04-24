@@ -9,9 +9,9 @@ import mSweeper_package as mSweeper
 
 class Gui:
     def __init__(
-        self,
-        session: mSweeper.Session,
-        is_interactive: bool
+            self,
+            session: mSweeper.Session,
+            is_interactive: bool
     ) -> None:
         here.init_shapes()
 
@@ -34,8 +34,8 @@ class Gui:
         self.root.mainloop()
 
     def change_context(
-        self,
-        new_context: contexts.Context
+            self,
+            new_context: contexts.Context
     ) -> None:
         if new_context == contexts.Context.MAIN_MENU:
             contexts.Context_main_menu(

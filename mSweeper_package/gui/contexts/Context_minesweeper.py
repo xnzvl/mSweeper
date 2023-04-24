@@ -62,7 +62,7 @@ class Context_minesweeper(Context.Context):
             )
 
     def refresh(
-        self
+            self
     ) -> None:
         def draw_deets() -> None:
             width = effective_width - gui.GAP_SIZE - gui.BOX_A \
@@ -163,7 +163,7 @@ class Context_minesweeper(Context.Context):
                 self.draw_cell(cell, cx, cy)
 
     def reset(
-        self
+            self
     ) -> None:  # reset()/init()
         self.session.get_new_ms()
 
@@ -176,7 +176,7 @@ class Context_minesweeper(Context.Context):
         self.refresh()
 
     def bind_actions(
-        self
+            self
     ) -> None:
         self.canvas.bind_all("r", lambda _: self.reset())
 
@@ -191,9 +191,9 @@ class Context_minesweeper(Context.Context):
         )
 
     def get_position(
-        self,
-        x: int,
-        y: int
+            self,
+            x: int,
+            y: int
     ) -> Optional[here.Position_t]:
         x_pos = (x - gui.Margins.LEFT - 1) // gui.CELL_SIZE
         y_pos = (y - gui.Margins.TOP - gui.GAP_SIZE - gui.BOX_A - 1) // gui.CELL_SIZE
@@ -204,9 +204,9 @@ class Context_minesweeper(Context.Context):
             else None
 
     def click(
-        self,
-        click_fun: here.Click_t,
-        event: tk.Event  # type: ignore
+            self,
+            click_fun: here.Click_t,
+            event: tk.Event  # type: ignore
     ) -> None:
         position = self.get_position(event.x, event.y)
 

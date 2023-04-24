@@ -129,7 +129,7 @@ class Context_highscores(Context.Context):
             draw_date(i, date)
 
     def init_draw(
-        self
+            self
     ) -> None:
         self.canvas.tag_bind(
             self.canvas.create_rectangle(

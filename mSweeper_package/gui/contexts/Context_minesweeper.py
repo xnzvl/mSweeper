@@ -1,15 +1,19 @@
 from typing import Optional
 import tkinter as tk
 
-from .. import contexts as here
-from .. import Context, Core
+import contexts as here
+
+import Context
+import Core
 
 from ... import gui
 from ... import minesweeper as ms
-from .... import mSweeper_package as mSweeper
+
+import mSweeper_package as mSweeper
 
 
-class C_minesweeper(Context.Context):
+# TODO
+class Context_minesweeper(Context.Context):
     def __init__(
             self,
             gui_root: Core.Gui,
@@ -25,7 +29,7 @@ class C_minesweeper(Context.Context):
 
     def draw_cell(
             self,
-            cell: mSweeper.Cell_t,
+            cell: ms.Cell_t,
             x: int,
             y: int
     ) -> None:

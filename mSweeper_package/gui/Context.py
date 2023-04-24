@@ -2,7 +2,7 @@ from typing import Callable
 
 import tkinter as tk
 
-from . import contexts
+import contexts
 import Core
 
 
@@ -24,7 +24,7 @@ class Context:
 
         self.canvas = tk.Canvas(
             width=width - 2, height=height - 2,  # to fix symmetry
-            background=contexts.COLOUR_BACKGROUND
+            background=contexts.Colour.BACKGROUND
         )
         self.canvas.pack()
 

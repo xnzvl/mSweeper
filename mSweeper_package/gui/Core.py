@@ -1,15 +1,16 @@
 import tkinter as tk
 
-from .. import gui as here
+import gui as here
 
-from . import contexts
-from ... import mSweeper_package as mSweeper
+import contexts
+
+import mSweeper_package as mSweeper
 
 
 class Gui:
     def __init__(
         self,
-        session: main.Session,
+        session: mSweeper.Session,
         is_interactive: bool
     ) -> None:
         here.init_shapes()
@@ -25,7 +26,7 @@ class Gui:
         self.max_height = max_config["height"] * here.CELL_SIZE + self.ver_margin + here.GAP_SIZE + here.BOX_A
 
         self.root = tk.Tk()
-        self.root.title(SW_TITLE)
+        self.root.title(SW_TITLE)  # TODO
         self.root.resizable(False, False)
         self.root.bind_all("q", lambda _: self.root.destroy())
 
@@ -37,23 +38,23 @@ class Gui:
         new_context: contexts.Context
     ) -> None:
         if new_context == contexts.Context.MAIN_MENU:
-            contexts.Main_menu(
+            contexts.Context_main_menu(
                 self,
                 self.max_width,
                 self.max_height
             )
         elif new_context == contexts.Context.MINESWEEPER:
-            contexts.Minesweeper(
+            contexts.Context_minesweeper(
                 self,
                 self.session.deets["width"] * here.CELL_SIZE + self.hor_margin,
                 self.session.deets["height"] * here.CELL_SIZE + self.ver_margin + here.GAP_SIZE + here.BOX_A
             )
         elif new_context == contexts.Context.HIGHSCORES:
-            contexts.Highscores(
+            contexts.Context_highscores(
                 self,
                 self.max_width,
                 self.max_height
             )
         elif new_context == contexts.Context.HELP:
             assert False, "WIP"
-            C_help(self, 1, 1)  # TODO
+            contexts.Context_help(self, 1, 1)  # TODO

@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Dict
 
+from .Session import Session
+
 
 class Difficulty(Enum):
     EASY = "Easy"

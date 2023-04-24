@@ -1,13 +1,16 @@
 from typing import Optional
 
-from .. import contexts as here
-from .. import Context, Core
+import contexts as here
+
+import Context
+import Core
 
 from ... import gui
-from .... import mSweeper_package as mSweeper
+
+import mSweeper_package as mSweeper
 
 
-class C_highscores(Context.Context):
+class Context_highscores(Context.Context):
     def __init__(
             self,
             gui_core: Core.Gui,
@@ -50,7 +53,7 @@ class C_highscores(Context.Context):
 
         def draw_time(
                 row: int,
-                time: Optional[u.mTime_tuple_t]
+                time: Optional[u.mTime_tuple_t]  # TODO
         ) -> None:
             if time is not None:
                 h, m, s, _ = time

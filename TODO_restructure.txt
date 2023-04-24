@@ -1,3 +1,2 @@
-uncycle dependencies
-    - more arguments forwarding :/
-
+Context_minesweeper.py
+    - session and minesweeper should be done first

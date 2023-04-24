@@ -1,14 +1,17 @@
-from .. import contexts as here
+import contexts as here
 
-from .. import Context, Core
+import Context
+import Core
+
 from ... import gui
-from .... import mSweeper_package as mSweeper
+
+import mSweeper_package as mSweeper
 
 
-class Main_menu(Context.Context):
+class Context_main_menu(Context.Context):
     def __init__(
             self,
-            gui_root: Core.Gui,
+            gui_core: Core.Gui,
             width: int,
             height: int
     ) -> None:
@@ -21,7 +24,7 @@ class Main_menu(Context.Context):
                 anchor="sw",
                 fill=here.Colour.BLACK,
                 font=(here.FONT, 64),
-                text=SW_TITLE
+                text=SW_TITLE  # TODO
             )
             return 0
 
@@ -36,7 +39,7 @@ class Main_menu(Context.Context):
                     activewidth=3,
                     fill=here.Colour.BACKGROUND
                 ),
-                "<Button-1>",  # add RMB button consts
+                "<Button-1>",  # TODO add RMB button consts
                 self.q_to_highscores
             )
 
@@ -140,15 +143,15 @@ class Main_menu(Context.Context):
                 fill="#484848",
                 font=(here.FONT, 15),
                 state="disabled",
-                text="v" + SW_VERSION
+                text="v" + SW_VERSION  # TODO
             )
 
             return qm_box_a
 
-        super().__init__(gui_root, width, height)
+        super().__init__(gui_core, width, height)
 
-        header_b_width = (width - self.gui_root.hor_margin - gui.GAP_SIZE) // 2
-        diff_b_a = (width - self.gui_root.hor_margin - 2 * gui.GAP_SIZE) // 3
+        header_b_width = (width - self.gui_core.hor_margin - gui.GAP_SIZE) // 2
+        diff_b_a = (width - self.gui_core.hor_margin - 2 * gui.GAP_SIZE) // 3
 
         y_anchor = height - (3 * gui.GAP_SIZE + 2 * gui.BOX_A + diff_b_a)
         y_anchor += draw_title(y_anchor) + gui.GAP_SIZE

@@ -3,11 +3,11 @@ import tkinter as tk
 
 import contexts as here
 
+import gui
+import minesweeper as ms
+
 import Context
 import Core
-
-from ... import gui
-from ... import minesweeper as ms
 
 import mSweeper_package as mSweeper
 
@@ -67,7 +67,7 @@ class Context_minesweeper(Context.Context):
         def draw_deets() -> None:
             width = effective_width - gui.GAP_SIZE - gui.BOX_A \
                 if special_case else b_width
-            flag_str = f"{self.session.ms.flags:0>2d}" + (
+            flag_str = f"{self.session.ms.flags:0>2d}" + (  # TODO
                 f" / {self.session.ms.mines}" if not special_case else ""
             )  # TODO
 
@@ -149,7 +149,7 @@ class Context_minesweeper(Context.Context):
         b_width = (effective_width - 2 * gui.GAP_SIZE - gui.BOX_A) // 2
 
         self.canvas.delete(tk.ALL)  # TODO
-        self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)
+        self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)  # TODO
 
         draw_deets()
         draw_observer()
@@ -168,9 +168,9 @@ class Context_minesweeper(Context.Context):
         self.session.get_new_ms()
 
         assert self.session.ms is not None
-        self.ms_data: u.mMinesweeper_t = self.session.ms.get_data()
+        self.ms_data: u.mMinesweeper_t = self.session.ms.get_data()  # TODO
 
-        if self.gui_root.is_interactive:
+        if self.gui_root.is_interactive:  # TODO
             self.bind_actions()
 
         self.refresh()

@@ -24,7 +24,7 @@ class Context:
 
         self.canvas = tk.Canvas(
             width=width - 2, height=height - 2,  # to fix symmetry
-            background=contexts.Colour.BACKGROUND
+            background=contexts.Colour.BACKGROUND.value
         )
         self.canvas.pack()
 

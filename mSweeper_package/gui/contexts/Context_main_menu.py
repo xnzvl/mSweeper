@@ -1,9 +1,9 @@
 import contexts as here
 
+import gui
+
 import Context
 import Core
-
-from ... import gui
 
 import mSweeper_package as mSweeper
 

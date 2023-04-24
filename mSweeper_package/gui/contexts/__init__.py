@@ -2,13 +2,13 @@ from enum import Enum
 from typing import Callable, Dict, List, Tuple
 import tkinter as tk
 
+import gui
+import minesweeper as ms
+
 from .Context_help import Context_help
 from .Context_highscores import Context_highscores
 from .Context_main_menu import Context_main_menu
 from .Context_minesweeper import Context_minesweeper
-
-from ... import gui
-from ... import minesweeper as ms
 
 
 class Colour(Enum):

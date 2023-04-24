@@ -2,10 +2,11 @@ from typing import Optional
 
 import contexts as here
 
+import gui
+
 import Context
 import Core
-
-from ... import gui
+import Stopwatch
 
 import mSweeper_package as mSweeper
 
@@ -23,7 +24,8 @@ class Context_highscores(Context.Context):
         self.subheader_h = 60
         self.rows_gap = 5
 
-        self.row_y_anchor = gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h + gui.GAP_SIZE // 2 - self.rows_gap
+        self.row_y_anchor = gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h \
+            + gui.GAP_SIZE // 2 - self.rows_gap
         self.row_w = self.width - self.gui_core.hor_margin
         self.row_h = (self.height - self.row_y_anchor - gui.Margins.BOTTOM) // 10
 
@@ -53,10 +55,10 @@ class Context_highscores(Context.Context):
 
         def draw_time(
                 row: int,
-                time: Optional[u.mTime_tuple_t]  # TODO
+                inner_time: Optional[Stopwatch.Time_tuple_t]
         ) -> None:
-            if time is not None:
-                h, m, s, _ = time
+            if inner_time is not None:
+                h, m, s, _ = inner_time
                 time_str = "{:02d}:{:02d}:{:02d}".format(h, m, s)
             else:
                 time_str = "##:##:##"
@@ -69,34 +71,34 @@ class Context_highscores(Context.Context):
 
         def draw_nick(
                 row: int,
-                nick: Optional[str]
+                inner_nick: Optional[str]
         ) -> None:
             text(
                 row,
-                nick if nick is not None else "< BLANK >",
+                inner_nick if inner_nick is not None else "< BLANK >",
                 gui.Margins.LEFT + gui.GAP_SIZE + 250
             )
 
         def draw_date(
                 row: int,
-                date: Optional[str]
+                inner_date: Optional[str]
         ) -> None:
             text(
                 row,
-                date if date is not None else "####-##-##",
+                inner_date if inner_date is not None else "####-##-##",
                 self.width - gui.Margins.RIGHT - 2 * gui.GAP_SIZE,
                 "e"
             )
 
         def mark_current(
-                difficulty: mSweeper.Difficulty
+                inner_difficulty: mSweeper.Difficulty
         ) -> None:
             chop = self.diff_b // 4
             x = gui.Margins.LEFT + gui.BOX_A + gui.GAP_SIZE + chop
 
-            if difficulty == mSweeper.Difficulty.MEDIUM:
+            if inner_difficulty == mSweeper.Difficulty.MEDIUM:
                 x += self.diff_b + gui.GAP_SIZE
-            elif difficulty == mSweeper.Difficulty.HARD:
+            elif inner_difficulty == mSweeper.Difficulty.HARD:
                 x += 2 * (self.diff_b + gui.GAP_SIZE)
 
             self.canvas.create_rectangle(

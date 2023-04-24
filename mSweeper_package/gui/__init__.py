@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 
 DEFAULT_MARGIN = 25
@@ -10,6 +10,19 @@ class Margins(Enum):
     RIGHT = DEFAULT_MARGIN
     BOTTOM = DEFAULT_MARGIN
     LEFT = DEFAULT_MARGIN
+
+    def __add__(
+            self,
+            other: Any
+    ) -> int:
+        match type(other):
+            case int():
+                return self.value + other
+            case Margins():
+                assert isinstance(other, Margins)
+                return self.value + other.value
+
+        raise TypeError(f"unsupported operand type(s) for +: {type(self)} and {type(other)}")  # TODO testing
 
 
 class Shape(Enum):
@@ -42,26 +55,23 @@ TEMPLATE: Dict[Shape, Tuple[Tuple[int, int], List[int]]] = {
 
 def init_shapes() -> None:
     def from_template(
-            template: List[int],
+            inner_template: List[int],
             x: int,
             y: int
     ) -> List[int]:
         even = True
-        shape = []
+        inner_shape = [x, y]
 
-        shape.append(x)
-        shape.append(y)
-
-        for coord in template:
+        for coord in inner_template:
             x += coord if even else 0
             y += coord if not even else 0
 
-            shape.append(x)
-            shape.append(y)
+            inner_shape.append(x)
+            inner_shape.append(y)
 
             even = not even
 
-        return shape
+        return inner_shape
 
     global TEMPLATE
 

@@ -1,2 +1,5 @@
 Context_minesweeper.py
     - session and minesweeper should be done first
+
+Time_tuple_t is used a lot
+    - so there's a lot of TODOs because of that

@@ -1,9 +1,19 @@
 from enum import Enum
+from typing import List, Tuple
 
 
 Cell_t = int
+# 0bXX XXXX             (cell)
+#   ├┘ └──┴─ here.MINE-bits  (cell value)
+#   └─────── state-bits (cell state)
+
 Cell_value_t = int
 Cell_state_t = int
+
+Position_t = Tuple[int, int]
+Dimensions_t = Tuple[int, int]
+
+Field_t = List[List[Cell_t]]
 
 
 # Masks
@@ -26,12 +36,18 @@ class Minesweeper_state(Enum):
 
 
 def get_cell_value(
-    cell: Cell_value_t
+        cell: Cell_value_t
 ) -> int:
     return cell & MINES_MASK
 
 
 def get_cell_state(
-    cell: Cell_state_t
+        cell: Cell_state_t
 ) -> Cell_state_t:
     return cell & STATE_MASK
+
+
+def is_mine(
+        cell: Cell_t
+) -> bool:
+    return (cell & MINES_MASK) == MINE

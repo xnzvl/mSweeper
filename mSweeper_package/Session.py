@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 import mSweeper_package as here
 
-import minesweeper as ms
+from . import minesweeper as ms
 
 
 class Session:

@@ -1,13 +1,10 @@
-from typing import Callable, List, Optional
+from typing import List, Optional
 import random
 
 import minesweeper as here
 
 import Field
 import Stopwatch
-
-
-Click_t = Callable[[here.Position_t], None]
 
 
 class Minesweeper:
@@ -182,7 +179,7 @@ class Minesweeper:
     def _click_wrapper(
         self,
         position: here.Position_t,
-        button: Click_t
+        button: here.Click_t
     ) -> None:
         if not self._is_playable():
             return

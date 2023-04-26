@@ -1,6 +1,6 @@
 import os
 
-import data_management as here
+from .. import data_management as here
 
 from . import Verify
 

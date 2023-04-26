@@ -1,3 +1,9 @@
-import mSweeper_package.data_management.Writer
+import mSweeper_package as mSweeper
 
-mSweeper_package.data_management.Writer.a()
+
+def main() -> None:
+    mSweeper.Session()
+
+
+if __name__ == '__main__':
+    main()

@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Dict
 
+from .Session import Session
+
 
 DATA_FOLDER = "something/"  # + some file/directory?
 
@@ -28,6 +30,3 @@ DIFFICULTY_DICT: Dict[Difficulty, Dict[str, int]] = {
         "height": 16
     }
 }
-
-
-# from .Session import Session

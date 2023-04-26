@@ -1,5 +1,7 @@
 from enum import Enum
-from typing import List, Tuple
+from typing import Callable, List, Tuple
+
+from .Minesweeper import Minesweeper
 
 
 Cell_t = int
@@ -14,6 +16,8 @@ Position_t = Tuple[int, int]
 Dimensions_t = Tuple[int, int]
 
 Field_t = List[List[Cell_t]]
+
+Click_t = Callable[[Position_t], None]
 
 
 # Masks

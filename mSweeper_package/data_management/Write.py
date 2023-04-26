@@ -1,5 +1,7 @@
 import data_management as here
 
 
-class Writer:
+def write_score_book(
+        score_board: here.Score_book_t
+) -> None:
     pass

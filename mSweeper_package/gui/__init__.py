@@ -24,6 +24,25 @@ class Margins(Enum):
 
         raise TypeError(f"unsupported operand type(s) for +: {type(self)} and {type(other)}")  # TODO testing
 
+    def __sub__(
+            self,
+            other: Any
+    ) -> int:
+        match type(other):
+            case int():
+                return self.value - other
+            case Margins():
+                assert isinstance(other, Margins)
+                return self.value - other.value
+
+        raise TypeError(f"unsupported operand type(s) for +: {type(self)} and {type(other)}")  # TODO testing
+
+    def __rsub__(
+            self,
+            other: Any
+    ) -> int:
+        return - (self - other)
+
 
 class Shape(Enum):
     MINE = "mine_shape"

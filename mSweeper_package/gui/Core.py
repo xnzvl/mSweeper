@@ -1,8 +1,8 @@
 import tkinter as tk
 
-import gui as here
+from .. import gui as here
 
-import contexts
+from . import contexts
 
 import mSweeper_package as mSweeper
 
@@ -10,7 +10,7 @@ import mSweeper_package as mSweeper
 class Gui:
     def __init__(
             self,
-            session: mSweeper.Session,
+            session: mSweeper.Session.Session,
             is_interactive: bool
     ) -> None:
         here.init_shapes()
@@ -37,6 +37,8 @@ class Gui:
             self,
             new_context: contexts.Context
     ) -> None:
+        assert self.session.deets is not None
+
         if new_context == contexts.Context.MAIN_MENU:
             contexts.Context_main_menu(
                 self,

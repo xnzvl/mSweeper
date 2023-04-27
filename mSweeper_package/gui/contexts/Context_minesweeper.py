@@ -1,13 +1,13 @@
 from typing import Optional
 import tkinter as tk
 
-import contexts as here
+from .. import contexts as here
 
-import gui
-import minesweeper as ms
+from ... import gui
+from ... import minesweeper as ms
 
-import Context
-import Core
+from .. import Context
+from .. import Core
 
 import mSweeper_package as mSweeper
 
@@ -34,7 +34,7 @@ class Context_minesweeper(Context.Context):
             y: int
     ) -> None:
         state, value = ms.get_cell_state(cell), ms.get_cell_value(cell)
-        main_clr, active_clr = here.get_colour(state, value)
+        main_clr, active_clr = here.get_colours(state, value)
 
         self.canvas.create_rectangle(
             x, y, x + gui.CELL_SIZE, y + gui.CELL_SIZE,

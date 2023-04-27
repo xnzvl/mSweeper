@@ -1,6 +1,6 @@
 from typing import List
 
-import minesweeper as here
+from .. import minesweeper as here
 
 
 class Field:

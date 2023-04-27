@@ -1,8 +1,6 @@
 whole
-    - re-add relative imports :c
+    - fix imports :c (mypy)
 
 data_management subpackage
     - whole
-
-Context_minesweeper.py
-    - session and minesweeper should be done first
+    - DATA_FOLDER has to be implemented beforehand!

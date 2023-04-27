@@ -2,13 +2,19 @@ from enum import Enum
 from typing import Callable, Dict, List, Tuple
 import tkinter as tk
 
-import gui
-import minesweeper as ms
+from ... import gui
+from ... import minesweeper as ms
 
-from .Context_help import Context_help
-from .Context_highscores import Context_highscores
-from .Context_main_menu import Context_main_menu
-from .Context_minesweeper import Context_minesweeper
+from .Context_help import Context_help as C_Help
+from .Context_highscores import Context_highscores as C_Highscores
+from .Context_main_menu import Context_main_menu as C_Main_menu
+from .Context_minesweeper import Context_minesweeper as C_Minesweeper
+
+
+Context_help = C_Help
+Context_highscores = C_Highscores
+Context_main_menu = C_Main_menu
+Context_minesweeper = C_Minesweeper
 
 
 class Colour(Enum):
@@ -74,7 +80,7 @@ COLOUR_CELLS: Dict[ms.Cell_state_t, Dict[ms.Cell_value_t, Tuple[str, str]]] = {
         6:       ("#a081db", "#ffffff"),
         7:       ("#8183db", "#ffffff"),
         8:       ("#595aa8", "#ffffff"),
-        ms.MINE: (Colour.RED, "#ffffff")
+        ms.MINE: (Colour.RED.value, "#ffffff")
     },
     ms.FLAG: {
         ms.MINE:          ("#a39676", "#ffffff"),
@@ -114,9 +120,9 @@ def adapt_coords(
     return adapted_coords
 
 
-def get_colour(
+def get_colours(
         cell: ms.Cell_t
-) -> Tuple[Colour, Colour]:
+) -> Tuple[str, str]:
     state = ms.get_cell_state(cell)
     value = ms.get_cell_value(cell)
 
@@ -138,7 +144,7 @@ def draw_mine(
 
     canvas.create_polygon(
         adapt_coords(n_x, n_y, side, gui.SHAPE[gui.Shape.MINE]),
-        fill=Colour.BLACK,
+        fill=Colour.BLACK.value,
         state="disabled"
     )
 
@@ -164,13 +170,13 @@ def draw_flag(
 
     canvas.create_polygon(
         adapt_coords(n_x, n_y, side, gui.SHAPE[gui.Shape.STAND]),
-        fill=Colour.BLACK,
+        fill=Colour.BLACK.value,
         state="disabled"
     )
 
     canvas.create_polygon(
         adapt_coords(n_x, n_y, side, gui.SHAPE[gui.Shape.FLAG]),
-        fill=Colour.FLAG if is_default_flag else Colour.BAD_FLAG,
+        fill=(Colour.FLAG if is_default_flag else Colour.BAD_FLAG).value,
         state="disabled"
     )
 
@@ -187,7 +193,7 @@ def draw_trophy(
     for shape in [gui.Shape.TROPHY_BODY, gui.Shape.TROPHY_EARS]:
         canvas.create_polygon(
             adapt_coords(n_x, n_y, side, gui.SHAPE[shape]),
-            fill=Colour.BLACK,
+            fill=Colour.BLACK.value,
             state="disabled"
         )
 
@@ -211,7 +217,7 @@ def draw_menu_sign(
         canvas.create_rectangle(
             n_x + 3 * side + 1, n_y + (3 + i * 3) * side + 1,
             n_x + 10 * side, n_y + (4 + i * 3) * side,
-            fill=Colour.BLACK,
+            fill=Colour.BLACK.value,
             state="disabled"
         )
 
@@ -230,14 +236,14 @@ def draw_face(
         canvas.create_rectangle(
             n_x + i * side, n_y + 3 * side,
             n_x + (i + 2) * side, n_y + 6 * side,
-            fill=Colour.BLACK, state="disabled"
+            fill=Colour.BLACK.value, state="disabled"
         )
 
     if ms_state == ms.Minesweeper_state.PLAYING:
         canvas.create_rectangle(
             n_x + 2 * side, n_y + 8 * side,
             n_x + 11 * side, n_y + 10 * side,
-            fill=Colour.BLACK, state="disabled"
+            fill=Colour.BLACK.value, state="disabled"
         )
     else:
         canvas.create_polygon(
@@ -246,5 +252,5 @@ def draw_face(
                 #    ^^ flip -> realign
                 side, gui.SHAPE[gui.Shape.SMILE], flip_y=ms_state != ms.Minesweeper_state.GAME_WON
             ),
-            fill=Colour.BLACK, state="disabled"
+            fill=Colour.BLACK.value, state="disabled"
         )

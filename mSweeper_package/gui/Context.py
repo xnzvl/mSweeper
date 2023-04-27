@@ -2,8 +2,8 @@ from typing import Callable
 
 import tkinter as tk
 
-import contexts
-import Core
+from . import contexts
+from . import Core
 
 
 Quit_context_lambda = Callable[[tk.Event], None]

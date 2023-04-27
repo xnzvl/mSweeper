@@ -1,12 +1,12 @@
 from typing import Optional
 
-import contexts as here
+from .. import contexts as here
 
-import gui
+from ... import gui
 
-import Context
-import Core
-import Stopwatch
+from ... import Stopwatch
+from .. import Context
+from .. import Core
 
 import mSweeper_package as mSweeper
 
@@ -41,13 +41,13 @@ class Context_highscores(Context.Context):
                 row: int,
                 txt: str,
                 x: int,
-                anchor: str = "w"
+                inner_anchor: str = "w"
         ) -> None:
-            self.canvas.create_text(
-                x, self.row_y_anchor + row * self.row_h + (self.row_h - self.rows_gap) * 0.5 + self.rows_gap,
-                anchor=anchor,
+            self.canvas.create_text(  # type: ignore
+                x, self.row_y_anchor + row * self.row_h + (self.row_h - self.rows_gap) * 0.5 + self.rows_gap,  # ? TODO
+                anchor=inner_anchor,
                 fill="white",
-                font=(here.Font_size.DEFAULT, record_font_size),
+                font=(here.FONT, record_font_size),
                 state="disabled",
                 tags=here.DISPOSABLE_FLAG,
                 text=txt
@@ -111,7 +111,7 @@ class Context_highscores(Context.Context):
         record_font_size = 16
 
         self.canvas.delete(here.DISPOSABLE_FLAG)
-        diff_records = self.session.hs_manager.get_diff_scores(difficulty)
+        diff_records = self.session.hs_manager.get_diff_scores(difficulty)  # TODO
 
         mark_current(difficulty)
 
@@ -135,9 +135,9 @@ class Context_highscores(Context.Context):
     ) -> None:
         self.canvas.tag_bind(
             self.canvas.create_rectangle(
-                self.width - gui.BOX_A - gui.Margins.RIGHT, gui.Margins.TOP,
+                self.width - gui.BOX_A - gui.Margins.RIGHT, gui.Margins.TOP.value,
                 self.width - gui.Margins.RIGHT, gui.Margins.TOP + gui.BOX_A,
-                fill=here.Colour.BACKGROUND,
+                fill=here.Colour.BACKGROUND.value,
                 activeoutline="red",
                 activewidth=3
             ),
@@ -147,18 +147,18 @@ class Context_highscores(Context.Context):
 
         here.draw_menu_sign(
             self.canvas,
-            self.width - gui.BOX_A - gui.Margins.RIGHT, gui.Margins.TOP,
+            self.width - gui.BOX_A - gui.Margins.RIGHT, gui.Margins.TOP.value,
             gui.BOX_A
         )
 
         self.canvas.create_rectangle(
-            gui.Margins.RIGHT, gui.Margins.TOP,
+            gui.Margins.RIGHT.value, gui.Margins.TOP.value,
             gui.Margins.RIGHT + gui.BOX_A, gui.Margins.TOP + gui.BOX_A
         )
 
         here.draw_trophy(
             self.canvas,
-            gui.Margins.LEFT, gui.Margins.TOP,
+            gui.Margins.LEFT.value, gui.Margins.TOP.value,
             gui.BOX_A
         )
 
@@ -170,15 +170,15 @@ class Context_highscores(Context.Context):
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
                     x_anchor + i * (self.diff_b + gui.GAP_SIZE),
-                    gui.Margins.TOP,
+                    gui.Margins.TOP.value,
                     x_anchor + (i + 1) * self.diff_b + i * gui.GAP_SIZE,
                     gui.Margins.TOP + gui.BOX_A,
-                    fill=here.Colour.BACKGROUND,
+                    fill=here.Colour.BACKGROUND.value,
                     activeoutline="red",
                     activewidth=3
                 ),
                 "<Button-1>",
-                lambda _, d=diff_enum: self.change_shown_diff(d)
+                lambda _, d=diff_enum: self.change_shown_diff(d)  # type: ignore # TODO later
             )
 
             self.canvas.create_text(
@@ -191,7 +191,7 @@ class Context_highscores(Context.Context):
             )
 
         self.canvas.create_rectangle(
-            gui.Margins.LEFT,
+            gui.Margins.LEFT.value,
             gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE,
             self.width - gui.Margins.RIGHT,
             gui.Margins.TOP + gui.BOX_A + gui.GAP_SIZE + self.subheader_h
@@ -235,10 +235,10 @@ class Context_highscores(Context.Context):
 
         for i in range(10):
             self.canvas.create_rectangle(
-                gui.Margins.LEFT,
+                gui.Margins.LEFT.value,
                 self.row_y_anchor + i * self.row_h + self.rows_gap,
                 gui.Margins.LEFT + self.row_w,
                 self.row_y_anchor + (i + 1) * self.row_h,
                 activeoutline="red",
-                fill=here.Colour.BACKGROUND
+                fill=here.Colour.BACKGROUND.value
             )

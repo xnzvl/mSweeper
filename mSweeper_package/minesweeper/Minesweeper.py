@@ -1,10 +1,10 @@
 from typing import List, Optional
 import random
 
-import minesweeper as here
+from .. import minesweeper as here
 
-import Field
-import Stopwatch
+from . import Field
+from .. import Stopwatch
 
 
 class Minesweeper:
@@ -119,7 +119,7 @@ class Minesweeper:
             if self._to_uncover == 0:
                 self._set_ms_state(here.Minesweeper_state.GAME_WON)
 
-        if self._is_mine(self._field.get_inner_value(x, y)) and state == here.SHOWN:
+        if here.is_mine(self._field.get_inner_value(x, y)) and state == here.SHOWN:
             self._set_ms_state(here.Minesweeper_state.GAME_LOST)
 
     def _flood_reveal(

@@ -19,10 +19,10 @@ class Context_main_menu(Context.Context):
         def draw_title(
                 y: int
         ) -> int:
-            self.canvas.create_text(  # type: ignore  # TODO
-                gui.Margins.LEFT + gui.GAP_SIZE, y,
+            self.canvas.create_text(
+                gui.Margins.LEFT.value + gui.GAP_SIZE, y,
                 anchor="sw",
-                fill=here.Colour.BLACK,
+                fill=here.Colour.BLACK.value,
                 font=(here.FONT, 64),
                 text=SW_TITLE  # TODO
             )
@@ -33,8 +33,8 @@ class Context_main_menu(Context.Context):
         ) -> int:
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
-                    gui.Margins.LEFT + header_b_width + gui.GAP_SIZE, y,
-                    gui.Margins.LEFT + header_b_width * 2 + gui.GAP_SIZE, y + gui.BOX_A,
+                    gui.Margins.LEFT.value + header_b_width + gui.GAP_SIZE, y,
+                    gui.Margins.LEFT.value + header_b_width * 2 + gui.GAP_SIZE, y + gui.BOX_A,
                     activeoutline="red",
                     activewidth=3,
                     fill=here.Colour.BACKGROUND.value
@@ -45,12 +45,12 @@ class Context_main_menu(Context.Context):
 
             here.draw_trophy(
                 self.canvas,
-                gui.Margins.LEFT + header_b_width + gui.GAP_SIZE, y,
+                gui.Margins.LEFT.value + header_b_width + gui.GAP_SIZE, y,
                 gui.BOX_A
             )
 
             self.canvas.create_text(
-                gui.Margins.LEFT + header_b_width + gui.GAP_SIZE + gui.BOX_A,
+                gui.Margins.LEFT.value + header_b_width + gui.GAP_SIZE + gui.BOX_A,
                 y + gui.BOX_A // 2,
                 anchor="w",
                 fill=here.Colour.BLACK.value,
@@ -82,7 +82,7 @@ class Context_main_menu(Context.Context):
             e = "=="  # TODO
 
             for i, diff in enumerate(mSweeper.Difficulty):
-                tmp_x_anchor = gui.Margins.LEFT + diff_b_a * i + gui.GAP_SIZE * i
+                tmp_x_anchor = gui.Margins.LEFT.value + diff_b_a * i + gui.GAP_SIZE * i
                 diff_dict = mSweeper.DIFFICULTY_DICT[diff]
 
                 self.canvas.tag_bind(
@@ -121,7 +121,7 @@ class Context_main_menu(Context.Context):
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
                     gui.Margins.LEFT.value, y,
-                    gui.Margins.LEFT + qm_box_a, y + qm_box_a,
+                    gui.Margins.LEFT.value + qm_box_a, y + qm_box_a,
                     activeoutline="red",
                     fill=here.Colour.BACKGROUND.value
                 ),
@@ -130,7 +130,7 @@ class Context_main_menu(Context.Context):
             )
 
             self.canvas.create_text(
-                gui.Margins.LEFT + qm_box_a / 2, y + qm_box_a / 2,
+                gui.Margins.LEFT.value + qm_box_a / 2, y + qm_box_a / 2,
                 fill="#484848",
                 font=(here.FONT, 22),
                 state="disabled",
@@ -138,7 +138,7 @@ class Context_main_menu(Context.Context):
             )
 
             self.canvas.create_text(
-                width - gui.Margins.RIGHT - gui.GAP_SIZE, height,
+                width - gui.Margins.RIGHT.value - gui.GAP_SIZE, height,
                 anchor="se",
                 fill="#484848",
                 font=(here.FONT, 15),
@@ -159,7 +159,7 @@ class Context_main_menu(Context.Context):
         y_anchor += draw_diffs(y_anchor) + gui.GAP_SIZE
         y_anchor += draw_footer(y_anchor)
 
-        if y_anchor > height - gui.Margins.BOTTOM:
+        if y_anchor > height - gui.Margins.BOTTOM.value:
             raise ValueError("Content out of bounds (margins)")
 
     def set_diff_and_quit(

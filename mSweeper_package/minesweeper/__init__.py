@@ -1,7 +1,10 @@
 from enum import Enum
 from typing import Callable, List, Tuple
 
-from .Minesweeper import Minesweeper
+from .Minesweeper import Minesweeper as Minesweeper_alias
+
+
+Minesweeper = Minesweeper_alias
 
 
 Cell_t = int

@@ -18,8 +18,8 @@ class Gui:
         self.session = session
         self.is_interactive = is_interactive
 
-        self.hor_margin = here.Margins.LEFT + here.Margins.RIGHT
-        self.ver_margin = here.Margins.TOP + here.Margins.BOTTOM
+        self.hor_margin = here.Margins.LEFT.value + here.Margins.RIGHT.value
+        self.ver_margin = here.Margins.TOP.value + here.Margins.BOTTOM.value
 
         max_config = mSweeper.DIFFICULTY_DICT[mSweeper.Difficulty.HARD]
         self.max_width = max_config["width"] * here.CELL_SIZE + self.hor_margin

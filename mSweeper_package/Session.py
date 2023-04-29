@@ -60,6 +60,8 @@ class Session:
     def get_new_ms(
         self
     ) -> None:
+        assert self.deets is not None
+
         self.ms = ms.Minesweeper(
             (self.deets["width"], self.deets["height"]),
             self.deets["mines"]

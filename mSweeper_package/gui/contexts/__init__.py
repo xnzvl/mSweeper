@@ -5,16 +5,16 @@ import tkinter as tk
 from ... import gui
 from ... import minesweeper as ms
 
-from .Context_help import Context_help as C_Help
-from .Context_highscores import Context_highscores as C_Highscores
-from .Context_main_menu import Context_main_menu as C_Main_menu
-from .Context_minesweeper import Context_minesweeper as C_Minesweeper
+from .Context_help import Context_help as C_help_alias
+from .Context_highscores import Context_highscores as C_highscores_alias
+from .Context_main_menu import Context_main_menu as C_main_menu_alias
+from .Context_minesweeper import Context_minesweeper as C_minesweeper_alias
 
 
-Context_help = C_Help
-Context_highscores = C_Highscores
-Context_main_menu = C_Main_menu
-Context_minesweeper = C_Minesweeper
+Context_help = C_help_alias
+Context_highscores = C_highscores_alias
+Context_main_menu = C_main_menu_alias
+Context_minesweeper = C_minesweeper_alias
 
 
 class Colour(Enum):

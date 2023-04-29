@@ -12,7 +12,6 @@ from .. import Core
 import mSweeper_package as mSweeper
 
 
-# TODO
 class Context_minesweeper(Context.Context):
     def __init__(
             self,
@@ -73,14 +72,14 @@ class Context_minesweeper(Context.Context):
 
             self.canvas.create_rectangle(
                 gui.Margins.LEFT.value, gui.Margins.TOP.value,
-                gui.Margins.LEFT + width, gui.Margins.TOP + gui.BOX_A,
+                gui.Margins.LEFT.value + width, gui.Margins.TOP.value + gui.BOX_A,
                 fill=here.Colour.BACKGROUND.value,
                 activeoutline=here.Colour.RED.value
             )
 
             self.canvas.create_text(
-                gui.Margins.LEFT + gui.GAP_SIZE // 2 + gui.BOX_A,
-                gui.Margins.TOP + gui.BOX_A // 2,
+                gui.Margins.LEFT.value + gui.GAP_SIZE // 2 + gui.BOX_A,
+                gui.Margins.TOP.value + gui.BOX_A // 2,
                 anchor="w",
                 font=(here.FONT, here.Font_size.DEFAULT),
                 state="disabled",
@@ -97,10 +96,10 @@ class Context_minesweeper(Context.Context):
             if special_case:
                 return
 
-            x_anchor = gui.Margins.LEFT + gui.GAP_SIZE + b_width
+            x_anchor = gui.Margins.LEFT.value + gui.GAP_SIZE + b_width
             face = self.canvas.create_rectangle(
                 x_anchor, gui.Margins.TOP.value,
-                x_anchor + gui.BOX_A, gui.Margins.TOP + gui.BOX_A,
+                x_anchor + gui.BOX_A, gui.Margins.TOP.value + gui.BOX_A,
                 fill=here.Colour.BACKGROUND.value,
                 activeoutline=here.Colour.RED.value
             )
@@ -120,12 +119,12 @@ class Context_minesweeper(Context.Context):
 
         def draw_menu_button() -> None:
             menu_width = gui.BOX_A if special_case else b_width
-            x_anchor = self.width - gui.Margins.RIGHT - menu_width
+            x_anchor = self.width - gui.Margins.RIGHT.value - menu_width
 
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
                     x_anchor, gui.Margins.TOP.value,
-                    self.width - gui.Margins.RIGHT, gui.Margins.TOP + gui.BOX_A,
+                    self.width - gui.Margins.RIGHT.value, gui.Margins.TOP.value + gui.BOX_A,
                     fill=here.Colour.BACKGROUND.value,
                     activeoutline="red"
                 ),
@@ -134,7 +133,7 @@ class Context_minesweeper(Context.Context):
 
             if not special_case:
                 self.canvas.create_text(
-                    x_anchor + gui.BOX_A, gui.Margins.TOP + gui.BOX_A // 2,
+                    x_anchor + gui.BOX_A, gui.Margins.TOP.value + gui.BOX_A // 2,
                     anchor="w",
                     font=(here.FONT, here.Font_size.DEFAULT.value),
                     state="disabled",
@@ -195,8 +194,8 @@ class Context_minesweeper(Context.Context):
             x: int,
             y: int
     ) -> Optional[here.Position_t]:
-        x_pos = (x - gui.Margins.LEFT - 1) // gui.CELL_SIZE
-        y_pos = (y - gui.Margins.TOP - gui.GAP_SIZE - gui.BOX_A - 1) // gui.CELL_SIZE
+        x_pos = (x - gui.Margins.LEFT.value - 1) // gui.CELL_SIZE
+        y_pos = (y - gui.Margins.TOP.value - gui.GAP_SIZE - gui.BOX_A - 1) // gui.CELL_SIZE
 
         assert self.session.deets is not None
 

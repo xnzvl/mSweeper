@@ -19,7 +19,7 @@ class Context_main_menu(Context.Context):
         def draw_title(
                 y: int
         ) -> int:
-            self.canvas.create_text(
+            self.canvas.create_text(  # type: ignore  # TODO
                 gui.Margins.LEFT + gui.GAP_SIZE, y,
                 anchor="sw",
                 fill=here.Colour.BLACK,
@@ -37,7 +37,7 @@ class Context_main_menu(Context.Context):
                     gui.Margins.LEFT + header_b_width * 2 + gui.GAP_SIZE, y + gui.BOX_A,
                     activeoutline="red",
                     activewidth=3,
-                    fill=here.Colour.BACKGROUND
+                    fill=here.Colour.BACKGROUND.value
                 ),
                 "<Button-1>",  # TODO add RMB button consts
                 self.q_to_highscores
@@ -53,8 +53,8 @@ class Context_main_menu(Context.Context):
                 gui.Margins.LEFT + header_b_width + gui.GAP_SIZE + gui.BOX_A,
                 y + gui.BOX_A // 2,
                 anchor="w",
-                fill=here.Colour.BLACK,
-                font=(here.FONT, here.Font_size.DEFAULT),
+                fill=here.Colour.BLACK.value,
+                font=(here.FONT, here.Font_size.DEFAULT.value),
                 state="disabled",
                 text="Highscores"
             )
@@ -73,7 +73,7 @@ class Context_main_menu(Context.Context):
                 self.canvas.create_text(
                     x_anchor + diff_b_a // 2,
                     y + diff_b_a // 2 + y_delta,
-                    fill=here.Colour.BLACK,
+                    fill=here.Colour.BLACK.value,
                     font=(here.FONT, font_size),
                     state="disabled",
                     text=text
@@ -89,13 +89,13 @@ class Context_main_menu(Context.Context):
                     self.canvas.create_rectangle(
                         tmp_x_anchor, y,
                         tmp_x_anchor + diff_b_a, y + diff_b_a,
-                        fill=here.Colour.BACKGROUND,
-                        outline=here.Colour.BLACK,
+                        fill=here.Colour.BACKGROUND.value,
+                        outline=here.Colour.BLACK.value,
                         activeoutline="#ff0000",  # TODO remove colour strings
                         activewidth=3
                     ),
                     "<Button-1>",
-                    lambda _, d=diff: self.set_diff_and_quit(d)
+                    lambda _, d=diff: self.set_diff_and_quit(d)  # type: ignore # TODO lambda type
                 )
 
                 create_ctext(
@@ -120,10 +120,10 @@ class Context_main_menu(Context.Context):
 
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
-                    gui.Margins.LEFT, y,
+                    gui.Margins.LEFT.value, y,
                     gui.Margins.LEFT + qm_box_a, y + qm_box_a,
                     activeoutline="red",
-                    fill=here.Colour.BACKGROUND
+                    fill=here.Colour.BACKGROUND.value
                 ),
                 "<Button-1>",
                 self.q_to_help
@@ -150,8 +150,8 @@ class Context_main_menu(Context.Context):
 
         super().__init__(gui_core, width, height)
 
-        header_b_width = (width - self.gui_core.hor_margin - gui.GAP_SIZE) // 2
-        diff_b_a = (width - self.gui_core.hor_margin - 2 * gui.GAP_SIZE) // 3
+        header_b_width: int = (width - self.gui_core.hor_margin - gui.GAP_SIZE) // 2
+        diff_b_a: int = (width - self.gui_core.hor_margin - 2 * gui.GAP_SIZE) // 3
 
         y_anchor = height - (3 * gui.GAP_SIZE + 2 * gui.BOX_A + diff_b_a)
         y_anchor += draw_title(y_anchor) + gui.GAP_SIZE

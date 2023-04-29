@@ -33,8 +33,8 @@ class Context_minesweeper(Context.Context):
             x: int,
             y: int
     ) -> None:
+        main_clr, active_clr = here.get_colours(cell)
         state, value = ms.get_cell_state(cell), ms.get_cell_value(cell)
-        main_clr, active_clr = here.get_colours(state, value)
 
         self.canvas.create_rectangle(
             x, y, x + gui.CELL_SIZE, y + gui.CELL_SIZE,
@@ -72,10 +72,10 @@ class Context_minesweeper(Context.Context):
             )  # TODO
 
             self.canvas.create_rectangle(
-                gui.Margins.LEFT, gui.Margins.TOP,
+                gui.Margins.LEFT.value, gui.Margins.TOP.value,
                 gui.Margins.LEFT + width, gui.Margins.TOP + gui.BOX_A,
-                fill=here.Colour.BACKGROUND,
-                activeoutline=here.Colour.RED
+                fill=here.Colour.BACKGROUND.value,
+                activeoutline=here.Colour.RED.value
             )
 
             self.canvas.create_text(
@@ -89,7 +89,7 @@ class Context_minesweeper(Context.Context):
 
             here.draw_flag(
                 self.canvas,
-                gui.Margins.LEFT, gui.Margins.TOP, gui.BOX_A,
+                gui.Margins.LEFT.value, gui.Margins.TOP.value, gui.BOX_A,
                 True, True
             )
 
@@ -97,25 +97,25 @@ class Context_minesweeper(Context.Context):
             if special_case:
                 return
 
-            x_anchor = b_width + gui.Margins.LEFT + gui.GAP_SIZE
+            x_anchor = gui.Margins.LEFT + gui.GAP_SIZE + b_width
             face = self.canvas.create_rectangle(
-                x_anchor, gui.Margins.TOP,
+                x_anchor, gui.Margins.TOP.value,
                 x_anchor + gui.BOX_A, gui.Margins.TOP + gui.BOX_A,
-                fill=here.Colour.BACKGROUND,
-                activeoutline=here.Colour.RED
+                fill=here.Colour.BACKGROUND.value,
+                activeoutline=here.Colour.RED.value
             )
             self.canvas.tag_bind(face, "<Button-1>", lambda _: self.reset())
 
             if ms_state == ms.Minesweeper_state.UNINITIALIZED:
                 here.draw_mine(
-                    self.canvas, x_anchor, gui.Margins.TOP, gui.BOX_A, True
+                    self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A, True
                 )
             else:
                 if self.session.top_ten:
-                    here.draw_trophy(self.canvas, x_anchor, gui.Margins.TOP, gui.BOX_A)
+                    here.draw_trophy(self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A)
                 else:
                     here.draw_face(
-                        self.canvas, x_anchor, gui.Margins.TOP, gui.BOX_A, ms_state
+                        self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A, ms_state
                     )
 
         def draw_menu_button() -> None:
@@ -124,9 +124,9 @@ class Context_minesweeper(Context.Context):
 
             self.canvas.tag_bind(
                 self.canvas.create_rectangle(
-                    x_anchor, gui.Margins.TOP,
+                    x_anchor, gui.Margins.TOP.value,
                     self.width - gui.Margins.RIGHT, gui.Margins.TOP + gui.BOX_A,
-                    fill=here.Colour.BACKGROUND,
+                    fill=here.Colour.BACKGROUND.value,
                     activeoutline="red"
                 ),
                 "<Button-1>", self.q_to_main_menu
@@ -136,17 +136,17 @@ class Context_minesweeper(Context.Context):
                 self.canvas.create_text(
                     x_anchor + gui.BOX_A, gui.Margins.TOP + gui.BOX_A // 2,
                     anchor="w",
-                    font=(here.FONT, here.FONT_SIZE),
+                    font=(here.FONT, here.Font_size.DEFAULT.value),
                     state="disabled",
                     text="Menu"
                 )
 
-            here.draw_menu_sign(self.canvas, x_anchor, gui.Margins.TOP, gui.BOX_A)
+            here.draw_menu_sign(self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A)
 
-        ms_state = self.session.ms.get_state()
-        effective_width = self.width - self.gui_root.hor_margin
-        special_case = self.session.difficulty == mSweeper.Difficulty.EASY
-        b_width = (effective_width - 2 * gui.GAP_SIZE - gui.BOX_A) // 2
+        ms_state: ms.Minesweeper_state = self.session.ms.get_state()
+        effective_width: int = self.width - self.gui_core.hor_margin
+        special_case: bool = self.session.difficulty == mSweeper.Difficulty.EASY
+        b_width: int = (effective_width - 2 * gui.GAP_SIZE - gui.BOX_A) // 2
 
         self.canvas.delete(tk.ALL)  # TODO
         self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)  # TODO
@@ -157,8 +157,8 @@ class Context_minesweeper(Context.Context):
 
         for y, row in enumerate(self.ms_data):
             for x, cell in enumerate(row):
-                cx = x * gui.CELL_SIZE + gui.Margins.LEFT
-                cy = y * gui.CELL_SIZE + gui.Margins.TOP + gui.GAP_SIZE + gui.BOX_A
+                cx = x * gui.CELL_SIZE + gui.Margins.LEFT.value
+                cy = y * gui.CELL_SIZE + gui.Margins.TOP.value + gui.GAP_SIZE + gui.BOX_A
 
                 self.draw_cell(cell, cx, cy)
 
@@ -168,9 +168,9 @@ class Context_minesweeper(Context.Context):
         self.session.get_new_ms()
 
         assert self.session.ms is not None
-        self.ms_data: u.mMinesweeper_t = self.session.ms.get_data()  # TODO
+        self.ms_data: ms.Field_t = self.session.ms.get_data()  # TODO
 
-        if self.gui_root.is_interactive:  # TODO
+        if self.gui_core.is_interactive:  # TODO
             self.bind_actions()
 
         self.refresh()
@@ -197,6 +197,8 @@ class Context_minesweeper(Context.Context):
     ) -> Optional[here.Position_t]:
         x_pos = (x - gui.Margins.LEFT - 1) // gui.CELL_SIZE
         y_pos = (y - gui.Margins.TOP - gui.GAP_SIZE - gui.BOX_A - 1) // gui.CELL_SIZE
+
+        assert self.session.deets is not None
 
         return (x_pos, y_pos) \
             if 0 <= x_pos < self.session.deets["width"] \

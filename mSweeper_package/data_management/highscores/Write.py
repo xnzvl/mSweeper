@@ -21,10 +21,8 @@ def stringify_keys(
 
 
 def assert_dir() -> None:
-    if os.path.isdir(mSweeper.DATA_FOLDER):
-        return
-
-    os.mkdir(mSweeper.DATA_FOLDER)
+    if not os.path.isdir(mSweeper.DATA_FOLDER):
+        os.mkdir(mSweeper.DATA_FOLDER)
 
 
 def write_score_book(
@@ -32,10 +30,11 @@ def write_score_book(
 ) -> None:
     assert_dir()
 
-    json.dump(
-        stringify_keys(score_book),
-        open(here.SCORE_FILE, 'w'),
-        indent=4
-    )
+    with open(here.SCORE_FILE, 'w') as f:
+        json.dump(
+            stringify_keys(score_book),
+            f,
+            indent=4
+        )
 
-    Verify.sign_file(here.SCORE_FILE)
+    Verify.hash_file(here.SCORE_FILE)

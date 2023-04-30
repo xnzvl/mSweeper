@@ -1,6 +1,0 @@
-whole
-    - fix imports :c (mypy)
-
-data_management subpackage
-    - whole
-    - DATA_FOLDER has to be implemented beforehand!

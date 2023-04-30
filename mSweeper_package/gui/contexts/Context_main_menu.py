@@ -1,16 +1,16 @@
-from .. import contexts as here
-
-from ... import gui
-
-from .. import Context
-from .. import Core
+import mSweeper_package.gui.contexts as here
 
 import mSweeper_package as mSweeper
+import mSweeper_package.Details as Details
+import mSweeper_package.gui as gui
+import mSweeper_package.gui.Context as Context
+import mSweeper_package.gui.Core as Core
 
 
 class Context_main_menu(Context.Context):
     def __init__(
             self,
+            info_blob: Details.Info_blob,
             gui_core: Core.Gui,
             width: int,
             height: int
@@ -148,7 +148,7 @@ class Context_main_menu(Context.Context):
 
             return qm_box_a
 
-        super().__init__(gui_core, width, height)
+        super().__init__(info_blob, gui_core, width, height)
 
         header_b_width: int = (width - self.gui_core.hor_margin - gui.GAP_SIZE) // 2
         diff_b_a: int = (width - self.gui_core.hor_margin - 2 * gui.GAP_SIZE) // 3
@@ -166,5 +166,5 @@ class Context_main_menu(Context.Context):
             self,
             difficulty: mSweeper.Difficulty
     ) -> None:
-        self.session.set_difficulty(difficulty)
+        self.info_blob.set_difficulty(difficulty)
         self.quit_context_for(here.Context.MINESWEEPER)

@@ -1,10 +1,9 @@
 from typing import List, Optional, Tuple
 
-from .. import highscores as here
-
-from ... import Stopwatch
+import mSweeper_package.data_management.highscores as here
 
 import mSweeper_package as mSweeper
+import mSweeper_package.Stopwatch as Stopwatch
 
 
 class Highscore_manager:

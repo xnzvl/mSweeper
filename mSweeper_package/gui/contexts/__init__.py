@@ -2,19 +2,8 @@ from enum import Enum
 from typing import Callable, Dict, List, Tuple
 import tkinter as tk
 
-from ... import gui
-from ... import minesweeper as ms
-
-from .Context_help import Context_help as C_help_alias
-from .Context_highscores import Context_highscores as C_highscores_alias
-from .Context_main_menu import Context_main_menu as C_main_menu_alias
-from .Context_minesweeper import Context_minesweeper as C_minesweeper_alias
-
-
-Context_help = C_help_alias
-Context_highscores = C_highscores_alias
-Context_main_menu = C_main_menu_alias
-Context_minesweeper = C_minesweeper_alias
+import mSweeper_package.gui as gui
+import mSweeper_package.minesweeper as here
 
 
 class Colour(Enum):
@@ -50,10 +39,10 @@ Click_t = Callable[[Position_t], None]
 
 
 WINDOW_PREFIXES = {
-    ms.Minesweeper_state.UNINITIALIZED: "",
-    ms.Minesweeper_state.PLAYING:       "Game in progress - ",
-    ms.Minesweeper_state.GAME_LOST:     "Game lost - ",
-    ms.Minesweeper_state.GAME_WON:      "Game won! - "
+    here.Minesweeper_state.UNINITIALIZED: "",
+    here.Minesweeper_state.PLAYING:       "Game in progress - ",
+    here.Minesweeper_state.GAME_LOST:     "Game lost - ",
+    here.Minesweeper_state.GAME_WON:      "Game won! - "
 }
 
 DISPOSABLE_FLAG = "disposable_flag"
@@ -69,8 +58,8 @@ assert gui.CELL_SIZE % ICON_PARTS == 1
 
 
 DEFAULT_DICT_KEY = -1
-COLOUR_CELLS: Dict[ms.Cell_state_t, Dict[ms.Cell_value_t, Tuple[str, str]]] = {
-    ms.SHOWN: {
+COLOUR_CELLS: Dict[here.Cell_state_t, Dict[here.Cell_value_t, Tuple[str, str]]] = {
+    here.SHOWN: {
         0:       ("#faf3e1", "#ffffff"),
         1:       ("#b4db81", "#ffffff"),
         2:       ("#dbd281", "#ffffff"),
@@ -80,16 +69,16 @@ COLOUR_CELLS: Dict[ms.Cell_state_t, Dict[ms.Cell_value_t, Tuple[str, str]]] = {
         6:       ("#a081db", "#ffffff"),
         7:       ("#8183db", "#ffffff"),
         8:       ("#595aa8", "#ffffff"),
-        ms.MINE: (Colour.RED.value, "#ffffff")
+        here.MINE: (Colour.RED.value, "#ffffff")
     },
-    ms.FLAG: {
-        ms.MINE:          ("#a39676", "#ffffff"),
-        ms.UNKNOWN:       ("#a39676", "#ffffff"),
+    here.FLAG: {
+        here.MINE:          ("#a39676", "#ffffff"),
+        here.UNKNOWN:       ("#a39676", "#ffffff"),
         DEFAULT_DICT_KEY: ("#a67e6f", "#ffffff")
         # ^ misplaced flag ^
     },
-    ms.COVERED: {
-        ms.MINE:          ("#a39676", "#ffffff"),
+    here.COVERED: {
+        here.MINE:          ("#a39676", "#ffffff"),
         DEFAULT_DICT_KEY: ("#dbcead", "#ffffff")
     }
 }
@@ -121,10 +110,10 @@ def adapt_coords(
 
 
 def get_colours(
-        cell: ms.Cell_t
+        cell: here.Cell_t
 ) -> Tuple[str, str]:
-    state = ms.get_cell_state(cell)
-    value = ms.get_cell_value(cell)
+    state = here.get_cell_state(cell)
+    value = here.get_cell_value(cell)
 
     return COLOUR_CELLS[state].get(value, COLOUR_CELLS[state][DEFAULT_DICT_KEY])
 
@@ -227,7 +216,7 @@ def draw_face(
         x: int,
         y: int,
         whole_side: int,
-        ms_state: ms.Minesweeper_state
+        ms_state: here.Minesweeper_state
 ) -> None:
     side = whole_side // (ICON_PARTS + 2 * ICON_INDENT)
     n_x, n_y = x + side * ICON_INDENT, y + side * ICON_INDENT
@@ -239,7 +228,7 @@ def draw_face(
             fill=Colour.BLACK.value, state="disabled"
         )
 
-    if ms_state == ms.Minesweeper_state.PLAYING:
+    if ms_state == here.Minesweeper_state.PLAYING:
         canvas.create_rectangle(
             n_x + 2 * side, n_y + 8 * side,
             n_x + 11 * side, n_y + 10 * side,
@@ -248,9 +237,9 @@ def draw_face(
     else:
         canvas.create_polygon(
             adapt_coords(
-                n_x, n_y if ms_state == ms.Minesweeper_state.GAME_WON else n_y + 4 * side,
+                n_x, n_y if ms_state == here.Minesweeper_state.GAME_WON else n_y + 4 * side,
                 #    ^^ flip -> realign
-                side, gui.SHAPE[gui.Shape.SMILE], flip_y=ms_state != ms.Minesweeper_state.GAME_WON
+                side, gui.SHAPE[gui.Shape.SMILE], flip_y=ms_state != here.Minesweeper_state.GAME_WON
             ),
             fill=Colour.BLACK.value, state="disabled"
         )

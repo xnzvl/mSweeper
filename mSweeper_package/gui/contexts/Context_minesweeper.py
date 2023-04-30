@@ -1,28 +1,30 @@
 from typing import Optional
 import tkinter as tk
 
-from .. import contexts as here
-
-from ... import gui
-from ... import minesweeper as ms
-
-from .. import Context
-from .. import Core
+import mSweeper_package.gui.contexts as here
 
 import mSweeper_package as mSweeper
+import mSweeper_package.Details as Details
+import mSweeper_package.gui as gui
+import mSweeper_package.gui.Context as Context
+import mSweeper_package.gui.Core as Core
+import mSweeper_package.minesweeper as ms
+import mSweeper_package.minesweeper.Proxy as Proxy
 
 
 class Context_minesweeper(Context.Context):
     def __init__(
             self,
+            info_blob: Details.Info_blob,
             gui_root: Core.Gui,
             width: int,
             height: int
     ) -> None:
-        super().__init__(gui_root, width, height)
+        super().__init__(info_blob, gui_root, width, height)
 
         self.width = width
         self.height = height
+        self.ms_proxy = Proxy.Minesweeper_proxy(info_blob)
 
         self.reset()
 
@@ -45,8 +47,8 @@ class Context_minesweeper(Context.Context):
             here.draw_flag(
                 self.canvas, x, y, gui.CELL_SIZE,
                 value == ms.MINE
-                or self.session.ms_state == ms.Minesweeper_state.UNINITIALIZED
-                or self.session.ms_state == ms.Minesweeper_state.PLAYING
+                or self.info_blob.ms_state == ms.Minesweeper_state.UNINITIALIZED
+                or self.info_blob.ms_state == ms.Minesweeper_state.PLAYING
             )
         elif value == ms.MINE:
             here.draw_mine(self.canvas, x, y, gui.CELL_SIZE)
@@ -64,11 +66,9 @@ class Context_minesweeper(Context.Context):
             self
     ) -> None:
         def draw_deets() -> None:
-            assert self.session.ms is not None
-
             width = effective_width - gui.GAP_SIZE - gui.BOX_A if special_case else b_width
-            flag_str = f"{self.session.ms.flags:0>2d}" + (  # TODO
-                f" / {self.session.ms.mines}" if not special_case else ""
+            flag_str = f"{self.ms_proxy.ms.flags:0>2d}" + (  # TODO
+                f" / {self.ms_proxy.ms.mines}" if not special_case else ""
             )  # TODO
 
             self.canvas.create_rectangle(
@@ -111,7 +111,7 @@ class Context_minesweeper(Context.Context):
                     self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A, True
                 )
             else:
-                if self.session.ms_scored_top_ten:
+                if self.info_blob.ms_top_ten:
                     here.draw_trophy(self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A)
                 else:
                     here.draw_face(
@@ -143,11 +143,9 @@ class Context_minesweeper(Context.Context):
 
             here.draw_menu_sign(self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A)
 
-        assert self.session.ms is not None
-
-        ms_state: ms.Minesweeper_state = self.session.ms.get_state()
+        ms_state: ms.Minesweeper_state = self.ms_proxy.ms.get_state()
         effective_width: int = self.width - self.gui_core.hor_margin
-        special_case: bool = self.session.ms_difficulty == mSweeper.Difficulty.EASY
+        special_case: bool = self.info_blob.ms_difficulty == mSweeper.Difficulty.EASY
         b_width: int = (effective_width - 2 * gui.GAP_SIZE - gui.BOX_A) // 2
 
         self.canvas.delete(tk.ALL)  # TODO - delete disposable?
@@ -157,7 +155,7 @@ class Context_minesweeper(Context.Context):
         draw_observer()
         draw_menu_button()
 
-        for y, row in enumerate(self.ms_data):
+        for y, row in enumerate(self.ms_field):
             for x, cell in enumerate(row):
                 cx = x * gui.CELL_SIZE + gui.Margins.LEFT.value
                 cy = y * gui.CELL_SIZE + gui.Margins.TOP.value + gui.GAP_SIZE + gui.BOX_A
@@ -167,10 +165,10 @@ class Context_minesweeper(Context.Context):
     def reset(
             self
     ) -> None:  # reset()/init()
-        self.session.get_new_ms()
+        self.ms_proxy.new_minesweeper()
 
-        assert self.session.ms is not None
-        self.ms_data: ms.Field_t = self.session.ms.get_data()  # TODO
+        assert self.ms_proxy.ms is not None
+        self.ms_field: ms.Field_t = self.ms_proxy.ms.get_data()  # TODO
 
         if self.gui_core.is_interactive:  # TODO
             self.bind_actions()
@@ -184,12 +182,12 @@ class Context_minesweeper(Context.Context):
 
         self.canvas.bind(
             "<Button-1>",
-            lambda event: self.click(self.session.ms_lmb, event)
+            lambda event: self.click(self.ms_proxy.ms_lmb, event)
         )
 
         self.canvas.bind(
             "<Button-3>",
-            lambda event: self.click(self.session.ms_rmb, event)
+            lambda event: self.click(self.ms_proxy.ms_rmb, event)
         )
 
     def get_position(
@@ -200,11 +198,11 @@ class Context_minesweeper(Context.Context):
         x_pos = (x - gui.Margins.LEFT.value - 1) // gui.CELL_SIZE
         y_pos = (y - gui.Margins.TOP.value - gui.GAP_SIZE - gui.BOX_A - 1) // gui.CELL_SIZE
 
-        assert self.session.ms_deets is not None
+        assert self.info_blob.ms_config is not None
 
         return (x_pos, y_pos) \
-            if 0 <= x_pos < self.session.ms_deets["width"] \
-            and 0 <= y_pos < self.session.ms_deets["height"] \
+            if 0 <= x_pos < self.info_blob.ms_config["width"] \
+            and 0 <= y_pos < self.info_blob.ms_config["height"] \
             else None
 
     def click(

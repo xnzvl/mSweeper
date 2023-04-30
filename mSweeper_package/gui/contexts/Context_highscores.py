@@ -1,24 +1,24 @@
 from typing import Optional
 
-from .. import contexts as here
-
-from ... import gui
-
-from ... import Stopwatch
-from .. import Context
-from .. import Core
+import mSweeper_package.gui.contexts as here
 
 import mSweeper_package as mSweeper
+import mSweeper_package.Details as Details
+import mSweeper_package.gui as gui
+import mSweeper_package.Stopwatch as Stopwatch
+import mSweeper_package.gui.Context as Context
+import mSweeper_package.gui.Core as Core
 
 
 class Context_highscores(Context.Context):
     def __init__(
             self,
+            info_blob: Details.Info_blob,
             gui_core: Core.Gui,
             width: int,
             height: int
     ) -> None:
-        super().__init__(gui_core, width, height)
+        super().__init__(info_blob, gui_core, width, height)
 
         self.diff_b = (self.width - 4 * gui.GAP_SIZE - 2 * gui.BOX_A - self.gui_core.hor_margin) // 3
         self.subheader_h = 60
@@ -111,7 +111,7 @@ class Context_highscores(Context.Context):
         record_font_size = 16
 
         self.canvas.delete(here.DISPOSABLE_FLAG)
-        diff_records = self.session.hs_manager.get_diff_scores(difficulty)  # TODO
+        diff_records = self.info_blob.hs_manager.get_diff_scores(difficulty)  # TODO
 
         mark_current(difficulty)
 

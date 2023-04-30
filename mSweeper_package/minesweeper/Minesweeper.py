@@ -1,10 +1,10 @@
 from typing import List, Optional
 import random
 
-from .. import minesweeper as here
+import mSweeper_package.minesweeper as here
 
-from . import Field
-from .. import Stopwatch
+import mSweeper_package.Stopwatch as Stopwatch
+import mSweeper_package.minesweeper.Field as Field
 
 
 class Minesweeper:

@@ -1,4 +1,4 @@
-from .. import highscores as here
+import mSweeper_package.data_management.highscores as here
 
 
 def write_score_book(

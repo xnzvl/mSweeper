@@ -1,8 +1,7 @@
 from typing import Dict, List, Tuple
 
-from ... import Stopwatch
-
 import mSweeper_package as mSweeper
+import mSweeper_package.Stopwatch as Stopwatch
 
 
 Score_record_t = Tuple[Stopwatch.Time_tuple_t, str, str]  # time, date, nick

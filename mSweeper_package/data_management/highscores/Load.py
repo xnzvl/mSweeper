@@ -1,10 +1,9 @@
 import os
 
-from .. import highscores as here
+import mSweeper_package.data_management.highscores as here
 
-from .. import Verify
-
-from .... import mSweeper_package as mSweeper
+import mSweeper_package as mSweeper
+import mSweeper_package.data_management.Verify as Verify
 
 
 def default_score_book() -> here.Score_book_t:

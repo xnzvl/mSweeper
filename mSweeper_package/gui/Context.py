@@ -2,8 +2,9 @@ from typing import Callable
 
 import tkinter as tk
 
-from . import contexts
-from . import Core
+import mSweeper_package.Details as Details
+import mSweeper_package.gui.contexts as contexts
+import mSweeper_package.gui.Core as Core
 
 
 Quit_context_lambda = Callable[[tk.Event], None]
@@ -12,13 +13,14 @@ Quit_context_lambda = Callable[[tk.Event], None]
 class Context:
     def __init__(
             self,
+            info_blob: Details.Info_blob,
             gui_core: Core.Gui,
             width: int,
             height: int
     ) -> None:
         self.root = gui_core.root
         self.gui_core = gui_core
-        self.session = gui_core.session
+        self.info_blob = info_blob
         self.width = width
         self.height = height
 

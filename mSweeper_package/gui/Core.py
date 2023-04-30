@@ -1,21 +1,21 @@
 import tkinter as tk
 
-from .. import gui as here
-
-from . import contexts
+import mSweeper_package.gui as here
 
 import mSweeper_package as mSweeper
+import mSweeper_package.Details as Details
+import mSweeper_package.gui.contexts as contexts
 
 
 class Gui:
     def __init__(
             self,
-            session: mSweeper.Session.Session,
+            info_blob: Details.Info_blob,
             is_interactive: bool
     ) -> None:
         here.init_shapes()
 
-        self.session = session
+        self.info_blob = info_blob
         self.is_interactive = is_interactive
 
         self.hor_margin = here.Margins.LEFT.value + here.Margins.RIGHT.value
@@ -37,26 +37,34 @@ class Gui:
             self,
             new_context: contexts.Context
     ) -> None:
-        assert self.session.ms_deets is not None
-
         if new_context == contexts.Context.MAIN_MENU:
-            contexts.Context_main_menu(
+            import mSweeper_package.gui.contexts.Context_main_menu as C_main_menu
+            C_main_menu.Context_main_menu(
+                self.info_blob,
                 self,
                 self.max_width,
                 self.max_height
             )
+
         elif new_context == contexts.Context.MINESWEEPER:
-            contexts.Context_minesweeper(
+            import mSweeper_package.gui.contexts.Context_minesweeper as C_minesweeper
+            C_minesweeper.Context_minesweeper(
+                self.info_blob,
                 self,
-                self.session.ms_deets["width"] * here.CELL_SIZE + self.hor_margin,
-                self.session.ms_deets["height"] * here.CELL_SIZE + self.ver_margin + here.GAP_SIZE + here.BOX_A
+                self.info_blob.ms_config["width"] * here.CELL_SIZE + self.hor_margin,
+                self.info_blob.ms_config["height"] * here.CELL_SIZE + self.ver_margin + here.GAP_SIZE + here.BOX_A
             )
+
         elif new_context == contexts.Context.HIGHSCORES:
-            contexts.Context_highscores(
+            import mSweeper_package.gui.contexts.Context_highscores as C_highscores
+            C_highscores.Context_highscores(
+                self.info_blob,
                 self,
                 self.max_width,
                 self.max_height
             )
+
         elif new_context == contexts.Context.HELP:
+            import mSweeper_package.gui.contexts.Context_help as C_help
             assert False, "WIP"
-            contexts.Context_help(self, 1, 1)  # TODO
+            C_help.Context_help(self, 1, 1)  # TODO

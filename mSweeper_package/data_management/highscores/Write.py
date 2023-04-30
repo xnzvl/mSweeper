@@ -1,4 +1,4 @@
-import data_management as here
+from .. import highscores as here
 
 
 def write_score_book(

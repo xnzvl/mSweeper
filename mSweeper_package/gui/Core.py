@@ -37,7 +37,7 @@ class Gui:
             self,
             new_context: contexts.Context
     ) -> None:
-        assert self.session.deets is not None
+        assert self.session.ms_deets is not None
 
         if new_context == contexts.Context.MAIN_MENU:
             contexts.Context_main_menu(
@@ -48,8 +48,8 @@ class Gui:
         elif new_context == contexts.Context.MINESWEEPER:
             contexts.Context_minesweeper(
                 self,
-                self.session.deets["width"] * here.CELL_SIZE + self.hor_margin,
-                self.session.deets["height"] * here.CELL_SIZE + self.ver_margin + here.GAP_SIZE + here.BOX_A
+                self.session.ms_deets["width"] * here.CELL_SIZE + self.hor_margin,
+                self.session.ms_deets["height"] * here.CELL_SIZE + self.ver_margin + here.GAP_SIZE + here.BOX_A
             )
         elif new_context == contexts.Context.HIGHSCORES:
             contexts.Context_highscores(

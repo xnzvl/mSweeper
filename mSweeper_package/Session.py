@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 import mSweeper_package as here
 
 from . import minesweeper as ms
+from .data_management.highscores import Highscore_manager as Hs_manager
 from .gui import Core
 
 
@@ -13,11 +14,14 @@ class Session:
     ) -> None:
         self.ai_player = ai_player
 
-        self.waiting_for_win = True
-        self.ms_state = ms.Minesweeper_state.UNINITIALIZED
+        self.hs_manager = Hs_manager.Highscore_manager()
 
-        self.difficulty: Optional[here.Difficulty] = None
-        self.deets: Optional[Dict[str, int]] = None
+        self.ms_waiting_for_win = True
+        self.ms_scored_top_ten = False
+        self.ms: Optional[ms.Minesweeper] = None
+        self.ms_state = ms.Minesweeper_state.UNINITIALIZED
+        self.ms_difficulty: Optional[here.Difficulty] = None
+        self.ms_deets: Optional[Dict[str, int]] = None
 
         self.game_gui = Core.Gui(self, ai_player is None)
 
@@ -25,23 +29,22 @@ class Session:
         self,
         diff: here.Difficulty
     ) -> None:
-        self.difficulty = diff
-        self.deets = here.DIFFICULTY_DICT[diff]
+        self.ms_difficulty = diff
+        self.ms_deets = here.DIFFICULTY_DICT[diff]
 
-    # def victory_routine(
-    #     self
-    # ) -> None:
-    #     assert self.ms is not None
-    #     t = self.ms.get_time()
-    #     print("\nVICTORY!")
-    #     print("time:", t, "\n")
+    def victory_routine(
+        self
+    ) -> None:
+        assert self.ms is not None and self.ms_difficulty is not None
 
-    #     nick = self.cnfg["NICK"]
-    #     diff_str = self.cnfg["DEFAULT_DIFFICULTY"]
-    #     assert isinstance(nick, str) and isinstance(diff_str, str)
+        print("\nVICTORY!")
+        print("time:", self.ms.get_time(), "\n")
 
-    #     self.top_ten = self.hs_manager.score(t, nick, self.difficulty)
-    #     self.waiting_for_win = False
+        nick = "hardcoded"
+        x, y = self.hs_manager.score(self.ms.get_time(), nick, self.ms_difficulty)  # TODO
+        self.ms_scored_top_ten = x is not None or y is not None
+
+        self.ms_waiting_for_win = False
 
     def ms_click_wrapper(
         self,
@@ -51,32 +54,33 @@ class Session:
         click(position)
 
         assert self.ms is not None
-        if self.ms.get_state() == ms.Minesweeper_state.GAME_WON and self.waiting_for_win:
-            # self._victory_routine()
-            print("victory_routine()")
+        if self.ms.get_state() == ms.Minesweeper_state.GAME_WON and self.ms_waiting_for_win:
+            self.victory_routine()
 
     ################################################
 
     def get_new_ms(
         self
     ) -> None:
-        assert self.deets is not None
+        assert self.ms_deets is not None
 
         self.ms = ms.Minesweeper(
-            (self.deets["width"], self.deets["height"]),
-            self.deets["mines"]
+            (self.ms_deets["width"], self.ms_deets["height"]),
+            self.ms_deets["mines"]
         )
         self._current_ms_lmb = self.ms.lmb
         self._current_ms_rmb = self.ms.rmb
 
-        self.waiting_for_win = True
-        self.top_ten = False
+        self.ms_scored_top_ten = False
+        self.ms_waiting_for_win = True
         self.ms_state = ms.Minesweeper_state.UNINITIALIZED
 
     def ms_lmb(
         self,
         position: ms.Position_t
     ) -> None:
+        assert self.ms is not None
+
         self.ms_click_wrapper(self._current_ms_lmb, position)
         self.ms_state = self.ms.get_state()
 

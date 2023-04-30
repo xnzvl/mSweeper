@@ -64,8 +64,9 @@ class Context_minesweeper(Context.Context):
             self
     ) -> None:
         def draw_deets() -> None:
-            width = effective_width - gui.GAP_SIZE - gui.BOX_A \
-                if special_case else b_width
+            assert self.session.ms is not None
+
+            width = effective_width - gui.GAP_SIZE - gui.BOX_A if special_case else b_width
             flag_str = f"{self.session.ms.flags:0>2d}" + (  # TODO
                 f" / {self.session.ms.mines}" if not special_case else ""
             )  # TODO
@@ -110,7 +111,7 @@ class Context_minesweeper(Context.Context):
                     self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A, True
                 )
             else:
-                if self.session.top_ten:
+                if self.session.ms_scored_top_ten:
                     here.draw_trophy(self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A)
                 else:
                     here.draw_face(
@@ -142,9 +143,11 @@ class Context_minesweeper(Context.Context):
 
             here.draw_menu_sign(self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A)
 
+        assert self.session.ms is not None
+
         ms_state: ms.Minesweeper_state = self.session.ms.get_state()
         effective_width: int = self.width - self.gui_core.hor_margin
-        special_case: bool = self.session.difficulty == mSweeper.Difficulty.EASY
+        special_case: bool = self.session.ms_difficulty == mSweeper.Difficulty.EASY
         b_width: int = (effective_width - 2 * gui.GAP_SIZE - gui.BOX_A) // 2
 
         self.canvas.delete(tk.ALL)  # TODO - delete disposable?
@@ -197,11 +200,11 @@ class Context_minesweeper(Context.Context):
         x_pos = (x - gui.Margins.LEFT.value - 1) // gui.CELL_SIZE
         y_pos = (y - gui.Margins.TOP.value - gui.GAP_SIZE - gui.BOX_A - 1) // gui.CELL_SIZE
 
-        assert self.session.deets is not None
+        assert self.session.ms_deets is not None
 
         return (x_pos, y_pos) \
-            if 0 <= x_pos < self.session.deets["width"] \
-            and 0 <= y_pos < self.session.deets["height"] \
+            if 0 <= x_pos < self.session.ms_deets["width"] \
+            and 0 <= y_pos < self.session.ms_deets["height"] \
             else None
 
     def click(

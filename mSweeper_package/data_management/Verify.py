@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Set
 
 import hashlib
 import json
@@ -21,6 +21,7 @@ def load_hashes() -> Dict[str, str]:
     with open(here.HASH_FILE, 'r') as f:
         loaded = json.load(f)
 
+    assert isinstance(loaded, dict)
     return loaded
 
 

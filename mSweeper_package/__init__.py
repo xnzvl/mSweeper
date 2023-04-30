@@ -12,10 +12,10 @@ class Difficulty(Enum):
     HARD = "Hard"
 
 
-DATA_FOLDER = os.path.join(os.getcwd(), ".mSweeper")  # + some file/directory?
+DATA_FOLDER: str = os.path.join(os.getcwd(), ".mSweeper")  # + some file/directory?
 
 SOFTWARE_TITLE = ":: mSweeper _"
-SOFTWARE_VERSION = "v2.00"
+SOFTWARE_VERSION = "2.00"
 
 WINDOW_PREFIXES = {
     here.Minesweeper_state.UNINITIALIZED: "",

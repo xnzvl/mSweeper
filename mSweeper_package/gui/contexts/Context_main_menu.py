@@ -22,7 +22,7 @@ class Context_main_menu(Context.Context):
             self.canvas.create_text(
                 gui.Margins.LEFT.value + gui.GAP_SIZE, y,
                 anchor="sw",
-                fill=here.Colour.BLACK.value,
+                fill=here.Colour.WHITE.value,
                 font=(here.FONT, 64),
                 text=mSweeper.SOFTWARE_TITLE
             )
@@ -53,7 +53,7 @@ class Context_main_menu(Context.Context):
                 gui.Margins.LEFT.value + header_b_width + gui.GAP_SIZE + gui.BOX_A,
                 y + gui.BOX_A // 2,
                 anchor="w",
-                fill=here.Colour.BLACK.value,
+                fill=here.Colour.WHITE.value,
                 font=(here.FONT, here.Font_size.DEFAULT.value),
                 state="disabled",
                 text="Highscores"
@@ -73,7 +73,7 @@ class Context_main_menu(Context.Context):
                 self.canvas.create_text(
                     x_anchor + diff_b_a // 2,
                     y + diff_b_a // 2 + y_delta,
-                    fill=here.Colour.BLACK.value,
+                    fill=here.Colour.WHITE.value,
                     font=(here.FONT, font_size),
                     state="disabled",
                     text=text

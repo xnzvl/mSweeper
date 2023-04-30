@@ -37,11 +37,13 @@ class Minesweeper_proxy:
         print("\nVICTORY!")
         print("time:", self.ms.get_time(), "\n")
 
-        nick = "hardcoded"
-        x, y = self.info_blob.hs_manager.score(self.ms.get_time(), nick, self.info_blob.ms_difficulty)
-        self.ms_scored_top_ten = x is not None or y is not None
+        nick = "Zubychi"  # TODO it's hardcoded ._.
 
-        self.ms_waiting_for_win = False
+        self.ms_scored_top_ten = self.info_blob.hs_manager.score(
+            self.ms.get_time(), nick, self.info_blob.ms_difficulty
+        )
+
+        self.info_blob.ms_win_waiting = False
 
     def ms_click_wrapper(
         self,
@@ -51,7 +53,7 @@ class Minesweeper_proxy:
         click(position)
 
         assert self.ms is not None
-        if self.ms.get_state() == ms.Minesweeper_state.GAME_WON and self.ms_waiting_for_win:
+        if self.ms.get_state() == ms.Minesweeper_state.GAME_WON and self.info_blob.ms_win_waiting:
             self.victory_routine()
 
     def ms_lmb(

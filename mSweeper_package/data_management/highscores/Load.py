@@ -32,7 +32,12 @@ def enumerate_dict(
     enum_dict: here.Score_book_t = dict()
 
     for diff, scores in str_dict.items():
-        enum_dict[map_to_enum_diff(diff)] = scores
+        diff_enum = map_to_enum_diff(diff)
+        enum_dict[diff_enum] = []
+
+        for score in scores:
+            time, date, nick = score
+            enum_dict[diff_enum].append((tuple(time), date, nick))
 
     return enum_dict
 

@@ -147,8 +147,8 @@ class Context_minesweeper(Context.Context):
         special_case: bool = self.session.difficulty == mSweeper.Difficulty.EASY
         b_width: int = (effective_width - 2 * gui.GAP_SIZE - gui.BOX_A) // 2
 
-        self.canvas.delete(tk.ALL)  # TODO
-        self.root.title(WINDOW_PREFIXES[ms_state] + SW_TITLE)  # TODO
+        self.canvas.delete(tk.ALL)  # TODO - delete disposable?
+        self.root.title(mSweeper.WINDOW_PREFIXES[ms_state] + mSweeper.SOFTWARE_TITLE)
 
         draw_deets()
         draw_observer()

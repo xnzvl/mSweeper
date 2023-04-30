@@ -2,15 +2,26 @@ from enum import Enum
 from typing import Dict
 
 from . import Session
-
-
-DATA_FOLDER = "something/"  # + some file/directory?
+from . import minesweeper as ms
 
 
 class Difficulty(Enum):
     EASY = "Easy"
     MEDIUM = "Medium"
     HARD = "Hard"
+
+
+DATA_FOLDER = "something/"  # + some file/directory?
+
+SOFTWARE_TITLE = ":: mSweeper _"
+SOFTWARE_VERSION = "??"
+
+WINDOW_PREFIXES = {
+    ms.Minesweeper_state.UNINITIALIZED: "",
+    ms.Minesweeper_state.PLAYING:       "Game in progress - ",
+    ms.Minesweeper_state.GAME_LOST:     "Game lost - ",
+    ms.Minesweeper_state.GAME_WON:      "Game won! - "
+}
 
 
 DIFFICULTY_DICT: Dict[Difficulty, Dict[str, int]] = {

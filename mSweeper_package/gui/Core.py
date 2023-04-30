@@ -26,7 +26,7 @@ class Gui:
         self.max_height = max_config["height"] * here.CELL_SIZE + self.ver_margin + here.GAP_SIZE + here.BOX_A
 
         self.root = tk.Tk()
-        self.root.title(SW_TITLE)  # TODO
+        self.root.title(mSweeper.SOFTWARE_TITLE)
         self.root.resizable(False, False)
         self.root.bind_all("q", lambda _: self.root.destroy())
 

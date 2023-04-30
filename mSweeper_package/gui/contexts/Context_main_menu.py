@@ -24,7 +24,7 @@ class Context_main_menu(Context.Context):
                 anchor="sw",
                 fill=here.Colour.BLACK.value,
                 font=(here.FONT, 64),
-                text=SW_TITLE  # TODO
+                text=mSweeper.SOFTWARE_TITLE
             )
             return 0
 
@@ -143,7 +143,7 @@ class Context_main_menu(Context.Context):
                 fill="#484848",
                 font=(here.FONT, 15),
                 state="disabled",
-                text="v" + SW_VERSION  # TODO
+                text="v" + mSweeper.SOFTWARE_VERSION
             )
 
             return qm_box_a

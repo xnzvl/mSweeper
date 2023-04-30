@@ -1,3 +1,4 @@
+from typing import Optional
 
 import mSweeper_package.Details as Details
 import mSweeper_package.minesweeper as ms
@@ -10,7 +11,7 @@ class Minesweeper_proxy:
             info_blob: Details.Info_blob
     ) -> None:
         self.info_blob = info_blob
-        self.ms
+        self.ms: Optional[Minesweeper.Minesweeper] = None
 
         self.new_minesweeper()
 
@@ -31,6 +32,8 @@ class Minesweeper_proxy:
     def victory_routine(
         self
     ) -> None:
+        assert self.ms is not None
+
         print("\nVICTORY!")
         print("time:", self.ms.get_time(), "\n")
 
@@ -64,4 +67,6 @@ class Minesweeper_proxy:
         self,
         position: ms.Position_t
     ) -> None:
+        assert self.ms is not None
+
         self.ms_click_wrapper(self.ms.rmb, position)

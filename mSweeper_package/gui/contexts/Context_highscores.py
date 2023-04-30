@@ -185,7 +185,7 @@ class Context_highscores(Context.Context):
                 x_anchor + i * (self.diff_b + gui.GAP_SIZE) + self.diff_b // 2,
                 gui.Margins.TOP.value + gui.BOX_A // 2,
                 fill="white",
-                font=(here.FONT, here.Font_size.DEFAULT),
+                font=(here.FONT, here.Font_size.DEFAULT.value),
                 state="disabled",
                 text=str(diff_enum).split('.')[-1]
             )
@@ -202,7 +202,7 @@ class Context_highscores(Context.Context):
             gui.Margins.TOP.value + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
-            font=(here.FONT, here.Font_size.DEFAULT),
+            font=(here.FONT, here.Font_size.DEFAULT.value),
             text="#"
         )
 
@@ -211,7 +211,7 @@ class Context_highscores(Context.Context):
             gui.Margins.TOP.value + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
-            font=(here.FONT, here.Font_size.DEFAULT),
+            font=(here.FONT, here.Font_size.DEFAULT.value),
             text="Time"
         )
 
@@ -220,7 +220,7 @@ class Context_highscores(Context.Context):
             gui.Margins.TOP.value + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
-            font=(here.FONT, here.Font_size.DEFAULT),
+            font=(here.FONT, here.Font_size.DEFAULT.value),
             text="Nickname"
         )
 
@@ -229,7 +229,7 @@ class Context_highscores(Context.Context):
             gui.Margins.TOP.value + gui.BOX_A + gui.GAP_SIZE + self.subheader_h // 2,
             anchor="w",
             fill="white",
-            font=(here.FONT, here.Font_size.DEFAULT),
+            font=(here.FONT, here.Font_size.DEFAULT.value),
             text="Date"
         )
 

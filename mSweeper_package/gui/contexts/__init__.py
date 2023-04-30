@@ -69,7 +69,8 @@ COLOUR_CELLS: Dict[here.Cell_state_t, Dict[here.Cell_value_t, Tuple[str, str]]] 
         6:       ("#a081db", "#ffffff"),
         7:       ("#8183db", "#ffffff"),
         8:       ("#595aa8", "#ffffff"),
-        here.MINE: (Colour.RED.value, "#ffffff")
+        here.MINE: (Colour.RED.value, "#ffffff"),
+        DEFAULT_DICT_KEY: ("black", "blackq")
     },
     here.FLAG: {
         here.MINE:          ("#a39676", "#ffffff"),
@@ -115,7 +116,9 @@ def get_colours(
     state = here.get_cell_state(cell)
     value = here.get_cell_value(cell)
 
-    return COLOUR_CELLS[state].get(value, COLOUR_CELLS[state][DEFAULT_DICT_KEY])
+    colours = COLOUR_CELLS[state].get(value)
+
+    return colours if colours is not None else COLOUR_CELLS[state][DEFAULT_DICT_KEY]
 
 
 # DRAWERS

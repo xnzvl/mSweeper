@@ -13,7 +13,7 @@ class Difficulty(Enum):
 DATA_FOLDER = "something/"  # + some file/directory?
 
 SOFTWARE_TITLE = ":: mSweeper _"
-SOFTWARE_VERSION = "??"
+SOFTWARE_VERSION = "v2.00"
 
 WINDOW_PREFIXES = {
     here.Minesweeper_state.UNINITIALIZED: "",

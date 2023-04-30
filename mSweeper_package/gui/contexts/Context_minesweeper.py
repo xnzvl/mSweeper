@@ -66,6 +66,8 @@ class Context_minesweeper(Context.Context):
             self
     ) -> None:
         def draw_deets() -> None:
+            assert self.ms_proxy.ms is not None
+
             width = effective_width - gui.GAP_SIZE - gui.BOX_A if special_case else b_width
             flag_str = f"{self.ms_proxy.ms.flags:0>2d}" + (  # TODO
                 f" / {self.ms_proxy.ms.mines}" if not special_case else ""
@@ -82,7 +84,7 @@ class Context_minesweeper(Context.Context):
                 gui.Margins.LEFT.value + gui.GAP_SIZE // 2 + gui.BOX_A,
                 gui.Margins.TOP.value + gui.BOX_A // 2,
                 anchor="w",
-                font=(here.FONT, here.Font_size.DEFAULT),
+                font=(here.FONT, here.Font_size.DEFAULT.value),
                 state="disabled",
                 text=flag_str
             )
@@ -142,6 +144,8 @@ class Context_minesweeper(Context.Context):
                 )
 
             here.draw_menu_sign(self.canvas, x_anchor, gui.Margins.TOP.value, gui.BOX_A)
+
+        assert self.ms_proxy.ms is not None
 
         ms_state: ms.Minesweeper_state = self.ms_proxy.ms.get_state()
         effective_width: int = self.width - self.gui_core.hor_margin

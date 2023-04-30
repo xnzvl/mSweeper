@@ -4,11 +4,12 @@ import mSweeper_package.data_management.highscores as here
 
 import mSweeper_package as mSweeper
 import mSweeper_package.Stopwatch as Stopwatch
+import mSweeper_package.data_management.highscores.Load as Load
 
 
 class Highscore_manager:
     def __init__(self) -> None:
-        pass
+        self.score_book: here.Score_book_t = Load.load_score_book()
 
     def score(
             self,
@@ -22,4 +23,4 @@ class Highscore_manager:
             self,
             difficulty: mSweeper.Difficulty
     ) -> List[here.Score_record_t]:
-        pass
+        return self.score_book[difficulty]

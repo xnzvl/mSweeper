@@ -1,5 +1,7 @@
 from typing import Dict, List, Tuple
 
+import os.path
+
 import mSweeper_package as mSweeper
 import mSweeper_package.Stopwatch as Stopwatch
 
@@ -7,8 +9,7 @@ import mSweeper_package.Stopwatch as Stopwatch
 Score_record_t = Tuple[Stopwatch.Time_tuple_t, str, str]  # time, date, nick
 Score_book_t = Dict[mSweeper.Difficulty, List[Score_record_t]]
 
-
-SCORE_FILE = mSweeper.DATA_FOLDER + "scores"
+SCORE_FILE = os.path.join(mSweeper.DATA_FOLDER, "scores")
 
 INVALID_HASH = ValueError("Corrupted file")
 INVALID_FORMAT = ValueError("Score record has invalid format")

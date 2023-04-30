@@ -1,3 +1,6 @@
+from typing import Dict, List
+
+import json
 import os.path
 
 import mSweeper_package.data_management.highscores as here
@@ -14,9 +17,32 @@ def default_score_book() -> here.Score_book_t:
     }
 
 
+def map_to_enum_diff(
+        diff_str: str
+) -> mSweeper.Difficulty:
+    for diff_enum in mSweeper.Difficulty:
+        if diff_str == diff_enum.value:
+            return diff_enum
+    assert False
+
+
+def enumerate_dict(
+        str_dict: Dict[str, List[here.Score_record_t]]
+) -> here.Score_book_t:
+    enum_dict: here.Score_book_t = dict()
+
+    for diff, scores in str_dict.items():
+        enum_dict[map_to_enum_diff(diff)] = scores
+
+    return enum_dict
+
+
 def load_score_book() -> here.Score_book_t:
     if not os.path.isfile(here.SCORE_FILE) or not Verify.check_hash(here.SCORE_FILE):
-        print("DEFAULT SCORES")
+        print("default scores used")
         return default_score_book()
 
-    assert False
+    with open(here.SCORE_FILE, 'r') as f:
+        enum_dict = enumerate_dict(json.load(f))
+
+    return enum_dict

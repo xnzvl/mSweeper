@@ -37,7 +37,8 @@ def enumerate_dict(
 
         for score in scores:
             time, date, nick = score
-            enum_dict[diff_enum].append((tuple(time), date, nick))
+            h, m, s, u = time
+            enum_dict[diff_enum].append(((h, m, s, u), date, nick))
 
     return enum_dict
 

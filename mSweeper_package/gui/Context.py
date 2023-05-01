@@ -1,13 +1,10 @@
-from typing import Callable
-
 import tkinter as tk
+
+import mSweeper_package.gui as here
 
 import mSweeper_package.Details as Details
 import mSweeper_package.gui.contexts as contexts
 import mSweeper_package.gui.Core as Core
-
-
-Quit_context_lambda = Callable[[tk.Event], None]
 
 
 class Context:
@@ -30,13 +27,13 @@ class Context:
         )
         self.canvas.pack()
 
-        self.q_to_main_menu: Quit_context_lambda = \
+        self.q_to_main_menu: here.Quit_context_lambda = \
             lambda _: self.quit_context_for(contexts.Context.MAIN_MENU)
-        self.q_to_sweeper: Quit_context_lambda = \
+        self.q_to_sweeper: here.Quit_context_lambda = \
             lambda _: self.quit_context_for(contexts.Context.MINESWEEPER)
-        self.q_to_highscores: Quit_context_lambda = \
+        self.q_to_highscores: here.Quit_context_lambda = \
             lambda _: self.quit_context_for(contexts.Context.HIGHSCORES)
-        self.q_to_help: Quit_context_lambda = \
+        self.q_to_help: here.Quit_context_lambda = \
             lambda _: self.quit_context_for(contexts.Context.HELP)
 
     def quit_context_for(

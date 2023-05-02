@@ -6,6 +6,7 @@ import mSweeper_package.gui.contexts as here
 import mSweeper_package as mSweeper
 import mSweeper_package.Details as Details
 import mSweeper_package.gui as gui
+import mSweeper_package.data_management.highscores as Highscores
 import mSweeper_package.gui.Context as Context
 import mSweeper_package.gui.Core as Core
 
@@ -88,6 +89,9 @@ class Context_main_menu(Context.Context):
 
         self.draw_nickbox(here.Colour.RED)
         self.keyboard = True
+
+        for char in Highscores.ALLOWED_CHARS:
+            self.root.bind(char, (lambda _, c=char: print(c)))
 
     def unbind_keyboard(
             self

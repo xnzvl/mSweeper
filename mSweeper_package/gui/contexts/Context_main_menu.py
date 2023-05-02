@@ -25,6 +25,13 @@ class Context_main_menu(Context.Context):
 
         y_anchor = height - (3 * gui.GAP_SIZE + 2 * gui.BOX_A + diff_b_a)
         y_anchor += draw_title(self.canvas, y_anchor) + gui.GAP_SIZE
+
+        self.nickbox_y = y_anchor
+        self.nickbox_width = header_b_width
+
+        self.keyboard = False
+        self.bind_default()
+
         y_anchor += draw_header(self.canvas, y_anchor, header_b_width, self.q_to_highscores) + gui.GAP_SIZE
         y_anchor += draw_diffs(self.canvas, y_anchor, diff_b_a, self.set_diff_and_quit) + gui.GAP_SIZE
         y_anchor += draw_footer(self.canvas, y_anchor, width, height, self.q_to_help)
@@ -38,6 +45,54 @@ class Context_main_menu(Context.Context):
     ) -> None:
         self.info_blob.set_difficulty(difficulty)
         self.quit_context_for(here.Context.MINESWEEPER)
+
+    def draw_nickbox(
+            self,
+            colour: here.Colour
+    ) -> None:
+        self.canvas.tag_bind(
+            self.canvas.create_rectangle(
+                gui.Margins.LEFT.value, self.nickbox_y,
+                gui.Margins.LEFT.value + self.nickbox_width, self.nickbox_y + gui.BOX_A,
+                activeoutline="red",
+                activewidth=3,
+                fill=here.Colour.BACKGROUND.value,
+                outline=colour.value,
+                tag="nickbox"
+            ),
+            "<Button-1>",  # TODO add RMB button consts
+            lambda _: self.bind_keyboard()
+        )
+
+    def bind_default(
+            self
+    ) -> None:
+        if self.keyboard:
+            self.keyboard = False
+            return
+
+        Core.bind_default(self.root)
+
+        self.unbind_keyboard()
+        self.draw_nickbox(here.Colour.BLACK)
+
+        self.canvas.bind(
+            "<Button-1>",
+            lambda _: self.bind_default()
+        )
+
+    def bind_keyboard(
+            self
+    ) -> None:
+        Core.unbind_default(self.root)
+
+        self.draw_nickbox(here.Colour.RED)
+        self.keyboard = True
+
+    def unbind_keyboard(
+            self
+    ) -> None:
+        pass
 
 
 def draw_title(
@@ -59,7 +114,7 @@ def draw_header(
         y: int,
         header_b_width: int,
         q_to_highscores: gui.Quit_context_lambda
-) -> int:
+) -> None:
     canvas.tag_bind(
         canvas.create_rectangle(
             gui.Margins.LEFT.value + header_b_width + gui.GAP_SIZE, y,
@@ -127,7 +182,7 @@ def draw_diffs(
                 activeoutline="#ff0000",  # TODO remove colour strings
                 activewidth=3
             ),
-            "<Button-1>",
+            "<Button-1>",  # TODO
             lambda _, d=diff: set_diff_and_quit(d)  # type: ignore # TODO lambda type
         )
 

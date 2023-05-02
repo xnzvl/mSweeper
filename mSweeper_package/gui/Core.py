@@ -28,7 +28,8 @@ class Gui:
         self.root = tk.Tk()
         self.root.title(mSweeper.SOFTWARE_TITLE)
         self.root.resizable(False, False)
-        self.root.bind_all("q", lambda _: self.root.destroy())
+
+        bind_default(self.root)
 
         self.change_context(contexts.Context.MAIN_MENU)
         self.root.mainloop()
@@ -68,3 +69,15 @@ class Gui:
             import mSweeper_package.gui.contexts.Context_help as C_help
             assert False, "WIP"
             C_help.Context_help(self, 1, 1)  # TODO
+
+
+def bind_default(
+        root: tk.Tk
+) -> None:
+    root.bind_all("q", lambda _: root.destroy())
+
+
+def unbind_default(
+        root: tk.Tk
+) -> None:
+    root.unbind_all("q")

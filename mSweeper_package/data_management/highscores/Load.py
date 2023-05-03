@@ -45,7 +45,6 @@ def enumerate_dict(
 
 def load_score_book() -> here.Score_book_t:
     if not os.path.isfile(here.SCORE_FILE) or not Verify.check_hash(here.SCORE_FILE):
-        print("default scores used")
         return default_score_book()
 
     with open(here.SCORE_FILE, 'r') as f:

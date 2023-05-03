@@ -51,6 +51,7 @@ class Context_main_menu(Context.Context):
             self,
             colour: here.Colour
     ) -> None:
+        self.canvas.delete("nick_box")
         self.canvas.tag_bind(
             self.canvas.create_rectangle(
                 gui.Margins.LEFT.value, self.nickbox_y,
@@ -59,23 +60,50 @@ class Context_main_menu(Context.Context):
                 activewidth=3,
                 fill=here.Colour.BACKGROUND.value,
                 outline=colour.value,
-                tag="nickbox"
+                tag="nick_box"
             ),
             "<Button-1>",  # TODO add RMB button consts
             lambda _: self.bind_keyboard()
         )
 
+    def draw_nick_text(
+            self
+    ) -> None:
+        self.canvas.delete("nick_text")
+        self.canvas.create_text(
+            gui.GAP_SIZE * 2, self.nickbox_y + gui.BOX_A // 2,
+            anchor="w",
+            fill=here.Colour.WHITE.value,
+            font=(here.FONT, here.Font_size.DEFAULT.value),
+            state="disabled",
+            tags="nick_text",
+            text=self.info_blob.player_nick
+        )
+
+    def update_nick_text(
+            self,
+            char: str
+    ) -> None:
+        print(f"{char}")
+        if char == "\b":
+            self.info_blob.player_nick = self.info_blob.player_nick[:len(self.info_blob.player_nick) - 1]
+        elif len(self.info_blob.player_nick) < 16:
+            self.info_blob.player_nick += char
+
+        self.draw_nick_text()
+
     def bind_default(
             self
     ) -> None:
-        if self.keyboard:
+        if self.keyboard:  # TODO bind with `add` argument
             self.keyboard = False
             return
 
-        Core.bind_default(self.root)
-
         self.unbind_keyboard()
         self.draw_nickbox(here.Colour.BLACK)
+        self.draw_nick_text()
+
+        Core.bind_default(self.root)
 
         self.canvas.bind(
             "<Button-1>",
@@ -88,15 +116,32 @@ class Context_main_menu(Context.Context):
         Core.unbind_default(self.root)
 
         self.draw_nickbox(here.Colour.RED)
+        self.draw_nick_text()
         self.keyboard = True
 
-        for char in Highscores.ALLOWED_CHARS:
-            self.root.bind(char, (lambda _, c=char: print(c)))
+        for char in Highscores.ALLOWED_CHARS | {"\b"}:
+            self.root.bind(
+                char_to_tksequence(char),
+                lambda _, c=char: self.update_nick_text(c)
+            )
 
     def unbind_keyboard(
             self
     ) -> None:
-        pass
+        for char in Highscores.ALLOWED_CHARS | {"\b"}:
+            self.root.unbind(char_to_tksequence(char))
+
+
+def char_to_tksequence(
+        char: str
+) -> str:
+    match char:
+        case " ":
+            return "<space>"
+        case "\b":
+            return "<BackSpace>"
+        case _:
+            return char
 
 
 def draw_title(

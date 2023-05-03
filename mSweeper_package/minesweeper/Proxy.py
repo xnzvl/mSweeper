@@ -35,13 +35,15 @@ class Minesweeper_proxy:
         assert self.ms is not None
 
         print("\nVICTORY!")
-        print("time:", self.ms.get_time(), "\n")
-
-        nick = "Zubychi"  # TODO it's hardcoded ._.
+        print("time:", self.ms.get_time())
 
         self.ms_scored_top_ten = self.info_blob.hs_manager.score(
-            self.ms.get_time(), nick, self.info_blob.ms_difficulty
+            self.ms.get_time(), self.info_blob.player_nick, self.info_blob.ms_difficulty
         )
+
+        if self.ms_scored_top_ten:
+            print(f"Congratulations, {self.info_blob.player_nick}! Your score is in top 10!")
+        print()
 
         self.info_blob.ms_win_waiting = False
 

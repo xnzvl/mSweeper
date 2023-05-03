@@ -1,7 +1,7 @@
 import sys
 
 import mSweeper_package as mSweeper
-import project_wrapper.superuser as su
+import project_wrapper.super_user as su
 
 
 def main() -> None:
@@ -9,7 +9,7 @@ def main() -> None:
         return
 
     if len(sys.argv) == 3:
-        su.print_args()
+        su.init_super_user()
 
     mSweeper.new_session()
 

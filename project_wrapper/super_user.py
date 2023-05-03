@@ -1,5 +1,5 @@
 import sys
 
 
-def print_args() -> None:
+def init_super_user() -> None:
     print(sys.argv)

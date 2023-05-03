@@ -1,22 +1,25 @@
 import os.path
 
-import mSweeper_package.data_management as data_management
+import mSweeper_package.data_management as here
+
 import mSweeper_package.data_management.Verify as Verify
 
 
 def load_nickname() -> str:
-    if os.path.isfile(data_management.NICK_FILE) and Verify.check_hash(data_management.NICK_FILE):
-        with open(data_management.NICK_FILE, 'r') as f:
+    if os.path.isfile(here.NICK_FILE) and Verify.check_hash(here.NICK_FILE):
+        with open(here.NICK_FILE, 'r') as f:
             return f.read().strip()
 
-    return "Nobody"
+    return here.DEFAULT_NICKNAME
 
 
 def write_nickname(
         nickname: str
 ) -> None:
-    with open(data_management.NICK_FILE, 'w') as f:
+    nickname = nickname.strip()
+
+    with open(here.NICK_FILE, 'w') as f:
         f.write(nickname + "\n" if nickname != "" else "")
         f.write("\n")
 
-    Verify.hash_file(data_management.NICK_FILE)
+    Verify.hash_file(here.NICK_FILE)

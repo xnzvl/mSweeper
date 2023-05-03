@@ -6,6 +6,7 @@ import mSweeper_package.gui.contexts as here
 import mSweeper_package as mSweeper
 import mSweeper_package.Details as Details
 import mSweeper_package.gui as gui
+import mSweeper_package.data_management as data
 import mSweeper_package.data_management.highscores as Highscores
 import mSweeper_package.gui.Context as Context
 import mSweeper_package.gui.Core as Core
@@ -84,7 +85,6 @@ class Context_main_menu(Context.Context):
             self,
             char: str
     ) -> None:
-        print(f"{char}")
         if char == "\b":
             self.info_blob.player_nick = self.info_blob.player_nick[:len(self.info_blob.player_nick) - 1]
         elif len(self.info_blob.player_nick) < 16:
@@ -113,6 +113,9 @@ class Context_main_menu(Context.Context):
     def bind_keyboard(
             self
     ) -> None:
+        if self.info_blob.player_nick == data.DEFAULT_NICKNAME:
+            self.info_blob.player_nick = ""
+
         Core.unbind_default(self.root)
 
         self.draw_nickbox(here.Colour.RED)
@@ -130,6 +133,9 @@ class Context_main_menu(Context.Context):
     ) -> None:
         for char in Highscores.ALLOWED_CHARS | {"\b"}:
             self.root.unbind(char_to_tksequence(char))
+
+        if self.info_blob.player_nick.strip() == "":
+            self.info_blob.player_nick = data.DEFAULT_NICKNAME
 
 
 def char_to_tksequence(

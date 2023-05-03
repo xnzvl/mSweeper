@@ -1,11 +1,10 @@
 from typing import Dict, List
 
 import json
-import os
 
 import mSweeper_package.data_management.highscores as here
 
-import mSweeper_package as mSweeper
+import mSweeper_package.data_management as data
 import mSweeper_package.data_management.Verify as Verify
 
 
@@ -20,15 +19,10 @@ def stringify_keys(
     return stringified
 
 
-def assert_dir() -> None:
-    if not os.path.isdir(mSweeper.DATA_FOLDER):
-        os.mkdir(mSweeper.DATA_FOLDER)
-
-
 def write_score_book(
         score_book: here.Score_book_t
 ) -> None:
-    assert_dir()
+    data.assert_dir()
 
     with open(here.SCORE_FILE, 'w') as f:
         json.dump(

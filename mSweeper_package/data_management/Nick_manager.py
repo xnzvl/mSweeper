@@ -18,6 +18,7 @@ def write_nickname(
 ) -> None:
     nickname = nickname.strip()
 
+    here.assert_dir()
     with open(here.NICK_FILE, 'w') as f:
         f.write(nickname + "\n" if nickname != "" else "")
         f.write("\n")

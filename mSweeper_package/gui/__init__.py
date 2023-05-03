@@ -1,5 +1,10 @@
 from enum import Enum
-from typing import Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple
+
+import tkinter as tk
+
+
+Quit_context_lambda = Callable[[tk.Event], None]
 
 
 DEFAULT_MARGIN = 25

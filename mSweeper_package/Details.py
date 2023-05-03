@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 import mSweeper_package.minesweeper as here
 
 import mSweeper_package as mSweeper
+import mSweeper_package.data_management.Nick_manager as Nick_manager
 import mSweeper_package.data_management.highscores.Highscore_manager as Hs_manager
 
 
@@ -15,6 +16,8 @@ class Info_blob:
         self.ai_player = ai_player
 
         self.hs_manager = hs_manager
+
+        self.player_nick = Nick_manager.load_nickname()
 
         self.ms_config: Dict[str, int] = {}
         self.ms_difficulty = mSweeper.Difficulty.MEDIUM

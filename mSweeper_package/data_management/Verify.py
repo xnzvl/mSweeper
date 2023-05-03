@@ -1,4 +1,4 @@
-from typing import Dict, Set
+from typing import Dict
 
 import hashlib
 import json
@@ -7,7 +7,7 @@ import os.path
 import mSweeper_package.data_management as here
 
 
-def assert_file(
+def assert_json(
         filename: str
 ) -> None:
     if not os.path.isfile(filename):
@@ -16,7 +16,7 @@ def assert_file(
 
 
 def load_hashes() -> Dict[str, str]:
-    assert_file(here.HASH_FILE)
+    assert_json(here.HASH_FILE)
 
     with open(here.HASH_FILE, 'r') as f:
         loaded = json.load(f)

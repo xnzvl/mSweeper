@@ -1,3 +1,5 @@
+from typing import List
+
 import tkinter as tk
 import sys
 
@@ -163,10 +165,16 @@ class Customize:
             self
     ) -> None:
         def save() -> None:
-            for i, remove in enumerate(reversed(self.remove_flags)):
-                if remove:
-                    self.score_book[self.current_diff].pop(9 - i)
+            keepers: List[highscores.Score_record_t] = []
+
+            for i, remove in enumerate(self.remove_flags):
+                if not remove and i < len(self.score_book[self.current_diff]):
+                    keepers.append(self.score_book[self.current_diff][i])
+
+            self.score_book[self.current_diff] = keepers
             Write.write_score_book(self.score_book)
+
+            #
 
             mDict = mSweeper.DIFFICULTY_DICT[self.current_diff]
             entry_amount = self.mines_entry.get()

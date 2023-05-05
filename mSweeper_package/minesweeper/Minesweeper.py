@@ -51,8 +51,8 @@ class Minesweeper:
         return result
 
     def _plant_mines(
-        self,
-        skip_origin: here.Position_t
+            self,
+            skip_origin: here.Position_t
     ) -> None:
         cells_to_skip = set(self._in_proximity(skip_origin))
         cells_to_skip.add(skip_origin)
@@ -68,7 +68,7 @@ class Minesweeper:
                 mines_planted += 1
 
     def _fill_numbers(
-        self
+            self
     ) -> None:
         for x in range(self.width):
             for y in range(self.height):
@@ -76,19 +76,17 @@ class Minesweeper:
                 self._field.set_inner_value(x, y, mines)
 
     def _field_init(
-        self,
-        position: here.Position_t
+            self,
+            position: here.Position_t
     ) -> None:
         self._plant_mines(position)
         self._fill_numbers()
         self._stopwatch.start()
         self._set_ms_state(here.Minesweeper_state.PLAYING)
 
-    ###########################################################################
-
     def _set_ms_state(
-        self,
-        ms_state: here.Minesweeper_state
+            self,
+            ms_state: here.Minesweeper_state
     ) -> None:
         if self._state != here.Minesweeper_state.GAME_LOST:
             self._state = ms_state
@@ -100,9 +98,9 @@ class Minesweeper:
                 self._time = self._stopwatch.get_time_tuple()
 
     def _set_cell_state(
-        self,
-        position: here.Position_t,
-        state: here.Cell_state_t
+            self,
+            position: here.Position_t,
+            state: here.Cell_state_t
     ) -> None:
         x, y = position
         old_state = self._field.get_inner_state(x, y)
@@ -123,8 +121,8 @@ class Minesweeper:
             self._set_ms_state(here.Minesweeper_state.GAME_LOST)
 
     def _flood_reveal(
-        self,
-        position: here.Position_t
+            self,
+            position: here.Position_t
     ) -> None:
         rec_stack = [position]
 
@@ -143,10 +141,10 @@ class Minesweeper:
                         rec_stack.append((x, y))
 
     def _count_around(
-        self,
-        position: here.Position_t,
-        mask: int,
-        to_count: int  # MINES/flags
+            self,
+            position: here.Position_t,
+            mask: int,
+            to_count: int  # MINES/flags
     ) -> int:
         counter = 0
 
@@ -157,8 +155,8 @@ class Minesweeper:
         return counter
 
     def _special_move(
-        self,
-        position: here.Position_t
+            self,
+            position: here.Position_t
     ) -> None:
         x, y = position
         if self._count_around(position, here.STATE_MASK, here.FLAG) \
@@ -170,16 +168,14 @@ class Minesweeper:
                 self._flood_reveal((p_x, p_y))
 
     def _is_playable(
-        self
+            self
     ) -> bool:
         return self._state != here.Minesweeper_state.GAME_LOST and self._state != here.Minesweeper_state.GAME_WON
 
-    ###########################################################################
-
     def _click_wrapper(
-        self,
-        position: here.Position_t,
-        button: here.Click_t
+            self,
+            position: here.Position_t,
+            button: here.Click_t
     ) -> None:
         if not self._is_playable():
             return
@@ -188,9 +184,9 @@ class Minesweeper:
         button(position)
         self._stopwatch.resume()
 
-    def _lmb(  # PRESS
-        self,
-        position: here.Position_t
+    def _lmb(
+            self,
+            position: here.Position_t
     ) -> None:
         x, y = position
         c_state = self._field.get_inner_state(x, y)
@@ -203,9 +199,9 @@ class Minesweeper:
         elif c_state == here.SHOWN:
             self._special_move(position)
 
-    def _rmb(  # here.FLAG
-        self,
-        position: here.Position_t
+    def _rmb(
+            self,
+            position: here.Position_t
     ) -> None:
         x, y = position
         c_state = self._field.get_inner_state(x, y)
@@ -219,30 +215,30 @@ class Minesweeper:
     ###########################################################################
 
     def get_time(
-        self
+            self
     ) -> Stopwatch.Time_tuple_t:  # TODO
         if self._time is None:
             raise ValueError("time is not set")
         return self._time
 
     def get_data(
-        self
+            self
     ) -> here.Field_t:  # TODO
         return self._field.outer
 
     def get_state(
-        self
+            self
     ) -> here.Minesweeper_state:
         return self._state
 
     def lmb(
-        self,
-        position: here.Position_t
+            self,
+            position: here.Position_t
     ) -> None:
         self._click_wrapper(position, self._lmb)
 
     def rmb(
-        self,
-        position: here.Position_t
+            self,
+            position: here.Position_t
     ) -> None:
         self._click_wrapper(position, self._rmb)

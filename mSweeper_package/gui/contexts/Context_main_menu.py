@@ -61,7 +61,7 @@ class Context_main_menu(Context.Context):
                 activewidth=3,
                 fill=here.Colour.BACKGROUND.value,
                 outline=colour.value,
-                tag="nick_box"
+                tags="nick_box"
             ),
             "<Button-1>",  # TODO add RMB button consts
             lambda _: self.bind_keyboard()
@@ -125,7 +125,7 @@ class Context_main_menu(Context.Context):
         for char in Highscores.ALLOWED_CHARS | {"\b"}:
             self.root.bind(
                 char_to_tksequence(char),
-                lambda _, c=char: self.update_nick_text(c)
+                lambda _, c=char: self.update_nick_text(c)  # type: ignore
             )
 
     def unbind_keyboard(
@@ -169,7 +169,7 @@ def draw_header(
         y: int,
         header_b_width: int,
         q_to_highscores: gui.Quit_context_lambda
-) -> None:
+) -> int:
     canvas.tag_bind(
         canvas.create_rectangle(
             gui.Margins.LEFT.value + header_b_width + gui.GAP_SIZE, y,

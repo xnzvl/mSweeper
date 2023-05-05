@@ -30,7 +30,7 @@ class Context_minesweeper(Context.Context):
 
     def quit(
             self,
-            event: tk.Event
+            event: tk.Event  # type: ignore
     ) -> None:
         self.canvas.unbind_all("r")
         self.q_to_main_menu(event)

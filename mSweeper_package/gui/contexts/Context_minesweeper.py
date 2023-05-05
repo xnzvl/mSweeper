@@ -28,6 +28,13 @@ class Context_minesweeper(Context.Context):
 
         self.reset()
 
+    def quit(
+            self,
+            event: tk.Event
+    ) -> None:
+        self.canvas.unbind_all("r")
+        self.q_to_main_menu(event)
+
     def draw_cell(
             self,
             cell: ms.Cell_t,
@@ -131,7 +138,7 @@ class Context_minesweeper(Context.Context):
                     fill=here.Colour.BACKGROUND.value,
                     activeoutline="red"
                 ),
-                "<Button-1>", self.q_to_main_menu
+                "<Button-1>", self.quit
             )
 
             if not special_case:

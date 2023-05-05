@@ -19,7 +19,7 @@ class Highscore_manager:
             difficulty: mSweeper.Difficulty,
             score: here.Score_record_t
     ) -> bool:
-        return len(self.score_book[difficulty]) < 10 or score < self.score_book[difficulty][10]
+        return len(self.score_book[difficulty]) < 10 or score < self.score_book[difficulty][9]
 
     def score(
             self,

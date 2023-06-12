@@ -4,6 +4,4 @@ GUI         -> highscores_c: default values
 GUI         -> "?" button in main menu
 GUI         -> *help* context, (CS/EN)
 MAINSWEEPER -> flag special move
-HIGHSCORER  -> context
-HIGHSCORER  -> delete highscores
 GUI         -> click on active-filled cell (lambdas)

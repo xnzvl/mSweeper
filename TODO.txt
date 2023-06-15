@@ -1,3 +1,6 @@
+BUG         -> starting game when nickbox is focused
+               - pressing "r" or "q"
+
 FILEMANAGER -> writing bug
 mSweeper    -> re-indend function arguments
 GUI         -> highscores_c: default values
